@@ -48,7 +48,7 @@ previsao <- predict(fit, n.ahead = 10L)
 Sera retornada uma matriz contendo, na primeira coluna, a media prevista e na segunda o desvio
 padrao, para cada passo a frente
 
-### Atualiacao
+### Atualizacao
 
 Em muitos casos se deseja aplicar um modelo ja estimado a um novo conjunto de dados (previsao
 online) sem a necessidade de reestimar parametros, o que pode ser demorado.
