@@ -1,9 +1,8 @@
-///// IMPLETMENTACAO
+## IMPLEMENTACAO
 - Adicionar a fit_ss os coeficientes ajustados na saida de modelo
+- Ferramentas de diagnostico
 
-///// MODELAGEM
+## MODELAGEM
 - Estudar possiveis diferencas na inicializacao da sazonalidade no modelo em espaco de estados
-- Regressoes de horizontes sucessivos (possivelmente dinmica)
+- Auto regressoes de horizontes sucessivos (possivelmente dinamica)
 - Modelos ETS do Hyndman
-
-- Gerar e testar todos eles nos horizontes 1:24 (meia hora a doze horas a frente)
