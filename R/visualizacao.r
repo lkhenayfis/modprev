@@ -20,6 +20,7 @@ plot.fit_TR <- function(fit, ..., legend = TRUE) {
     # Plota
     plot(fit$serie_in, panel.first = grid(col = "grey85"),
         xlab = "Tempo", ylab = "Geracao", ...)
+    if(!("main" %in% names(list(...)))) title(main = attr(fit, "tipo"))
     lines(fitt, col = 4, lty = 2)
     if(legend) {
         legend("topright", inset = 0.02, legend = c("Serie", "Ajuste"), lty = c(1,2), col = c(1, 4))
