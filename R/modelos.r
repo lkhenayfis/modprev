@@ -85,11 +85,6 @@ fit_ss_ar1_saz <- function(serie, ...) {
     T <- matrix(c(1, 0, 0, 0), 2)
     R <- matrix(c(0, 1), 2)
 
-    # Condicao inicial da sazonalidade
-    a1saz <- matrix(sapply(1:(frequency(serie)-1), function(x) mean(serie[seq(x, length(serie), by = frequency(serie))])))
-    a1saz <- a1saz - mean(a1saz)
-    P1saz <- diag(rep(1000, 47))
-
     # Especifica modelo, funcao de atualizacao e estima
     mod <- SSModel(serie ~ -1 +
         SSMcustom(Z = Z, T = T, R = R, a1 = c(1, 0), Q = NA) +
