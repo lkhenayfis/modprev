@@ -69,7 +69,9 @@ extraiserie <- function(dat, data_ini, hora_ini = "00:00", data_fim, hora_fim = 
     return(out)
 }
 
-print.ts_TR <- function(x) {attr(x, "out_sample") <- NULL; class(x) <- "ts"; print(x)}
+print.ts_TR <- function(x) {
+    attr(x, "out_sample") <- NULL; class(x) <- "ts"; print(x)
+}
 
 #' Separador de in e out sample
 #' 
@@ -94,7 +96,7 @@ quebrats.ts <- function(serie, int = 0L) {
     FIM <- deltats(INI, delta = DLT, freq = S)
     serie_in <- window(serie, end = FIM)
     if(int != 0) {
-        INI <- deltats(INI, delta = DLT+1, freq = S)
+        INI <- deltats(INI, delta = DLT + 1, freq = S)
         serie_out <- window(serie, start = INI)
     } else {
         serie_out <- NULL

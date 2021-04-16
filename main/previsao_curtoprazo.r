@@ -49,7 +49,7 @@ v_horas <- seq(as.POSIXct("2020-01-01 00:00:00"), as.POSIXct("2020-01-01 23:30:0
 v_horas <- c("data", format(v_horas, format = "%H%M"))
 
 for(pto in v_ptoconex) {
-    
+
     # Le hge e pi do dia anterior
     arq <- file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$gerhist, paste0("HGE_", pto, ".txt"))
     d_hge <- read.table(arq, sep = ";", header = FALSE, skip = k_pular, col.names = v_horas)
@@ -66,7 +66,7 @@ for(pto in v_ptoconex) {
 
     # Junta tudo
     d_hist <- data.matrix(rbind(d_hge, d_ontem, d_hoje))
-    d_hist <- d_hist[!duplicated(d_hist[,1]), -1]
+    d_hist <- d_hist[!duplicated(d_hist[, 1]), -1]
 
     # Monta serie para estimacao
     serie <- c(t(d_hist))
@@ -76,11 +76,11 @@ for(pto in v_ptoconex) {
 
     # Checa se deve ser estimado um modelo ou apenas atualizado e previsto
     if(format(tempoatual, format = "%H:%M") == CONFIG$PARAMS$horafit) {
-        
+
         # Ajusta modelos, preve e salva
         l_prev <- lapply(CONFIG$PARAMS$modelos, function(spec) {
             fit   <- estimamodelo(serie, tipo = spec)
-            
+
             arq <- file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$outmods, paste0(pto, "_", spec, ".RData"))
             save(list = "fit", file = arq)
 
@@ -105,7 +105,7 @@ for(pto in v_ptoconex) {
             jpeg(arq, width = 3600, height = 2700, res = 350)
             plot(fit, main = paste0(pto, " [", spec, "]"))
             dev.off()
-            
+
             predict(fit, n.ahead = CONFIG$PARAMS$nahead, plot = FALSE)
         })
     }

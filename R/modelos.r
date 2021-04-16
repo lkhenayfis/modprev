@@ -58,7 +58,7 @@ estimamodelo.ts_TR <- function(serie, out_sample, tipo = c("sarima", "ss_ar1_saz
     aux <- quebrats(serie, out_sample)
     serie_in  <- aux[[1]]
     serie_out <- aux[[2]]
-    
+
     # Compoe chamada de fit para o tipo especificado
     tipo <- match.arg(tipo)
     fit_func <- paste0("fit_", tipo)
@@ -92,8 +92,8 @@ fit_ss_ar1_saz <- function(serie, ...) {
 
     # Especifica modelo, funcao de atualizacao e estima
     mod <- SSModel(serie ~ -1 +
-        SSMcustom(Z = Z, T = T, R = R, a1 = c(1, 0), Q = NA) + 
-        SSMseasonal(period = 48, sea.type = "dummy", Q = NA), 
+        SSMcustom(Z = Z, T = T, R = R, a1 = c(1, 0), Q = NA) +
+        SSMseasonal(period = 48, sea.type = "dummy", Q = NA),
         H = 0)
     upfunc <- function(par, model) {
         model["Z", "custom"][1] <- par[1]
@@ -103,7 +103,7 @@ fit_ss_ar1_saz <- function(serie, ...) {
         model["P1", "custom"][2, 2] <- exp(par[3]) / (1 - (par[2] / sqrt(1 + par[2]^2))^2)
         model
     }
-    fit <- fitSSM(mod, inits = c(mean(serie),0,0,0), updatefn = upfunc, method = "BFGS")
+    fit <- fitSSM(mod, inits = c(mean(serie), 0, 0, 0), updatefn = upfunc, method = "BFGS")
 
     # Retorna apenas modelo ajustado
     return(fit$model)
@@ -161,17 +161,17 @@ predict.fit_TR <- function(fit, n.ahead, serie_out, plot = TRUE, ...) {
         S      <- frequency(fit$serie_in)
         eixo_x <- c(start(fit$serie_in)[1] + start(fit$serie_in)[2] / S, NA)
         if(!is.null(prev)) {
-            eixo_x[2] <- end(prev[,1])[1] + end(prev[,1])[2] / S
+            eixo_x[2] <- end(prev[, 1])[1] + end(prev[, 1])[2] / S
         } else {
             eixo_x[2] <- end(fit$serie_in)[1] + end(fit$serie_in)[2] / S
         }
 
         plot(fit, xlim = eixo_x, ylim = range(fit$serie_in) * c(1, 1.2), legend = FALSE)
         lines(serie_out)
-        lines(prev[,1], col = 4)
+        lines(prev[, 1], col = 4)
         legend("topright", inset = 0.02,
-            legend = c("Serie", "Ajuste", "Previsao"), 
-            lty = c(1,2,1), col = c(1, 4, 4))
+            legend = c("Serie", "Ajuste", "Previsao"),
+            lty = c(1, 2, 1), col = c(1, 4, 4))
     }
 
     # Retona vetor de previao
@@ -204,7 +204,7 @@ pred_ss_ar1_saz <- function(model, ...) {
 #' @value [objeto fit_TR] modelo com novos dados e possivelmente reajustado
 
 update.fit_TR <- function(fit, newdata, refit = FALSE) {
-    
+
     if(refit) {
         fit <- estimamodelo(serie = newdata, tipo = attr(fit, "tipo"))
     } else {
@@ -214,7 +214,7 @@ update.fit_TR <- function(fit, newdata, refit = FALSE) {
         fit$modelo <- do.call(upd_func, args)
         fit[2:3] <- newdata
     }
-    
+
     return(fit)
 }
 
@@ -263,9 +263,13 @@ janelamovel.ts <- function(objeto, tipo, largura, n.ahead = 1L, refit_cada = NA,
 
     # Funcao de verbose
     verb_func <- switch(as.character(verbose),
-        "0" = function(...) NULL, 
+        "0" = function(...) NULL,
         "1" = function(i, f, r) if(r) cat("\t Prevendo serie [", i, "] -> [", f, "]\n") else NULL,
-        "2" = function(i, f, r) if(r) cat("REFIT -- Prevendo serie [", i, "] -> [", f, "]\n") else cat("\t Prevendo serie [", i, "] -> [", f, "]\n"))
+        "2" = function(i, f, r) if(r) {
+            cat("REFIT -- Prevendo serie [", i, "] -> [", f, "]\n")
+        } else {
+            cat("\t Prevendo serie [", i, "] -> [", f, "]\n")
+        })
 
     # Janelas
     Nj <- N - largura + 1
@@ -288,8 +292,8 @@ janelamovel.ts <- function(objeto, tipo, largura, n.ahead = 1L, refit_cada = NA,
     for(i in 1:Nj) {
 
         # Reduz serie e atualiza modelo
-        ini_t <- deltats(INI, delta = i-1, freq = S)
-        fim_t <- deltats(ini_t, delta = largura-1, freq = S)
+        ini_t <- deltats(INI, delta = i - 1, freq = S)
+        fim_t <- deltats(ini_t, delta = largura - 1, freq = S)
         verb_func(ini_t, fim_t, v_refit[i])
         serie <- window(objeto, start = ini_t, end = fim_t)
         fit   <- update(fit = fit, newdata = serie, refit = v_refit[i])
