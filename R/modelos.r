@@ -100,6 +100,11 @@ fit_ss_ar1_saz <- function(serie, ...) {
     }
     fit <- fitSSM(mod, inits = c(mean(serie), 0, 0, 0), updatefn = upfunc, method = "BFGS")
 
+    # Checa convergencia
+    if(abs(logLik(fit$model)) < 1e-10) {
+        fit$model$Z[] <- NA
+    }
+
     # Retorna apenas modelo ajustado
     return(fit$model)
 }
@@ -216,6 +221,11 @@ update.fit_TR <- function(fit, newdata, refit = FALSE) {
 upd_sarima <- function(model, newdata) Arima(newdata, model = model)
 
 upd_ss_ar1_saz <- function(model, newdata) {
+
+    # Se modelo nao convergiu, tenta reestimar
+    if(all(is.na(model$Z))) return(estimamodelo(newdata, tipo = "ss_ar1_saz")$modelo)
+
+    # Do contrario, atualiza normalmente
     model$y <- newdata
     attr(model$y, "dim") <- c(length(newdata), 1)
     attr(model, "n") <- as.integer(length(newdata))
