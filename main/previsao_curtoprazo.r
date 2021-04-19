@@ -119,12 +119,53 @@ for(pto in v_ptoconex) {
             load(arq)
             for(spec in CONFIG$PARAMS$modelos) {
                 l_prev[[spec]] <- unname(c(l_prev[spec], aux[spec]))
-                tags <- sapply(l_prev, function(x) paste0(start(x), collapse = "_"))
-                l_prev <- l_prev[!duplicated(tags)]
             }
             save(list = "l_prev", file = arq)
         })
     } else {
         save(list = "l_prev", file = arq)
     }
+}
+
+# LEITURA DAS PREVISOES REGULARES ------------------------------------------------------------------
+
+# Monta patterns e le dados
+datas <- as.Date(tempoatual) + 0:3
+datas <- format(datas, format = "%d-%m-%Y")
+arqs <- list.files(file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$prevOnline),
+    pattern = paste0("Previs.._[[:alpha:]]{1,2}_", c("D_", "D1_", "D2_", "D3_"), datas, collapse = "|"),
+    full.names = TRUE)
+l_prevOnline <- lapply(arqs, read.table, sep = ";", dec = ",", header = TRUE)
+
+# Separa por pontos
+l_prevOnline <- lapply(v_ptoconex, function(pto) {
+    unlist(sapply(l_prevOnline, function(arq) arq[[pto]]))
+})
+names(l_prevOnline) <- v_ptoconex
+
+# Isola apenas as horas de previsao (parte dos arquivos pode ser verificado)
+iniprev     <- as.POSIXlt(tempoatual + 30 * 60)
+datainiprev <- as.numeric(as.Date(iniprev))
+horainiprev <- (iniprev$hour * 2 + 1) + (iniprev$min == 30)
+l_prevOnline <- lapply(l_prevOnline, function(v) {
+    v <- v[horainiprev:length(v)]
+    m <- matrix(c(v, rep(NA, length(v))), length(v))
+    colnames(m) <- c("pred", "sd")
+    ts(m, start = c(datainiprev, horainiprev), freq = 48)
+})
+
+# Adiciona as listas adequadas
+for(pto in v_ptoconex) {
+
+    arq <- file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$outprevs, paste0(pto, ".RData"))
+    local({
+        aux <- l_prevOnline[[pto]]
+        load(arq)
+        if(is.null(l_prev[["regular"]])) {
+            l_prev["regular"] <- list(aux)
+        } else {
+            l_prev[["regular"]] <- unname(c(l_prev["regular"], list(aux)))
+        }
+       save(list = "l_prev", file = arq)
+    })
 }
