@@ -4,6 +4,23 @@ Conjunto de funcoes para estimacao de modelos e subsequente previsao da geracao 
 curtissimoprazo. Estas funcoes sao um wrapper de diversas formas de modelagem, com o objetivo de
 apresentar uma interface comum independente do tipo de modelo ajustado
 
+## Arquivo de configuracao
+
+Todas as parametrizacoes deste pacote, como janela de dados para estimacao, horario para reajuste
+dos modelos diariamente e etc, sao definidas em um arquivo especifico por fora dos codigos. Isto e
+feito pois cada script e monitorado pelo git, de tal modo que mudancas simples de parametrizacao
+para testes criariam confusao e poderiam levar a commits erroneos causando erros na
+operacionalizacao.Por motivos similares nao esta incluso um arquivo de configuracao no repositorio:
+cada clone e fork pode ter o seu sem risco de corromper os de outros desenvolvedores e/ou oficial da
+operacao.
+
+Esta incluso no repositorio um programa gerador de config padrao, chamado `default_config.bat`, com
+todos os campos especificados em seus valores iguais aqueles utilizados operacionalmente. Uma nota
+neste ponto e o campo **raiz** na chave **CAMINHOS**. Este campo determina onde serao buscados
+essencialmente todos os dados necessarios e, por padrao, aponta para a maquina 01 onde o codigo foi
+testado inicialmente. Ao ser aplicado em outras maquinas este campo deve ser atualizado de acordo.
+Toda execucao deste programa emitira um aviso lembrando desta necessidade.
+
 ## Modelos implementados
 
 Ate o momento apenas dois tipos de modelo foram implementados
