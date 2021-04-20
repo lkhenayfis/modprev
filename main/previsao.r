@@ -32,10 +32,10 @@ if(file.exists("config.yml")) {
     # Se nada funcionar, emite erro
     stop("Nao foi possivel localizar um arquivo de configuracoes")
 }
-setwd(wd0)
 
 # Carrega funcoes necessarias
 for(arq in list.files(file.path(root, "R"), full.names = TRUE)) source(arq)
+setwd(wd0)
 
 # INICIALIZACAO ------------------------------------------------------------------------------------
 
