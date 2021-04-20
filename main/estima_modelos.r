@@ -1,7 +1,24 @@
 # CARREGA CONFIGURACAO E FUNCOES -------------------------------------------------------------------
 
+# Numa rodada por cmd, o diretorio do arquivo pode ser localizado facilmente
+args <- commandArgs()
+dir  <- sapply(args, function(arg) grepl("\\-\\-file", arg))
+if(any(dir)) {
+    dir <- args[[which(dir)]]
+    dir <- sub("\\-\\-file\\=", "", dir)
+    dir <- gsub("\\\\", "/", dir)
+    dir <- strsplit(dir, "/")[[1]]
+    dir <- do.call(file.path, as.list(dir[-length(dir)]))
+} else {
+
+    # Em rodadas normais, dir e o diretorio de trabalho mesmo
+    dir <- getwd()
+}
+
 # Procura root ou no wd atual ou um nivel acima (vai acontecer em rodada agendada)
 # Em ultimo caso, se estiver sendo rodado pelo codigo principal, acha o root pelo nome completo
+wd0 <- getwd()
+setwd(dir)
 if(file.exists("config.yml")) {
     root <- getwd()
     CONFIG <- configr::read.config("config.yml")
@@ -15,6 +32,7 @@ if(file.exists("config.yml")) {
     # Se nada funcionar, emite erro
     stop("Nao foi possivel localizar um arquivo de configuracoes")
 }
+setwd(wd0)
 
 # Carrega funcoes necessarias
 for(arq in list.files(file.path(root, "R"), full.names = TRUE)) source(arq)
