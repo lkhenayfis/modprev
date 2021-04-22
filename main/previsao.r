@@ -110,12 +110,16 @@ for(pto in v_ptoconex) {
 
     # Checa se ja existe uma lista de prevs para o ponto
     arq <- file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$outprevs, paste0(pto, ".RData"))
-    if(exists(arq)) {
+    if(file.exists(arq)) {
         local({
             aux <- l_prev
             load(arq)
             for(spec in CONFIG$PARAMS$modelos) {
-                l_prev[[spec]] <- unname(c(l_prev[spec], aux[spec]))
+                if(class(l_prev[[spec]]) != "list") {
+                    l_prev[[spec]] <- unname(c(l_prev[spec], aux[spec]))
+                } else {
+                    l_prev[[spec]] <- unname(c(l_prev[[spec]], aux[spec]))
+                }
             }
             save(list = "l_prev", file = arq)
         })
@@ -174,7 +178,11 @@ for(pto in v_ptoconex) {
         if(is.null(l_prev[["regular"]])) {
             l_prev["regular"] <- list(aux)
         } else {
-            l_prev[["regular"]] <- unname(c(l_prev["regular"], list(aux)))
+            if(class(l_prev[["regular"]]) != "list") {
+                l_prev[["regular"]] <- unname(c(l_prev["regular"], list(aux)))
+            } else {
+                l_prev[["regular"]] <- unname(c(l_prev[["regular"]], list(aux)))
+            }
         }
        save(list = "l_prev", file = arq)
     })
