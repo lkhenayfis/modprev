@@ -88,7 +88,7 @@ for(pto in v_ptoconex) {
 
     # Monta serie para estimacao
     serie <- c(t(d_hist))
-    serie <- serie[-c(1:(inihora - 1))]
+    serie <- serie[inihora:length(serie)]
     serie <- serie[!is.na(serie)]
     serie <- ts(serie, start = c(as.numeric(as.Date(inihist)), inihora), freq = 48)
 
