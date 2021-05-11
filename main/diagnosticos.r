@@ -69,7 +69,7 @@ for(pto in v_ptoconex) {
     })
 
     erros <- lapply(l_prev, function(l) {
-        l <- lapply(l, function(v) unname(as.vector(obs - v[, 1])))
+        l <- lapply(l, function(v) unname(as.vector(obs - v[, 1] * (v[, 1] > 0))))
         tam <- sapply(l, length)
         if(all(tam == min(tam))) {
             return(do.call(cbind, l))
