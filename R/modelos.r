@@ -7,24 +7,25 @@ library(forecast)
 
 # ESTIMACAO ----------------------------------------------------------------------------------------
 
-#' Generica para ajustar modelo a uma serie
+#' Ajuste De Modelos Para Previsao Eolica
 #' 
 #' Wrapper de multiplos modelos numa unica funcao com saida unificada
 #' 
-#' @param serie [objeto ts] serie para ajustar
-#' @param out_sample [escalar inteiro] numero de pontos para deixar de fora da amostra. Ver Detalhes
-#' @param tipo [escalar string] tipo de modelo a ser ajustado
+#' O numero \code{out_sample} diz respeito ao numero de observacoes a serem deixadas para 
+#' teste. Ou seja, se desejamos deixar 10 horas para teste, o valor do parametro deve ser
 #' 
-#' @details O numero \code{out_sample} diz respeito ao numero de observacoes a serem deixadas para 
-#'     teste. Ou seja, se desejamos deixar 10 horas para teste, o valor do parametro deve ser
+#' out_sample = 20 (10 x 2 meia horas por hora)
 #' 
-#'     out_sample = 20 (10 x 2 meia horas por hora)
+#' Se for informado um valor diferente de zero, os ultimos \code{out_sample} da serie serao 
+#' cortados e apenas o restante e passado para o fit. Esta parte removida continua com o objeto 
+#' de saida e sera usado para previsao no metodo de \code{predict}
 #' 
-#'     Se for informado um valor diferente de zero, os ultimos \code{out_sample} da serie serao 
-#'     cortados e apenas o restante e passado para o fit. Esta parte removida continua com o objeto 
-#'     de saida e sera usado para previsao no metodo de \code{predict}
+#' @param serie serie para ajustar
+#' @param out_sample numero de pontos para deixar de fora da amostra. Ver Detalhes
+#' @param tipo tipo de modelo a ser ajustado. Ver Detalhes
+#' @param ... demais parametros passados para as funcoes de fit especificas de cada modelo
 #' 
-#' @value [objeto modTR] objeto contendo modelo (classe dependente do modelo ajustato)
+#' @value objeto da classe mod_eol contendo modelo (classe dependente do modelo ajustato)
 
 estimamodelo <- function(serie, out_sample, tipo) UseMethod("estimamodelo")
 
@@ -111,23 +112,23 @@ fit_ss_ar1_saz <- function(serie, ...) {
 
 # PREVISAO -----------------------------------------------------------------------------------------
 
-#' Previsao de modelos fit_TR
+#' Previsao De Modelos fit_TR
 #' 
-#' Wrapper para previsao e plot de modelos ajustados por estimamodelo
+#' Wrapper para previsao e plot de modelos ajustados por \code{estimamodelo}
 #' 
-#' @param fit [modelo ajustado] Ver detalhes
-#' @param n.ahead [escalar inteiro] numero de passos a frente para prever. Ver detalhes
-#' @param serie_out [vetor numerico ou ts] serie fora da amostra para comparacao. Ver detalhes
-#' @param plot [escalar booleano] se deve ser plotado o resultado da previsao
+#' Essa funcao e um simples facilitador do processo de previsao e plot out of sample para 
+#' comparacao com verificado adiante.
+#' 
+#' Se nao forem fornecidos os argumentos n.ahead ou out_sample, ambos serao pegos por padrao do 
+#' objeto fit_TR fornecido. Caso algum seja fornecido sera utilizado no lugar do padrao
+#' 
+#' @param fit modelo ajustado. Ver detalhes
+#' @param n.ahead numero de passos a frente para prever. Ver detalhes
+#' @param serie_out serie fora da amostra para comparacao. Ver detalhes
+#' @param plot booleano indicando se deve ser plotado o resultado da previsao
 #' @param ... parametros extras passados para o metodo de \code{predict} apropriado. Ver detalhes
 #' 
-#' @details Essa funcao e um simples facilitador do processo de previsao e plot out of sample para 
-#'     comparacao com verificado adiante.
-#' 
-#'     Se nao forem fornecidos os argumentos n.ahead ou out_sample, ambos serao pegos por padrao do 
-#'     objeto fit_TR fornecido. Caso algum seja fornecido sera utilizado no lugar do padrao
-#' 
-#' @value [vetor numerico] vetor de previsoes. Opcionalmente um plot
+#' @value vetor numerico vetor de previsoes. Opcionalmente um plot
 
 # ;;TESTAR continuidade da serie_out em final, meio e inicio de dia
 
@@ -193,15 +194,15 @@ pred_ss_ar1_saz <- function(model, ...) {
 
 # ATUALIZACAO --------------------------------------------------------------------------------------
 
-#' Atualizacao de modelos fit_TR
+#' Atualizacao De Modelos fit_TR
 #' 
 #' Wrapper para atualizar e possivelmete reajustar modelos fit_TR
 #' 
-#' @param fit [objeto fit_TR] modelo ajustado atraves de estimamodelo
-#' @param newdata [serie temporal] nova serie para associar ao modelo
-#' @param refit [booleano] se o modelo deve ser reajustado
+#' @param fit modelo ajustado atraves de estimamodelo
+#' @param newdata nova serie para associar ao modelo
+#' @param refit booleano indicando se o modelo deve ser reajustado
 #' 
-#' @value [objeto fit_TR] modelo com novos dados e possivelmente reajustado
+#' @value modelo com novos dados e possivelmente reajustado
 
 update.fit_TR <- function(fit, newdata, refit = FALSE) {
 
@@ -234,26 +235,28 @@ upd_ss_ar1_saz <- function(model, newdata) {
 
 # JANELA MOVEL -------------------------------------------------------------------------------------
 
-#' Previsao em horizonte rolante
+#' Previsao Em Horizonte Rolante
 #' 
 #' Funcao para realizar previsoes e reajustes em janela movel
 #' 
-#' @param objeto [ts ou fit_TR] Ver detalhes
-#' @param tipo [escalar string] tipo de modelo a ser ajustado
-#' @param serie [ts] serie temporal pela qual passar a janela movel
-#' @param largura [escalar inteiro] numero de observacoes na janela movel
-#' @param n.ahead [escalar inteiro] numero de passos a frente para prever. Ver detalhes
-#' @param refit_cada [escalar ou vetor inteiro] se escalar, reajusta o modelo a cada refit_cada 
-#'     observacoes. Se for um vetor, reajusta apos cada indice de refit_cada
-#' @param verbose [escalar numerico] Nivel de informacao a ser emitido durante rodada. 0 = nenhuma,
-#'     1: toda vez que reajusta modelo, 2: todo horizonte de previsao e reajuste
+#' \code{objeto} pode ser tanto um objeto fit_TR contendo um modelo ajustado ou uma serie temporal
+#' simples. No primeiro caso, deve ser passado em conjunto uma serie temporal atraves do parametro
+#' \code{serie} e, no segundo, deve ser informado o tipo de modelo a ser ajustado atraves do 
+#' parametro \code{tipo}.
 #' 
-#' @details \code{objeto} pode ser uma serie temporal ou objeto fit_TR. Se for uma serie temporal, 
-#'    deve ser passado o parametro \code{tipo} conjuntamente. Caso \code{objeto} seja um fit_TR deve 
-#'    ser passado o parametro \code{serie}
+#' Embora esta estrutura pareca redundante, ela permite que um modelo ajustado independentemente 
+#' possa ser utilizado para prever em janela rolante uma outra serie qualquer, diferente daquela 
+#' utilizada para sua estimacao.
 #' 
-#'    A diferenca entre estes dois metodos e que passar um fit_TR permite filtrar toda a serie com 
-#'    um modelo ajustado independentemente, com qualquer input que nao a propria serie da janela
+#' @param objeto serie ou modelo ajusdado para previsao rolante. Ver detalhes
+#' @param tipo tipo de modelo a ser ajustado, caso \code{objeto} seja uma serie temporal
+#' @param serie serie temporal pela qual passar a janela movel. Ver Detalhes
+#' @param largura numero de observacoes na janela movel
+#' @param n.ahead numero de passos a frente para prever
+#' @param refit_cada escalar ou vetor inteiro. Se escalar, reajusta o modelo a cada 
+#'     \code{refit_cada} observacoes. Se vetor, reajusta apos cada indice de \code{refit_cada}
+#' @param verbose Escalar inteiro indicando quanta informacao a ser emitida durante rodada. 
+#'     0 = nenhuma, 1: toda vez que reajusta modelo, 2: todo horizonte de previsao e reajuste
 #' 
 #' @value [lista] lista contendo previsoes de 1 a n.ahead passos a frente para cada janela
 
