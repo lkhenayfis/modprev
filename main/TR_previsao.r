@@ -1,7 +1,34 @@
+####################################################################################################
+#                          Script para previsao de modelos do Tempo Real
+#
+# Este script e rodado de meia em meia hora para previsao de modelos no tempo real. A cada rodada
+# serao lidos os modelos previamente estimados, atualizados com dados historicos mais recentes e
+# entao faz-se a previsao.
+#
+# Em seguida procura a previsao de tempo real do modelo regular, junta tudo num mesmo dado e salva
+####################################################################################################
+
 # CARREGA CONFIGURACAO E FUNCOES -------------------------------------------------------------------
+
+# Numa rodada por cmd, o diretorio do arquivo pode ser localizado facilmente
+args <- commandArgs()
+dir  <- sapply(args, function(arg) grepl("\\-\\-file", arg))
+if(any(dir)) {
+    dir <- args[[which(dir)]]
+    dir <- sub("\\-\\-file\\=", "", dir)
+    dir <- gsub("\\\\", "/", dir)
+    dir <- strsplit(dir, "/")[[1]]
+    dir <- do.call(file.path, as.list(dir[-length(dir)]))
+} else {
+
+    # Em rodadas normais, dir e o diretorio de trabalho mesmo
+    dir <- getwd()
+}
 
 # Procura root ou no wd atual ou um nivel acima (vai acontecer em rodada agendada)
 # Em ultimo caso, se estiver sendo rodado pelo codigo principal, acha o root pelo nome completo
+wd0 <- getwd()
+setwd(dir)
 if(file.exists("config.yml")) {
     root <- getwd()
     CONFIG <- configr::read.config("config.yml")
@@ -18,18 +45,19 @@ if(file.exists("config.yml")) {
 
 # Carrega funcoes necessarias
 for(arq in list.files(file.path(root, "R"), full.names = TRUE)) source(arq)
+setwd(wd0)
 
 # INICIALIZACAO ------------------------------------------------------------------------------------
-
-# Le lista de pontos de conexao
-arq <- file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$dadpontos)
-v_ptoconex <- read.table(arq, sep = ";", header = FALSE, stringsAsFactors = FALSE)
-v_ptoconex <- v_ptoconex[, 1]
 
 # Identifica data-hora atual e arredonda para meia hora inferior
 tempoatual <- as.POSIXlt(Sys.time())
 tempoatual$sec <- 0
 tempoatual$min <- (tempoatual$min > 30) * 30
+
+# Le lista de pontos de conexao
+arq <- file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$dadpontos)
+v_ptoconex <- read.table(arq, sep = ";", header = FALSE, stringsAsFactors = FALSE)
+v_ptoconex <- v_ptoconex[, 1]
 
 # Identifica inicio do historico para ajuste
 inihist <- as.POSIXlt(tempoatual - (CONFIG$PARAMS$janela - 1) * 30 * 60)
@@ -70,55 +98,38 @@ for(pto in v_ptoconex) {
 
     # Monta serie para estimacao
     serie <- c(t(d_hist))
-    serie <- serie[-c(1:(inihora - 1))]
+    serie <- serie[inihora:length(serie)]
     serie <- serie[!is.na(serie)]
     serie <- ts(serie, start = c(as.numeric(as.Date(inihist)), inihora), freq = 48)
 
-    # Checa se deve ser estimado um modelo ou apenas atualizado e previsto
-    if(format(tempoatual, format = "%H:%M") == CONFIG$PARAMS$horafit) {
+    # Caso nao seja hora marcada para estimar, le o modelo estimado, atualiza e faz a previsao
+    l_prev <- lapply(CONFIG$PARAMS$modelos, function(spec) {
+        arq <- file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$outmods, paste0(pto, "_", spec, ".RData"))
+        load(arq)
 
-        # Ajusta modelos, preve e salva
-        l_prev <- lapply(CONFIG$PARAMS$modelos, function(spec) {
-            fit   <- estimamodelo(serie, tipo = spec)
+        fit <- update(fit, newdata = serie)
 
-            arq <- file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$outmods, paste0(pto, "_", spec, ".RData"))
-            save(list = "fit", file = arq)
+        arq <- file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$outmods, paste0(pto, "_", spec, ".jpeg"))
+        jpeg(arq, width = 3600, height = 2700, res = 350)
+        plot(fit, main = paste0(pto, " [", spec, "]"))
+        dev.off()
 
-            arq <- file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$outmods, paste0(pto, "_", spec, ".jpeg"))
-            jpeg(arq, width = 3600, height = 2700, res = 350)
-            plot(fit, main = paste0(pto, " [", spec, "]"))
-            dev.off()
-
-            predict(fit, n.ahead = CONFIG$PARAMS$nahead, plot = FALSE)
-        })
-
-    } else {
-
-        # Caso nao seja hora marcada para estimar, le o modelo estimado, atualiza e faz a previsao
-        l_prev <- lapply(CONFIG$PARAMS$modelos, function(spec) {
-            arq <- file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$outmods, paste0(pto, "_", spec, ".RData"))
-            load(arq)
-
-            fit <- update(fit, newdata = serie)
-
-            arq <- file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$outmods, paste0(pto, "_", spec, ".jpeg"))
-            jpeg(arq, width = 3600, height = 2700, res = 350)
-            plot(fit, main = paste0(pto, " [", spec, "]"))
-            dev.off()
-
-            predict(fit, n.ahead = CONFIG$PARAMS$nahead, plot = FALSE)
-        })
-    }
+        predict(fit, n.ahead = CONFIG$PARAMS$nahead, plot = FALSE)
+    })
     names(l_prev) <- CONFIG$PARAMS$modelos
 
     # Checa se ja existe uma lista de prevs para o ponto
     arq <- file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$outprevs, paste0(pto, ".RData"))
-    if(exists(arq)) {
+    if(file.exists(arq)) {
         local({
             aux <- l_prev
             load(arq)
             for(spec in CONFIG$PARAMS$modelos) {
-                l_prev[[spec]] <- unname(c(l_prev[spec], aux[spec]))
+                if(class(l_prev[[spec]]) != "list") {
+                    l_prev[[spec]] <- unname(c(l_prev[spec], aux[spec]))
+                } else {
+                    l_prev[[spec]] <- unname(c(l_prev[[spec]], aux[spec]))
+                }
             }
             save(list = "l_prev", file = arq)
         })
@@ -129,12 +140,25 @@ for(pto in v_ptoconex) {
 
 # LEITURA DAS PREVISOES REGULARES ------------------------------------------------------------------
 
-# Monta patterns e le dados
+# Espera ate ter os arquivos mais atuais
 datas <- as.Date(tempoatual) + 0:3
 datas <- format(datas, format = "%d-%m-%Y")
-arqs <- list.files(file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$prevOnline),
-    pattern = paste0("Previs.._[[:alpha:]]{1,2}_", c("D_", "D1_", "D2_", "D3_"), datas, collapse = "|"),
-    full.names = TRUE)
+arqs  <- list.files(file.path(CONFIG$CAMINHOS$raiz, CONFIG$CAMINHOS$prevOnline),
+        pattern = paste0("Previs.._[[:alpha:]]{1,2}_", c("D_", "D1_", "D2_", "D3_"), datas, collapse = "|"),
+        full.names = TRUE)
+ok <- FALSE
+while(!ok) {
+    horaarqs <- file.mtime(arqs)
+    horaarqs <- sapply(horaarqs, function(x) {
+        x <- as.POSIXlt(x)
+        x$sec <- 0
+        x$min <- (x$min > 30) * 30
+        x == tempoatual
+    })
+    if(all(horaarqs)) ok <- TRUE else Sys.sleep(60)
+}
+
+# Le as previsoes regulares
 l_prevOnline <- lapply(arqs, read.table, sep = ";", dec = ",", header = TRUE)
 
 # Separa por pontos
@@ -164,7 +188,11 @@ for(pto in v_ptoconex) {
         if(is.null(l_prev[["regular"]])) {
             l_prev["regular"] <- list(aux)
         } else {
-            l_prev[["regular"]] <- unname(c(l_prev["regular"], list(aux)))
+            if(class(l_prev[["regular"]]) != "list") {
+                l_prev[["regular"]] <- unname(c(l_prev["regular"], list(aux)))
+            } else {
+                l_prev[["regular"]] <- unname(c(l_prev[["regular"]], list(aux)))
+            }
         }
        save(list = "l_prev", file = arq)
     })

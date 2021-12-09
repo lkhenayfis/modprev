@@ -1,3 +1,15 @@
+####################################################################################################
+#                          Script para estimacao de modelos do Tempo Real
+#
+# Este script e rodado de meia em meia hora para (possivel) estimacao de modelos de tempo real. A
+# cada rodada sera checado se bate com a hora para estimacao dos modelos e, caso positivo, ajusta e
+# salva modelos especificados no arquivo de conf. Do contrario simplesmente encerra sem fazer nada
+#
+# Embora so se realize a estimacao em uma determinada hora do dia, o script e rodado regularmente de
+# meia em meia hora. Assim so e necessario mudar a hora de estimacao no arquivo de conf e nao no
+# agendamento de execucao do script
+####################################################################################################
+
 # CARREGA CONFIGURACAO E FUNCOES -------------------------------------------------------------------
 
 # Numa rodada por cmd, o diretorio do arquivo pode ser localizado facilmente

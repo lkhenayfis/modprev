@@ -1,3 +1,11 @@
+####################################################################################################
+#                         Script para diagnosticos de modelos do Tempo Real
+#
+# Este script e rodado uma vez por dia para calcular os erros de previsao de cada modelo rodando no
+# tempo real. A cada rodada sao gerados graficos comparando o desempenho de cada um num horizonte
+# de ate seis horas a frente
+####################################################################################################
+
 # CARREGA CONFIGURACAO E FUNCOES -------------------------------------------------------------------
 
 # Numa rodada por cmd, o diretorio do arquivo pode ser localizado facilmente
@@ -89,7 +97,7 @@ for(pto in v_ptoconex) {
     png(file.path(outplots, paste0(pto, ".png")), width = 2700, height = 1800, res = 300)
     plot(NA, panel.first = grid(col = "grey85"),
         xlim = c(1, nrow(rmse)), ylim = range(rmse),
-        xlab = "Horizonte de previsão [n x 30 min]", ylab = "Valor", main = paste0("RMSE - ", pto))
+        xlab = "Horizonte de previsï¿½o [n x 30 min]", ylab = "Valor", main = paste0("RMSE - ", pto))
     for(i in seq(ncol(rmse))) {
         points(rmse[, i], col = i, type = "o", lwd = 2)
     }
