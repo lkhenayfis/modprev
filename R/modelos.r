@@ -43,7 +43,7 @@ estimamodelo.ts <- function(serie, out_sample = 0L, tipo = c("sarima", "ss_ar1_s
 
     # Adiciona classe e serie out-ot-sample
     out <- list(modelo = fit_mod, serie_in = serie_in, serie_out = serie_out)
-    class(out) <- "fit_TR"
+    class(out) <- "mod_eol"
     attr(out, "tipo") <- tipo
 
     # Retorna
@@ -67,7 +67,7 @@ estimamodelo.ts_TR <- function(serie, out_sample, tipo = c("sarima", "ss_ar1_saz
 
     # Adiciona classe e serie out-ot-sample
     out <- list(modelo = fit_mod, serie_in = serie_in, serie_out = serie_out)
-    class(out) <- "fit_TR"
+    class(out) <- "mod_eol"
     attr(out, "tipo") <- tipo
 
     # Retorna
@@ -112,7 +112,7 @@ fit_ss_ar1_saz <- function(serie, ...) {
 
 # PREVISAO -----------------------------------------------------------------------------------------
 
-#' Previsao De Modelos fit_TR
+#' Previsao De Modelos mod_eol
 #' 
 #' Wrapper para previsao e plot de modelos ajustados por \code{estimamodelo}
 #' 
@@ -120,7 +120,7 @@ fit_ss_ar1_saz <- function(serie, ...) {
 #' comparacao com verificado adiante.
 #' 
 #' Se nao forem fornecidos os argumentos n.ahead ou out_sample, ambos serao pegos por padrao do 
-#' objeto fit_TR fornecido. Caso algum seja fornecido sera utilizado no lugar do padrao
+#' objeto mod_eol fornecido. Caso algum seja fornecido sera utilizado no lugar do padrao
 #' 
 #' @param fit modelo ajustado. Ver detalhes
 #' @param n.ahead numero de passos a frente para prever. Ver detalhes
@@ -132,7 +132,7 @@ fit_ss_ar1_saz <- function(serie, ...) {
 
 # ;;TESTAR continuidade da serie_out em final, meio e inicio de dia
 
-predict.fit_TR <- function(fit, n.ahead, serie_out, plot = TRUE, ...) {
+predict.mod_eol <- function(fit, n.ahead, serie_out, plot = TRUE, ...) {
 
     # Identifica se serie out foi fornecida
     if(missing(serie_out)) {
@@ -194,9 +194,9 @@ pred_ss_ar1_saz <- function(model, ...) {
 
 # ATUALIZACAO --------------------------------------------------------------------------------------
 
-#' Atualizacao De Modelos fit_TR
+#' Atualizacao De Modelos mod_eol
 #' 
-#' Wrapper para atualizar e possivelmete reajustar modelos fit_TR
+#' Wrapper para atualizar e possivelmete reajustar modelos mod_eol
 #' 
 #' @param fit modelo ajustado atraves de estimamodelo
 #' @param newdata nova serie para associar ao modelo
@@ -204,7 +204,7 @@ pred_ss_ar1_saz <- function(model, ...) {
 #' 
 #' @value modelo com novos dados e possivelmente reajustado
 
-update.fit_TR <- function(fit, newdata, refit = FALSE) {
+update.mod_eol <- function(fit, newdata, refit = FALSE) {
 
     if(refit) {
         fit <- estimamodelo(serie = newdata, tipo = attr(fit, "tipo"))
@@ -239,7 +239,7 @@ upd_ss_ar1_saz <- function(model, newdata) {
 #' 
 #' Funcao para realizar previsoes e reajustes em janela movel
 #' 
-#' \code{objeto} pode ser tanto um objeto fit_TR contendo um modelo ajustado ou uma serie temporal
+#' \code{objeto} pode ser tanto um objeto mod_eol contendo um modelo ajustado ou uma serie temporal
 #' simples. No primeiro caso, deve ser passado em conjunto uma serie temporal atraves do parametro
 #' \code{serie} e, no segundo, deve ser informado o tipo de modelo a ser ajustado atraves do 
 #' parametro \code{tipo}.

@@ -2,16 +2,16 @@
 # FUNCOES DE VISUALIZACAO
 ####################################################################################################
 
-#' Plot de fit_TR
+#' Plot de mod_eol
 #' 
-#' Metodo para plotar ajustes fit_TR
+#' Metodo para plotar ajustes mod_eol
 #' 
-#' @param fit [objeto fit_TR] objeto para plotar
+#' @param fit [objeto mod_eol] objeto para plotar
 #' @param ... demais parametros repassados para \code{plot}
 #' 
 #' @value plot da serie e ajuste realizado
 
-plot.fit_TR <- function(fit, ..., legend = TRUE) {
+plot.mod_eol <- function(fit, ..., legend = TRUE) {
 
     # Ajuste do modelo
     args <- c(list(object = fit$modelo, filter = TRUE))
