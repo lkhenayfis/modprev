@@ -2,34 +2,72 @@
 # FUNCOES DE ESTIMACAO E PREVISAO DE MODELOS PARA TEMPO REAL
 ####################################################################################################
 
-library(KFAS)
-library(forecast)
-
 # ESTIMACAO ----------------------------------------------------------------------------------------
 
-#' Ajuste De Modelos Para Previsao Eolica
+#' Ajuste De Modelos
 #' 
-#' Wrapper de multiplos modelos numa unica funcao com saida unificada
+#' Wrapper de estimação para múltiplos modelos com interface e saída unificadas
 #' 
-#' O numero \code{out_sample} diz respeito ao numero de observacoes a serem deixadas para 
-#' teste. Ou seja, se desejamos deixar 10 horas para teste, o valor do parametro deve ser
+#' Esta função facilita a estimação de diversos tipos de modelos com uma única interface e, mais 
+#' importante ainda, única estrutura de saída. O tipo de modelo estimado para a série passada 
+#' através de \code{serie} é selecionado através do argumento \code{tipo}, podendo ser um de
+#' 
+#' \describe{
+#'     \item{\code{sarima}}{SARIMA(p, d, q)(P, D, Q)}
+#'     \item{\code{ss_ar1_saz}}{Espaço de estados composto por processo AR(1) + Sazonalidade}
+#'     \item{\code{ss_reg_din}}{Regressão univariada dinâmica}
+#' }
+#' 
+#' Deve ser notado que no caso dos modelos com sazonalidade, o argumento \code{serie} \emph{DEVE SER
+#' UM OBJETO SERIE TEMPORAL COM PERIODO ESPECIFICADO}. Isto e necessario para que a função possa 
+#' automaticamente lidar com diversos tipos de séries sem a necessidade de demais argumentos.
+#' 
+#' No caso de modelos com variaveis explicativas deve ser fornecido um parametro \code{regdata} na
+#' forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas.
+#' 
+#' O numero \code{out_sample} diz respeito ao numero de observacoes a serem deixadas para teste. Ou
+#' seja, se desejamos deixar 10 horas para teste, o valor do parametro deve ser
 #' 
 #' out_sample = 20 (10 x 2 meia horas por hora)
 #' 
-#' Se for informado um valor diferente de zero, os ultimos \code{out_sample} da serie serao 
-#' cortados e apenas o restante e passado para o fit. Esta parte removida continua com o objeto 
-#' de saida e sera usado para previsao no metodo de \code{predict}
+#' Se for informado um valor diferente de zero, os últimos \code{out_sample} da série serão 
+#' cortados e apenas o restante é passado para o fit. Esta parte removida continua com o objeto 
+#' de saída e sera usada para comparação com a previsão no método \code{predict}
 #' 
-#' @param serie serie para ajustar
-#' @param out_sample numero de pontos para deixar de fora da amostra. Ver Detalhes
+#' @param serie série para ajustar
+#' @param out_sample número de pontos para deixar de fora da amostra. Ver Detalhes
 #' @param tipo tipo de modelo a ser ajustado. Ver Detalhes
-#' @param ... demais parametros passados para as funcoes de fit especificas de cada modelo
+#' @param ... demais parâmetros passados para as funções de fit específicas de cada modelo
 #' 
-#' @value objeto da classe mod_eol contendo modelo (classe dependente do modelo ajustato)
+#' @examples 
+#' 
+#' # ajustando tipo SARIMA
+#' mod_sarima <- estimamodelo(AirPassengers, tipo = "sarima")
+#' 
+#' # caso a serie nao possua sazonalidade explicita, o modelo sera ajustado sem isso
+#' ss <- arima.sim(200, model = list(ar = .8))
+#' mod_sarima_semsazo <- estimamodelo(ss, tipo = "sarima")
+#' 
+#' \dontrun{
+#'     # estima so um AR(1) sem sazonalidade
+#'     coef(mod_sarima_semsazo)
+#' }
+#' 
+#' # ajustando uma regressao dinamica (com dado dummy interno do pacote)
+#' serie <- window(datregdin[[1]], 1, 100)
+#' varex <- window(datregdin[[2]], 1, 100)
+#' mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "reg_din")
+#' 
+#' @return objeto da classe mod_eol contendo modelo (classe dependente do modelo ajustato), serie
+#'     ajustada e, caso \code{out_sample > 0}, a parte reservada para comparação
+#' 
+#' @export
 
-estimamodelo <- function(serie, out_sample, tipo) UseMethod("estimamodelo")
+estimamodelo <- function(serie, out_sample, tipo, ...) UseMethod("estimamodelo")
 
-estimamodelo.ts <- function(serie, out_sample = 0L, tipo = c("sarima", "ss_ar1_saz"), ...) {
+#' @export
+
+estimamodelo.ts <- function(serie, out_sample = 0L, tipo = c("sarima", "ss_ar1_saz", "ss_reg_din"), ...) {
 
     # Separa in-sample e out-of-sample
     aux <- quebrats(serie, out_sample)
@@ -38,8 +76,9 @@ estimamodelo.ts <- function(serie, out_sample = 0L, tipo = c("sarima", "ss_ar1_s
 
     # Compoe chamada de fit para o tipo especificado
     tipo <- match.arg(tipo)
-    fit_func <- paste0("fit_", tipo)
-    fit_mod  <- do.call(fit_func, c(list(serie = serie_in), list(...)))
+    fit_func <- match.call()
+    fit_func[[1]] <- as.name(paste0("fit_", tipo))
+    fit_mod <- eval(fit_func, parent.frame())
 
     # Adiciona classe e serie out-ot-sample
     out <- list(modelo = fit_mod, serie_in = serie_in, serie_out = serie_out)
@@ -50,27 +89,22 @@ estimamodelo.ts <- function(serie, out_sample = 0L, tipo = c("sarima", "ss_ar1_s
     return(out)
 }
 
-estimamodelo.ts_TR <- function(serie, out_sample, tipo = c("sarima", "ss_ar1_saz"), ...) {
+estimamodelo.ts_TR <- function(serie, out_sample, tipo = c("sarima", "ss_ar1_saz", "ss_reg_din"), ...) {
 
-    # Olha se foi inputado um out_sample
     if(missing(out_sample)) out_sample <- attr(serie, "out_sample")
 
-    # Separa in-sample e out-of-sample
     aux <- quebrats(serie, out_sample)
     serie_in  <- aux[[1]]
     serie_out <- aux[[2]]
 
-    # Compoe chamada de fit para o tipo especificado
     tipo <- match.arg(tipo)
     fit_func <- paste0("fit_", tipo)
     fit_mod  <- do.call(fit_func, c(list(serie = serie_in), list(...)))
 
-    # Adiciona classe e serie out-ot-sample
     out <- list(modelo = fit_mod, serie_in = serie_in, serie_out = serie_out)
     class(out) <- "mod_eol"
     attr(out, "tipo") <- tipo
 
-    # Retorna
     return(out)
 }
 
@@ -81,16 +115,20 @@ fit_sarima <- function(serie, ...) {
 
 fit_ss_ar1_saz <- function(serie, ...) {
 
-    # Matrizes de sistema
     Z <- matrix(c(1, 1), 1)
     T <- matrix(c(1, 0, 0, 0), 2)
     R <- matrix(c(0, 1), 2)
 
-    # Especifica modelo, funcao de atualizacao e estima
-    mod <- SSModel(serie ~ -1 +
-        SSMcustom(Z = Z, T = T, R = R, a1 = c(1, 0), Q = NA) +
-        SSMseasonal(period = 48, sea.type = "dummy", Q = NA),
-        H = 0)
+    if(frequency(serie) == 1) {
+        mod <- SSModel(serie ~ -1 +
+            SSMcustom(Z = Z, T = T, R = R, a1 = c(1, 0), Q = NA),
+            H = 0)
+    } else {
+        mod <- SSModel(serie ~ -1 +
+            SSMcustom(Z = Z, T = T, R = R, a1 = c(1, 0), Q = NA) +
+            SSMseasonal(period = frequency(serie), sea.type = "dummy", Q = NA),
+            H = 0)
+    }
     upfunc <- function(par, model) {
         model["Z", "custom"][1] <- par[1]
         model["T", "custom"][2, 2] <- par[2] / sqrt(1 + par[2]^2)
@@ -101,12 +139,32 @@ fit_ss_ar1_saz <- function(serie, ...) {
     }
     fit <- fitSSM(mod, inits = c(mean(serie), 0, 0, 0), updatefn = upfunc, method = "BFGS")
 
-    # Checa convergencia
     if(abs(logLik(fit$model)) < 1e-10) {
         fit$model$Z[] <- NA
     }
 
-    # Retorna apenas modelo ajustado
+    return(fit$model)
+}
+
+fit_ss_reg_din <- function(serie, regdata, ...) {
+
+    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
+
+    if("data.frame" %in% class(regdata)) {
+        regdata <- data.matrix(regdata)
+    } else {
+        regdata <- as.matrix(regdata)
+    }
+
+    nvars <- ncol(regdata)
+
+    mod <- SSModel(serie ~ SSMregression(~ regdata, Q = diag(NA_real_, nvars)), H = matrix(NA))
+    fit <- fitSSM(mod, rep(0, 2), method = "BFGS")
+
+    if(fit$optim.out$convergence < 0) {
+        fit$model$Z[] <- NA
+    }
+
     return(fit$model)
 }
 
