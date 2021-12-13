@@ -60,8 +60,8 @@ ss <- arima.sim(200, model = list(ar = .8))
 mod_sarima_semsazo <- estimamodelo(ss, tipo = "sarima")
 
 \dontrun{
-    # estima so um AR(1) sem sazonalidade
-    coef(mod_sarima_semsazo)
+# estima so um AR(1) sem sazonalidade
+coef(mod_sarima_semsazo)
 }
 
 # ajustando uma regressao dinamica (com dado dummy interno do pacote)

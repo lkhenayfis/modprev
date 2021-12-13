@@ -38,3 +38,26 @@ test_that("Previsao de modelo S.S. RegDin - regressao simples", {
 
     expect_error(predict(mod))
 })
+
+test_that("Atualizacao de modelo S.S. RegDin", {
+    serie1 <- window(datregdin[[1]], 1, 300)
+    varex1 <- data.frame(venprev = window(datregdin[[2]], 1, 300))
+    serie2 <- window(datregdin[[1]], 501, 900)
+    varex2 <- data.frame(venprev = window(datregdin[[2]], 501, 900))
+
+    mod <- estimamodelo(serie1, tipo = "ss_reg_din", regdata = varex1)
+
+    mod_upd <- update(mod, serie2, newregdata = varex2)
+    expect_equal(c(mod$modelo["Q"]), c(mod_upd$modelo["Q"]))
+    expect_equal(c(mod$modelo["H"]), c(mod_upd$modelo["H"]))
+    expect_equal(c(mod$modelo["T"]), c(mod_upd$modelo["T"]))
+    expect_equal(mod_upd$modelo["Z"][, 2, ], c(varex2[[1]]))
+    expect_equal(c(mod_upd$modelo$y), c(serie2))
+
+    mod_refit <- update(mod, serie2, newregdata = varex2, refit = TRUE)
+    expect_equal(c(mod_refit$modelo$y), c(serie2))
+    expect_snapshot_value(mod$modelo["Q"], style = "deparse")
+    expect_snapshot_value(mod$modelo["H"], style = "deparse")
+    expect_snapshot_value(mod$modelo["Z"], style = "deparse")
+    expect_snapshot_value(mod$modelo["T"], style = "deparse")
+})

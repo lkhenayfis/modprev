@@ -20,3 +20,18 @@ test_that("Previsao de modelo SARIMA", {
     expect_true(all(prev[, 1] == prevcomp[[1]]))
     expect_true(all(prev[, 2] == prevcomp[[2]]))
 })
+
+test_that("Atualizacao de modelo SARIMA", {
+    serie1 <- window(datregdin[[1]], 1, 300)
+    serie2 <- window(datregdin[[1]], 501, 900)
+
+    mod <- estimamodelo(serie1, tipo = "sarima")
+
+    mod_upd <- update(mod, serie2)
+    expect_equal(coef(mod$modelo), coef(mod_upd$modelo))
+    expect_equal(mod_upd$modelo$x, serie2)
+
+    mod_refit <- update(mod, serie2, refit = TRUE)
+    expect_equal(mod_refit$modelo$x, serie2)
+    expect_snapshot_value(round(coef(mod_refit$modelo), 10), style = "deparse")
+})

@@ -12,3 +12,21 @@
     52.5132673578, 53.9364259996, 55.2999974105, 56.608002922, 57.8666892852, 
     59.0832787676, 60.2561456298, 61.3104985748, 61.8870700235)
 
+# Atualizacao de modelo S.S. AR1+Saz
+
+    structure(1.03757393105933, .Dim = c(1L, 1L, 1L))
+
+---
+
+    structure(0, .Dim = c(1L, 1L, 1L))
+
+---
+
+    structure(c(3.08476265907036, 1), .Dim = c(1L, 2L, 1L), .Dimnames = list(
+        NULL, c("custom1", "custom2"), NULL))
+
+---
+
+    structure(c(1, 0, 0, 0.797315902065573), .Dim = c(2L, 2L, 1L), .Dimnames = list(
+        c("custom1", "custom2"), c("custom1", "custom2"), NULL))
+

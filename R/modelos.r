@@ -50,8 +50,8 @@
 #' mod_sarima_semsazo <- estimamodelo(ss, tipo = "sarima")
 #' 
 #' \dontrun{
-#'     # estima so um AR(1) sem sazonalidade
-#'     coef(mod_sarima_semsazo)
+#' # estima so um AR(1) sem sazonalidade
+#' coef(mod_sarima_semsazo)
 #' }
 #' 
 #' # ajustando uma regressao dinamica (com dado dummy interno do pacote)
@@ -194,8 +194,8 @@ fit_ss_reg_din <- function(serie, regdata, ...) {
 #' mod <- estimamodelo(AirPassengers, tipo = "sarima")
 #' 
 #' \dontrun{
-#'     predict(mod, n.ahead = 24)
-#'     predict(mod)
+#' predict(mod, n.ahead = 24)
+#' predict(mod)
 #' }
 #' 
 #' # em modelos de regressao, deve ser passada a variavel explicativa via newdata
@@ -294,41 +294,101 @@ pred_ss_reg_din <- function(object, newdata, ...) {
 
 #' Atualizacao De Modelos mod_eol
 #' 
-#' Wrapper para atualizar e possivelmete reajustar modelos mod_eol
+#' Wrapper para atualizar e possivelmete reajustar modelos \code{mod_eol}
+#' 
+#' O padrão desta função é simplesmente substituir \code{newseries} no modelo ajustado \code{fit}, 
+#' isto é, mantendo todos os hiperparâmetros estimados originalmente. Através do argumento
+#' \code{refit} é possível realizar o reajuste do modelo para a nova série.
+#' 
+#' No caso de modelos com variaveis explicativas deve ser fornecido um parametro \code{newregdata} 
+#' na forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas.
+#' Se houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal.
 #' 
 #' @param fit modelo ajustado atraves de estimamodelo
-#' @param newdata nova serie para associar ao modelo
+#' @param newseries nova serie para associar ao modelo
 #' @param refit booleano indicando se o modelo deve ser reajustado
+#' @param ... demais parâmetros passados para as updates específicas. Ver Detalhes
 #' 
-#' @value modelo com novos dados e possivelmente reajustado
+#' @examples 
+#' 
+#' serie1 <- window(datregdin[[1]], 1, 300)
+#' serie2 <- window(datregdin[[1]], 501, 800)
+#' 
+#' mod_orig  <- estimamodelo(serie1, tipo = "sarima")
+#' mod_upd   <- update(mod_orig, serie2, refit = FALSE)
+#' mod_refit <- update(mod_orig, serie2, refit = TRUE)
+#' 
+#' \dontrun{
+#' # comparando os casos
+#' coef(mod_orig$modelo)
+#' coef(mod_upd$modelo)
+#' coef(mod_refit$modelo)
+#' }
+#' 
+#' @return modelo com novos dados e possivelmente reajustado
+#' 
+#' @export
 
-update.mod_eol <- function(fit, newdata, refit = FALSE) {
+update.mod_eol <- function(object, newseries, refit = FALSE, ...) {
+
+    tipo <- attr(object, "tipo")
 
     if(refit) {
-        fit <- estimamodelo(serie = newdata, tipo = attr(fit, "tipo"))
+        call <- list(...)
+        call <- c(list(quote(estimamodelo), serie = newseries, tipo = tipo), call)
+        names(call)[grep("newregdata", names(call))] <- "regdata"
+        object <- eval(as.call(call), parent.frame())
     } else {
-        newdata <- quebrats(newdata)
-        upd_func <- paste0("upd_", attr(fit, "tipo"))
-        args     <- list(model = fit$modelo, newdata = newdata[[1]])
-        fit$modelo <- do.call(upd_func, args)
-        fit[2:3] <- newdata
+        upd_func <- match.call()
+        upd_func[[1]] <- as.name(paste0("upd_", tipo))
+        object$modelo <- eval(upd_func, parent.frame())
+        object[[2]] <- newseries
     }
 
-    return(fit)
+    return(object)
 }
 
-upd_sarima <- function(model, newdata) Arima(newdata, model = model)
+upd_sarima <- function(object, newseries, ...) Arima(newseries, model = object$modelo)
 
-upd_ss_ar1_saz <- function(model, newdata) {
+upd_ss_ar1_saz <- function(object, newseries, ...) {
+
+    modelo <- object$modelo
 
     # Se modelo nao convergiu, tenta reestimar
-    if(all(is.na(model$Z))) return(estimamodelo(newdata, tipo = "ss_ar1_saz")$modelo)
+    if(all(is.na(modelo$Z))) return(estimamodelo(newseries, tipo = "ss_ar1_saz")$modelo)
 
     # Do contrario, atualiza normalmente
-    model$y <- newdata
-    attr(model$y, "dim") <- c(length(newdata), 1)
-    attr(model, "n") <- as.integer(length(newdata))
-    model
+    modelo$y <- newseries
+    attr(modelo$y, "dim") <- c(length(newseries), 1)
+    attr(modelo, "n") <- as.integer(length(newseries))
+
+    return(modelo)
+}
+
+upd_ss_reg_din <- function(object, newseries, newregdata, ...) {
+
+    modelo <- object$modelo
+
+    if(missing(newregdata)) {
+        stop("Forneca nova variavel explicativa atraves do parametro newregdata")
+    }
+
+    if("data.frame" %in% class(newregdata)) {
+        colnames(newregdata) <- "xvar"
+    } else {
+        newregdata <- data.frame(xvar = newregdata)
+    }
+
+    # Se modelo nao convergiu, tenta reestimar
+    if(all(is.na(modelo$Z))) return(estimamodelo(neseries, tipo = "ss_ar1_saz", regdata = newregdata)$modelo)
+
+    # Do contrario, atualiza normalmente
+    Hmat <- modelo["H"]
+    Qmat <- modelo["Q"]
+    newmod <- SSModel(
+        newseries ~ SSMregression(~ xvar, data = newregdata, Q = Qmat), H = Hmat)
+
+    return(newmod)
 }
 
 # JANELA MOVEL -------------------------------------------------------------------------------------

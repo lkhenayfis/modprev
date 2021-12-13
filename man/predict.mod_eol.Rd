@@ -42,8 +42,8 @@ modelos, se o argumento \code{n.ahead} também tiver sido fornecido, \code{newda
 mod <- estimamodelo(AirPassengers, tipo = "sarima")
 
 \dontrun{
-    predict(mod, n.ahead = 24)
-    predict(mod)
+predict(mod, n.ahead = 24)
+predict(mod)
 }
 
 # em modelos de regressao, deve ser passada a variavel explicativa via newdata
