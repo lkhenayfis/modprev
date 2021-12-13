@@ -10,8 +10,31 @@ test_that("Estimacao de modelo S.S. RegDin - regressao simples", {
 
     expect_error(estimamodelo(serie, tipo = "ss_reg"))
 
-    # testa aviso quando tem NA na variavel explicativa
     serie <- datregdin[[1]]
     varex <- data.frame(venprev = datregdin[[2]])
     expect_warning(estimamodelo(serie, regdata = varex, tipo = "ss_reg"))
+})
+
+
+test_that("Previsao de modelo S.S. RegDin - regressao simples", {
+    serie <- window(datregdin[[1]], 1, 200)
+    varex <- data.frame(venprev = window(datregdin[[2]], 1, 200))
+    mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg")
+
+    newdata <- data.frame(venprev = window(datregdin[[2]], 201, 220))
+    prev    <- predict(mod, newdata = newdata, plot = FALSE)
+
+    expect_true(all(dim(prev) == c(20, 2)))
+    expect_equal(c("prev", "sd"), colnames(prev))
+
+    expect_snapshot_value(round(c(prev), 10), style = "deparse")
+
+    prev <- predict(mod, newdata = newdata, n.ahead = 10, plot = FALSE)
+
+    expect_true(all(dim(prev) == c(10, 2)))
+    expect_equal(c("prev", "sd"), colnames(prev))
+
+    expect_snapshot_value(round(c(prev), 10), style = "deparse")
+
+    expect_error(predict(mod))
 })

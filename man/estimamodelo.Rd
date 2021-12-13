@@ -38,7 +38,8 @@ UM OBJETO SERIE TEMPORAL COM PERIODO ESPECIFICADO}. Isto e necessario para que a
 automaticamente lidar com diversos tipos de séries sem a necessidade de demais argumentos.
 
 No caso de modelos com variaveis explicativas deve ser fornecido um parametro \code{regdata} na
-forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas.
+forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas. Se
+houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal.
 
 O numero \code{out_sample} diz respeito ao numero de observacoes a serem deixadas para teste. Ou
 seja, se desejamos deixar 10 horas para teste, o valor do parametro deve ser

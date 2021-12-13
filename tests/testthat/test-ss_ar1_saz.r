@@ -7,3 +7,14 @@ test_that("Estimacao de modelo S.S. AR1+Saz", {
     expect_equal(mod$modelo["Q"][2, 2, 1], 172.71706)
     expect_equal(mod$modelo["T"]["custom2", "custom2", 1], 0.9957003)
 })
+
+test_that("Previsao de modelo S.S. AR1+Saz", {
+    mod <- estimamodelo(AirPassengers, tipo = "ss_ar1_saz")
+
+    prev <- predict(mod, n.ahead = 24, plot = FALSE)
+
+    expect_true(all(dim(prev) == c(24, 2)))
+    expect_equal(c("prev", "sd"), colnames(prev))
+
+    expect_snapshot_value(round(c(prev), 10), style = "deparse")
+})

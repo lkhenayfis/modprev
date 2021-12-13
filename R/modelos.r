@@ -23,7 +23,8 @@
 #' automaticamente lidar com diversos tipos de séries sem a necessidade de demais argumentos.
 #' 
 #' No caso de modelos com variaveis explicativas deve ser fornecido um parametro \code{regdata} na
-#' forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas.
+#' forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas. Se
+#' houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal.
 #' 
 #' O numero \code{out_sample} diz respeito ao numero de observacoes a serem deixadas para teste. Ou
 #' seja, se desejamos deixar 10 horas para teste, o valor do parametro deve ser
@@ -150,11 +151,7 @@ fit_ss_reg_din <- function(serie, regdata, ...) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
 
-    if("data.frame" %in% class(regdata)) {
-        regdata <- data.matrix(regdata)
-    } else {
-        regdata <- as.matrix(regdata)
-    }
+    regdata <- as.matrix(regdata)
 
     nvars <- ncol(regdata)
 
@@ -170,62 +167,78 @@ fit_ss_reg_din <- function(serie, regdata, ...) {
 
 # PREVISAO -----------------------------------------------------------------------------------------
 
-#' Previsao De Modelos mod_eol
+#' Previsão De Modelos \code{mod_eol}
 #' 
-#' Wrapper para previsao e plot de modelos ajustados por \code{estimamodelo}
+#' Wrapper para previsão e plot de modelos ajustados por \code{estimamodelo}
 #' 
-#' Essa funcao e um simples facilitador do processo de previsao e plot out of sample para 
-#' comparacao com verificado adiante.
+#' Essa função é um simples facilitador do processo de previsão e plot out of sample para 
+#' comparação com verificado adiante.
 #' 
-#' Se nao forem fornecidos os argumentos n.ahead ou out_sample, ambos serao pegos por padrao do 
-#' objeto mod_eol fornecido. Caso algum seja fornecido sera utilizado no lugar do padrao
+#' Se não forem fornecidos os argumentos n.ahead ou out_sample, ambos serão pegos por padrão do 
+#' objeto mod_eol fornecido. Caso algum seja fornecido será utilizado no lugar do padrão.
 #' 
-#' @param fit modelo ajustado. Ver detalhes
+#' No caso de modelos com variáveis explicativas deve ser fornecido um parâmetro \code{newdata} na
+#' forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas. Se
+#' houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal. Nestes
+#' modelos, se o argumento \code{n.ahead} também tiver sido fornecido, \code{newdata} será reduzida 
+#' às \code{n.ahead} primeiras observações.
+#' 
+#' @param object modelo ajustado através de \code{\link{estimamodelo}}
 #' @param n.ahead numero de passos a frente para prever. Ver detalhes
-#' @param serie_out serie fora da amostra para comparacao. Ver detalhes
-#' @param plot booleano indicando se deve ser plotado o resultado da previsao
+#' @param serie_out serie fora da amostra para comparação. Ver detalhes
+#' @param plot booleano indicando se deve ser plotado o resultado da previsão
 #' @param ... parametros extras passados para o metodo de \code{predict} apropriado. Ver detalhes
 #' 
-#' @value vetor numerico vetor de previsoes. Opcionalmente um plot
+#' @examples
+#' 
+#' mod <- estimamodelo(AirPassengers, tipo = "sarima")
+#' 
+#' \dontrun{
+#'     predict(mod, n.ahead = 24)
+#'     predict(mod)
+#' }
+#' 
+#' # em modelos de regressao, deve ser passada a variavel explicativa via newdata
+#' 
+#' serie <- window(datregdin[[1]], 1, 200)
+#' varex <- window(datregdin[[2]], 1, 200)
+#' mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
+#' 
+#' \dontrun{
+#'     newdata <- window(datregdin[[2]], 201, 230)
+#'     predict(mod_regdin, newdata = newdata)
+#' }
+#' 
+#' @return série temporal multivariada contendo a previsão e o desvio padrão associado; caso 
+#'     \code{plot = TRUE} plota a previsão
+#' 
+#' @export
 
-# ;;TESTAR continuidade da serie_out em final, meio e inicio de dia
+predict.mod_eol <- function(object, n.ahead, serie_out, plot = TRUE, ...) {
 
-predict.mod_eol <- function(fit, n.ahead, serie_out, plot = TRUE, ...) {
-
-    # Identifica se serie out foi fornecida
     if(missing(serie_out)) {
-        serie_out <- fit$serie_out
+        serie_out <- object$serie_out
     } else {
-        # Garante continuidade
-        S  <- frequency(fit$serie_in)
-        FIM <- end(fit$serie_in)
+        S  <- frequency(object$serie_in)
+        FIM <- end(object$serie_in)
         INI <- c(FIM[1] + 1 * (FIM[2] == S), (FIM[2] + 1) * (FIM[2] != 48) + 1 * (FIM[2] == 48))
         serie_out <- ts(serie_out, start = INI, freq = S)
     }
 
-    # Identifica se n.ahead foi fornecido
-    if(missing(n.ahead)) n.ahead <- length(serie_out)
+    pred_func <- match.call()
+    pred_func[[1]] <- as.name(paste0("pred_", attr(object, "tipo")))
+    prev <- eval(pred_func, parent.frame())
 
-    # Realiza previsao
-    if(n.ahead != 0) {
-        pred_func <- paste0("pred_", attr(fit, "tipo"))
-        args      <- c(list(model = fit$modelo, n.ahead = n.ahead), list(...))
-        prev <- do.call(pred_func, args)
-    } else {
-        prev <- cbind(prev = NULL, sd = NULL)
-    }
-
-    # Checa se deve ser feito o plot
     if(plot) {
-        S      <- frequency(fit$serie_in)
-        eixo_x <- c(start(fit$serie_in)[1] + start(fit$serie_in)[2] / S, NA)
+        S      <- frequency(object$serie_in)
+        eixo_x <- c(start(object$serie_in)[1] + start(object$serie_in)[2] / S, NA)
         if(!is.null(prev)) {
             eixo_x[2] <- end(prev[, 1])[1] + end(prev[, 1])[2] / S
         } else {
-            eixo_x[2] <- end(fit$serie_in)[1] + end(fit$serie_in)[2] / S
+            eixo_x[2] <- end(object$serie_in)[1] + end(object$serie_in)[2] / S
         }
 
-        plot(fit, xlim = eixo_x, ylim = range(fit$serie_in) * c(1, 1.2), legend = FALSE)
+        plot(object, xlim = eixo_x, ylim = range(object$serie_in) * c(1, 1.2), legend = FALSE)
         lines(serie_out)
         lines(prev[, 1], col = 4)
         legend("topright", inset = 0.02,
@@ -233,21 +246,48 @@ predict.mod_eol <- function(fit, n.ahead, serie_out, plot = TRUE, ...) {
             lty = c(1, 2, 1), col = c(1, 4, 4))
     }
 
-    # Retona vetor de previao
     return(prev)
 }
 
-pred_sarima <- function(model, ...) {
-    prev <- predict(model, ...)
+pred_sarima <- function(object, ...) {
+    modelo <- object$modelo
+
+    prev <- predict(modelo, ...)
     prev <- do.call(cbind, prev)
     colnames(prev) <- c("prev", "sd")
-    prev
+
+    return(prev)
 }
 
-pred_ss_ar1_saz <- function(model, ...) {
-    prev <- predict(model, se.fit = TRUE, filter = TRUE, ...)
+pred_ss_ar1_saz <- function(object, ...) {
+    modelo <- object$modelo
+
+    prev <- predict(modelo, se.fit = TRUE, filter = TRUE, ...)
     colnames(prev) <- c("prev", "sd")
-    prev
+
+    return(prev)
+}
+
+pred_ss_reg_din <- function(object, newdata, ...) {
+    modelo <- object$modelo
+
+    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro newdata")
+
+    newdata <- as.matrix(newdata)
+
+    if("n.ahead" %in% names(list(...))) {
+        regobs <- min(list(...)$n.ahead, nrow(newdata))
+        newdata <- newdata[seq(regobs), , drop = FALSE]
+    }
+
+    Hmat <- modelo["H"]
+    Qmat <- modelo["Q"]
+    extmod <- SSModel(rep(NA_real_, nrow(newdata)) ~ SSMregression(~ newdata, Q = Qmat), H = Hmat)
+
+    prev <- predict(modelo, newdata = extmod, se.fit = TRUE, filtered = TRUE, ...)
+    colnames(prev) <- c("prev", "sd")
+
+    return(prev)
 }
 
 # ATUALIZACAO --------------------------------------------------------------------------------------
