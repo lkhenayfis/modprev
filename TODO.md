@@ -1,15 +1,19 @@
-### Implementacao
+## Geral
+- Retirar out_sample do codigo (e por consequencia quebrats)
+
 - Adicionar a fit_ss os coeficientes ajustados na saida de modelo
 
 - Ferramentas de diagnostico
 - Implementar selecao de tipo de modelo por ponto no arquivo de conf
 - Controlar negativos e numeros maiores que a capaciadade da usina
 
-### Testes
+## Testes
+- Reforcar testes de estimacao dos modelos
 - Checar datas da extracao de dado historico
 - Checar continuidade das previsoes feitas apos update de modelo
 
-### Modelagem
+## Modelagem
+- Adicionar regressao multipla dinamica (possivelmente com interacao entre variaveis explicativas)
 - Estudar possiveis diferencas na inicializacao da sazonalidade no modelo em espaco de estados
 - Auto regressoes de horizontes sucessivos (possivelmente dinamica)
 - Modelos ETS do Hyndman
