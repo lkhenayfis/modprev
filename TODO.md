@@ -1,6 +1,4 @@
 ## Geral
-- Retirar out_sample do codigo (e por consequencia quebrats)
-
 - Adicionar a fit_ss os coeficientes ajustados na saida de modelo
 
 - Ferramentas de diagnostico
@@ -10,7 +8,6 @@
 ## Testes
 - Reforcar testes de estimacao dos modelos
 - Checar datas da extracao de dado historico
-- Checar continuidade das previsoes feitas apos update de modelo
 
 ## Modelagem
 - Adicionar regressao multipla dinamica (possivelmente com interacao entre variaveis explicativas)
