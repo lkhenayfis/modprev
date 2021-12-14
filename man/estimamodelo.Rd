@@ -4,12 +4,10 @@
 \alias{estimamodelo}
 \title{Ajuste De Modelos}
 \usage{
-estimamodelo(serie, out_sample, tipo, ...)
+estimamodelo(serie, tipo, ...)
 }
 \arguments{
 \item{serie}{série para ajustar}
-
-\item{out_sample}{número de pontos para deixar de fora da amostra. Ver Detalhes}
 
 \item{tipo}{tipo de modelo a ser ajustado. Ver Detalhes}
 
@@ -40,15 +38,6 @@ automaticamente lidar com diversos tipos de séries sem a necessidade de demais 
 No caso de modelos com variaveis explicativas deve ser fornecido um parametro \code{regdata} na
 forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas. Se
 houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal.
-
-O numero \code{out_sample} diz respeito ao numero de observacoes a serem deixadas para teste. Ou
-seja, se desejamos deixar 10 horas para teste, o valor do parametro deve ser
-
-out_sample = 20 (10 x 2 meia horas por hora)
-
-Se for informado um valor diferente de zero, os últimos \code{out_sample} da série serão
-cortados e apenas o restante é passado para o fit. Esta parte removida continua com o objeto
-de saída e sera usada para comparação com a previsão no método \code{predict}
 }
 \examples{
 

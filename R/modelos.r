@@ -26,17 +26,7 @@
 #' forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas. Se
 #' houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal.
 #' 
-#' O numero \code{out_sample} diz respeito ao numero de observacoes a serem deixadas para teste. Ou
-#' seja, se desejamos deixar 10 horas para teste, o valor do parametro deve ser
-#' 
-#' out_sample = 20 (10 x 2 meia horas por hora)
-#' 
-#' Se for informado um valor diferente de zero, os últimos \code{out_sample} da série serão 
-#' cortados e apenas o restante é passado para o fit. Esta parte removida continua com o objeto 
-#' de saída e sera usada para comparação com a previsão no método \code{predict}
-#' 
 #' @param serie série para ajustar
-#' @param out_sample número de pontos para deixar de fora da amostra. Ver Detalhes
 #' @param tipo tipo de modelo a ser ajustado. Ver Detalhes
 #' @param ... demais parâmetros passados para as funções de fit específicas de cada modelo
 #' 
@@ -64,45 +54,18 @@
 #' 
 #' @export
 
-estimamodelo <- function(serie, out_sample, tipo, ...) UseMethod("estimamodelo")
+estimamodelo <- function(serie, tipo, ...) UseMethod("estimamodelo")
 
 #' @export
 
-estimamodelo.ts <- function(serie, out_sample = 0L, tipo = c("sarima", "ss_ar1_saz", "ss_reg_din"), ...) {
+estimamodelo.ts <- function(serie, tipo = c("sarima", "ss_ar1_saz", "ss_reg_din"), ...) {
 
-    # Separa in-sample e out-of-sample
-    aux <- quebrats(serie, out_sample)
-    serie_in  <- aux[[1]]
-    serie_out <- aux[[2]]
-
-    # Compoe chamada de fit para o tipo especificado
     tipo <- match.arg(tipo)
     fit_func <- match.call()
     fit_func[[1]] <- as.name(paste0("fit_", tipo))
     fit_mod <- eval(fit_func, parent.frame())
 
-    # Adiciona classe e serie out-ot-sample
-    out <- list(modelo = fit_mod, serie_in = serie_in, serie_out = serie_out)
-    class(out) <- "mod_eol"
-    attr(out, "tipo") <- tipo
-
-    # Retorna
-    return(out)
-}
-
-estimamodelo.ts_TR <- function(serie, out_sample, tipo = c("sarima", "ss_ar1_saz", "ss_reg_din"), ...) {
-
-    if(missing(out_sample)) out_sample <- attr(serie, "out_sample")
-
-    aux <- quebrats(serie, out_sample)
-    serie_in  <- aux[[1]]
-    serie_out <- aux[[2]]
-
-    tipo <- match.arg(tipo)
-    fit_func <- paste0("fit_", tipo)
-    fit_mod  <- do.call(fit_func, c(list(serie = serie_in), list(...)))
-
-    out <- list(modelo = fit_mod, serie_in = serie_in, serie_out = serie_out)
+    out <- list(modelo = fit_mod, serie = serie)
     class(out) <- "mod_eol"
     attr(out, "tipo") <- tipo
 
