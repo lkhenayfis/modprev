@@ -2,6 +2,7 @@
 
 S3method(estimamodelo,ts)
 S3method(janelamovel,ts)
+S3method(plot,mod_eol)
 S3method(predict,mod_eol)
 S3method(update,mod_eol)
 export(estimamodelo)

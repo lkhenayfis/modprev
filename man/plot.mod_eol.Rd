@@ -2,15 +2,18 @@
 % Please edit documentation in R/visualizacao.r
 \name{plot.mod_eol}
 \alias{plot.mod_eol}
-\title{Plot de mod_eol}
+\title{Plot De Objetos \code{mod_eol}}
 \usage{
-\method{plot}{mod_eol}(fit, ..., legend = TRUE)
+\method{plot}{mod_eol}(x, ...)
 }
 \arguments{
-\item{fit}{\link{objeto mod_eol} objeto para plotar}
-
 \item{...}{demais parametros repassados para \code{plot}}
+
+\item{fit}{objeto para plotar}
+}
+\value{
+plot da serie e ajuste realizado
 }
 \description{
-Metodo para plotar ajustes mod_eol
+Metodo para plotar ajustes \code{mod_eol}
 }

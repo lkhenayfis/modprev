@@ -2,27 +2,26 @@
 # FUNCOES DE VISUALIZACAO
 ####################################################################################################
 
-#' Plot de mod_eol
+#' Plot De Objetos \code{mod_eol}
 #' 
-#' Metodo para plotar ajustes mod_eol
+#' Metodo para plotar ajustes \code{mod_eol}
 #' 
-#' @param fit [objeto mod_eol] objeto para plotar
+#' @param fit objeto para plotar
 #' @param ... demais parametros repassados para \code{plot}
 #' 
-#' @value plot da serie e ajuste realizado
+#' @return plot da serie e ajuste realizado
+#' 
+#' @export
 
-plot.mod_eol <- function(fit, ..., legend = TRUE) {
+plot.mod_eol <- function(x, ...) {
 
     # Ajuste do modelo
-    args <- c(list(object = fit$modelo, filter = TRUE))
+    args <- c(list(object = x$modelo, filter = TRUE))
     fitt <- do.call(fitted, args)
 
     # Plota
-    plot(fit$serie_in, panel.first = grid(col = "grey85"),
+    plot(x$serie, panel.first = grid(col = "grey85"),
         xlab = "Tempo", ylab = "Geracao", ...)
-    if(!("main" %in% names(list(...)))) title(main = attr(fit, "tipo"))
+    if(!("main" %in% names(list(...)))) title(main = attr(x, "tipo"))
     lines(fitt, col = 4, lty = 2)
-    if(legend) {
-        legend("topright", inset = 0.02, legend = c("Serie", "Ajuste"), lty = c(1,2), col = c(1, 4))
-    }
 }
