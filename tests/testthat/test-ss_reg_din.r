@@ -8,6 +8,9 @@ test_that("Estimacao de modelo S.S. RegDin - regressao simples", {
     expect_equal(mod$modelo["Q"][1, 1, 1], 0.059735078) # precalculados e testados para garantir
     expect_equal(mod$modelo["H"][1, 1, 1], 0.67102834)
 
+    serie <- c(serie)
+    mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg")
+
     expect_error(estimamodelo(serie, tipo = "ss_reg"))
 
     serie <- datregdin[[1]]

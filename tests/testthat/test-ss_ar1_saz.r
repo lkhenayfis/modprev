@@ -6,6 +6,9 @@ test_that("Estimacao de modelo S.S. AR1+Saz", {
     expect_equal(mod$modelo["Q"][1, 1, 1], 17.183724) # precalculados e testados para garantir
     expect_equal(mod$modelo["Q"][2, 2, 1], 172.71706)
     expect_equal(mod$modelo["T"]["custom2", "custom2", 1], 0.9957003)
+
+    serie <- c(AirPassengers)
+    mod   <- estimamodelo(serie, "ss_ar1_saz")
 })
 
 test_that("Previsao de modelo S.S. AR1+Saz", {

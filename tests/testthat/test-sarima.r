@@ -5,6 +5,9 @@ test_that("Estimacao de modelo SARIMA", {
 
     expect_equal("sarima", attr(mod, "tipo"))
     expect_equal(coef(compmod), coef(mod$model))
+
+    serie <- c(AirPassengers)
+    mod   <- estimamodelo(serie, "sarima")
 })
 
 test_that("Previsao de modelo SARIMA", {

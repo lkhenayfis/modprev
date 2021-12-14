@@ -58,6 +58,10 @@ estimamodelo <- function(serie, tipo, ...) UseMethod("estimamodelo")
 
 #' @export
 
+estimamodelo.numeric <- function(serie, tipo, ...) estimamodelo.ts(ts(serie), tipo, ...)
+
+#' @export
+
 estimamodelo.ts <- function(serie, tipo = c("sarima", "ss_ar1_saz", "ss_reg_din"), ...) {
 
     tipo <- match.arg(tipo)
@@ -379,6 +383,10 @@ upd_ss_reg_din <- function(object, newseries, newregdata, ...) {
 #' @export
 
 janelamovel <- function(serie, ...) UseMethod("janelamovel")
+
+#' @export
+
+janelamovel.numeric <- function(serie, ...) janelamovel.ts(ts(serie), ...)
 
 #' @export
 
