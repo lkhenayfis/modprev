@@ -393,39 +393,85 @@ upd_ss_reg_din <- function(object, newseries, newregdata, ...) {
 
 # JANELA MOVEL -------------------------------------------------------------------------------------
 
-#' Previsao Em Horizonte Rolante
+#' Previsão Em Horizonte Rolante
 #' 
-#' Funcao para realizar previsoes e reajustes em janela movel
+#' Função para realizar previsões e reajustes em janela móvel
 #' 
-#' \code{objeto} pode ser tanto um objeto mod_eol contendo um modelo ajustado ou uma serie temporal
-#' simples. No primeiro caso, deve ser passado em conjunto uma serie temporal atraves do parametro
-#' \code{serie} e, no segundo, deve ser informado o tipo de modelo a ser ajustado atraves do 
-#' parametro \code{tipo}.
+#' Para cada janela de tamanho \code{largura} na \code{serie} fornecida será realizada uma previsão
+#' \code{n.ahead} passos à frente, retornadas em uma lista. Isto significa que a última previsão 
+#' realizada cobrirá até \code{n.ahead} além da última observação em \code{serie}.
 #' 
-#' Embora esta estrutura pareca redundante, ela permite que um modelo ajustado independentemente 
-#' possa ser utilizado para prever em janela rolante uma outra serie qualquer, diferente daquela 
-#' utilizada para sua estimacao.
+#' O comportamento dessa função é mais fortemente impactado por \code{refit_cada}. Através deste 
+#' argumento é possível indicar observações ou intervalos de tempo nos quais o modelo será 
+#' reestimado. Nas demais janelas será feita apenas a atualização das informações.
 #' 
-#' @param objeto serie ou modelo ajusdado para previsao rolante. Ver detalhes
+#' Caso o modelo escolhido necessite de variáveis explicativas, é necessário que o argumento 
+#' \code{regdata} seja passado na forma de uma matriz ou data.frame contendo apenas as colunas com 
+#' variáveis a serem utilizadas. Se houver apenas uma variável explicativa, pode ser passada como um
+#' vetor ou série temporal.
+#' 
+#' Este argumento \emph{DEVE CONTER AS VARIÁVEIS EXPLICATIVAS CORRESPONDENTES A TODAS AS OBSERVAÇÕES
+#' DA SÉRIE MAIS \code{n.ahead} À FRENTE}. A primeira parte dessa restrição é natural, pois são 
+#' necessárias as variáveis explicativas insample para ajustes do modelo. As observações 
+#' \code{n.ahead} passos à frente do final da série são necessárias apenas para a previsão das 
+#' últimas janelas.
+#' 
+#' @param serie serie temporal pela qual passar a janela movel
 #' @param tipo tipo de modelo a ser ajustado, caso \code{objeto} seja uma serie temporal
-#' @param serie serie temporal pela qual passar a janela movel. Ver Detalhes
 #' @param largura numero de observacoes na janela movel
-#' @param n.ahead numero de passos a frente para prever
+#' @param n.ahead numero de passos a frente para prever a cada passo
 #' @param refit_cada escalar ou vetor inteiro. Se escalar, reajusta o modelo a cada 
 #'     \code{refit_cada} observacoes. Se vetor, reajusta apos cada indice de \code{refit_cada}
 #' @param verbose Escalar inteiro indicando quanta informacao a ser emitida durante rodada. 
 #'     0 = nenhuma, 1: toda vez que reajusta modelo, 2: todo horizonte de previsao e reajuste
+#' @param regdata por padrão é \code{NULL}, só sendo necessário caso \code{tipo} seja um modelo com
+#'     variáveis explicativas. Ver Detalhes
 #' 
-#' @value [lista] lista contendo previsoes de 1 a n.ahead passos a frente para cada janela
+#' @examples 
+#' 
+#' \dontrun{
+#' serie <- ts(window(datregdin[[1]], 1, 250))
+#' jm <- janelamovel(serie, "ss_ar1_saz", 200, refit_cada = 10)
+#' 
+#' serie <- ts(window(datregdin[[1]], 1, 720), freq = 48)
+#' jm <- janelamovel(serie, "ss_ar1_saz", 480, refit_cada = 48)
+#' 
+#' serie <- ts(window(datregdin[[1]], 1, 250))
+#' varex <- ts(window(datregdin[[2]], 1, 255))
+#' jm <- janelamovel(serie, "ss_reg_din", 200, 5L, refit_cada = 10, regdata = varex)
+#' # como esta funcao pode demorar um tempo para rodar (especialmente com multiplos refits), pode
+#' # ser conveniente mandar o log para um arquivo
+#' sink("log_janelamovel.txt")
+#' jm <- janelamovel(serie, "ss_ar1_saz", 200, refit_cada = 10, verbose = 2)
+#' sink()
+#' }
+#' 
+#' @return lista contendo previsoes de 1 a n.ahead passos a frente para cada janela
+#' 
+#' @export
 
-janelamovel <- function(objeto, ...) UseMethod("janelamovel")
+janelamovel <- function(serie, ...) UseMethod("janelamovel")
 
-janelamovel.ts <- function(objeto, tipo, largura, n.ahead = 1L, refit_cada = NA, verbose = 0) {
+#' @export
+
+janelamovel.ts <- function(serie, tipo, largura, n.ahead = 1L, refit_cada = NA, verbose = 0, regdata) {
+
+    has_regdata <- !missing(regdata)
 
     # Caracteristicas da serie
-    N <- length(objeto)
-    S <- frequency(objeto)
-    INI <- start(objeto)
+    N <- length(serie)
+    S <- frequency(serie)
+    INI <- start(serie)
+
+    if((tipo == "ss_reg_din") & !has_regdata) {
+        stop("Forneca a variavel explicativa para previsao atraves do parametro newdata")
+    }
+
+    if(!has_regdata) {
+        regdata <- NULL
+    } else {
+        regdata <- as.matrix(regdata)
+    }
 
     # Funcao de verbose
     verb_func <- switch(as.character(verbose),
@@ -435,7 +481,8 @@ janelamovel.ts <- function(objeto, tipo, largura, n.ahead = 1L, refit_cada = NA,
             cat("REFIT -- Prevendo serie [", i, "] -> [", f, "]\n")
         } else {
             cat("\t Prevendo serie [", i, "] -> [", f, "]\n")
-        })
+        }
+    )
 
     # Janelas
     Nj <- N - largura + 1
@@ -449,9 +496,10 @@ janelamovel.ts <- function(objeto, tipo, largura, n.ahead = 1L, refit_cada = NA,
     }
 
     # Fit do primeiro modelo
-    fim_t <- deltats(INI, delta = largura - 1, freq = S)
-    serie <- window(objeto, start = INI, end = fim_t)
-    fit   <- estimamodelo(serie = serie, out_sample = 0L, tipo = tipo)
+    fim_t    <- deltats(INI, delta = largura - 1, freq = S)
+    iserie   <- window(serie, start = INI, end = fim_t)
+    iregdata <- regdata[1:largura, , drop = FALSE]
+    fit <- estimamodelo(serie = iserie, tipo = tipo, regdata = iregdata)
 
     # Loop da janela movel
     l_prev <- vector("list", N - largura + 1)
@@ -461,11 +509,16 @@ janelamovel.ts <- function(objeto, tipo, largura, n.ahead = 1L, refit_cada = NA,
         ini_t <- deltats(INI, delta = i - 1, freq = S)
         fim_t <- deltats(ini_t, delta = largura - 1, freq = S)
         verb_func(ini_t, fim_t, v_refit[i])
-        serie <- window(objeto, start = ini_t, end = fim_t)
-        fit   <- update(fit = fit, newdata = serie, refit = v_refit[i])
+
+        iserie   <- window(serie, start = ini_t, end = fim_t)
+        iregdata <- regdata[i:(largura + i - 1), , drop = FALSE]
+        fit <- update(fit, newseries = iserie, refit = v_refit[i], newregdata = iregdata)
 
         # Preve n.ahead passos
-        prev <- predict(fit = fit, n.ahead = n.ahead, plot = FALSE)
+        iniregdata <- (largura + i)
+        fimregdata <- (largura + i + n.ahead - 1)
+        inewdata <- regdata[iniregdata:fimregdata, , drop = FALSE]
+        prev <- predict(fit, n.ahead = n.ahead, plot = FALSE, newdata = inewdata)
 
         # Salva na lista
         l_prev[[i]] <- prev
