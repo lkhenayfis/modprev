@@ -11,7 +11,7 @@ test_that("Estimacao de modelo S.S. AR1+Saz", {
 test_that("Previsao de modelo S.S. AR1+Saz", {
     mod <- estimamodelo(AirPassengers, tipo = "ss_ar1_saz")
 
-    prev <- predict(mod, n.ahead = 24, plot = FALSE)
+    prev <- predict(mod, n.ahead = 24)
 
     expect_true(all(dim(prev) == c(24, 2)))
     expect_equal(c("prev", "sd"), colnames(prev))

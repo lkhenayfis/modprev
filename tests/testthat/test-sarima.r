@@ -11,8 +11,8 @@ test_that("Previsao de modelo SARIMA", {
     compmod <- forecast::auto.arima(AirPassengers)
     mod     <- estimamodelo(AirPassengers, tipo = "sarima")
 
-    prevcomp <- predict(compmod, n.ahead = 24, plot = FALSE)
-    prev     <- predict(mod, n.ahead = 24, plot = FALSE)
+    prevcomp <- predict(compmod, n.ahead = 24)
+    prev     <- predict(mod, n.ahead = 24)
 
     expect_true(all(dim(prev) == c(24, 2)))
     expect_equal(c("prev", "sd"), colnames(prev))

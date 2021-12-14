@@ -4,33 +4,22 @@
 \alias{predict.mod_eol}
 \title{Previsão De Modelos \code{mod_eol}}
 \usage{
-\method{predict}{mod_eol}(object, n.ahead, serie_out, plot = TRUE, ...)
+\method{predict}{mod_eol}(object, n.ahead, ...)
 }
 \arguments{
 \item{object}{modelo ajustado através de \code{\link{estimamodelo}}}
 
-\item{n.ahead}{numero de passos a frente para prever. Ver detalhes}
-
-\item{serie_out}{serie fora da amostra para comparação. Ver detalhes}
-
-\item{plot}{booleano indicando se deve ser plotado o resultado da previsão}
+\item{n.ahead}{numero de passos a frente para prever}
 
 \item{...}{parametros extras passados para o metodo de \code{predict} apropriado. Ver detalhes}
 }
 \value{
-série temporal multivariada contendo a previsão e o desvio padrão associado; caso
-\code{plot = TRUE} plota a previsão
+série temporal multivariada contendo a previsão e o desvio padrão associado
 }
 \description{
 Wrapper para previsão e plot de modelos ajustados por \code{estimamodelo}
 }
 \details{
-Essa função é um simples facilitador do processo de previsão e plot out of sample para
-comparação com verificado adiante.
-
-Se não forem fornecidos os argumentos n.ahead ou out_sample, ambos serão pegos por padrão do
-objeto mod_eol fornecido. Caso algum seja fornecido será utilizado no lugar do padrão.
-
 No caso de modelos com variáveis explicativas deve ser fornecido um parâmetro \code{newdata} na
 forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas. Se
 houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal. Nestes

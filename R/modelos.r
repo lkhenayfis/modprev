@@ -134,12 +134,6 @@ fit_ss_reg_din <- function(serie, regdata, ...) {
 #' 
 #' Wrapper para previsão e plot de modelos ajustados por \code{estimamodelo}
 #' 
-#' Essa função é um simples facilitador do processo de previsão e plot out of sample para 
-#' comparação com verificado adiante.
-#' 
-#' Se não forem fornecidos os argumentos n.ahead ou out_sample, ambos serão pegos por padrão do 
-#' objeto mod_eol fornecido. Caso algum seja fornecido será utilizado no lugar do padrão.
-#' 
 #' No caso de modelos com variáveis explicativas deve ser fornecido um parâmetro \code{newdata} na
 #' forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas. Se
 #' houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal. Nestes
@@ -147,9 +141,7 @@ fit_ss_reg_din <- function(serie, regdata, ...) {
 #' às \code{n.ahead} primeiras observações.
 #' 
 #' @param object modelo ajustado através de \code{\link{estimamodelo}}
-#' @param n.ahead numero de passos a frente para prever. Ver detalhes
-#' @param serie_out serie fora da amostra para comparação. Ver detalhes
-#' @param plot booleano indicando se deve ser plotado o resultado da previsão
+#' @param n.ahead numero de passos a frente para prever
 #' @param ... parametros extras passados para o metodo de \code{predict} apropriado. Ver detalhes
 #' 
 #' @examples
@@ -172,42 +164,15 @@ fit_ss_reg_din <- function(serie, regdata, ...) {
 #'     predict(mod_regdin, newdata = newdata)
 #' }
 #' 
-#' @return série temporal multivariada contendo a previsão e o desvio padrão associado; caso 
-#'     \code{plot = TRUE} plota a previsão
+#' @return série temporal multivariada contendo a previsão e o desvio padrão associado
 #' 
 #' @export
 
-predict.mod_eol <- function(object, n.ahead, serie_out, plot = TRUE, ...) {
-
-    if(missing(serie_out)) {
-        serie_out <- object$serie_out
-    } else {
-        S  <- frequency(object$serie_in)
-        FIM <- end(object$serie_in)
-        INI <- c(FIM[1] + 1 * (FIM[2] == S), (FIM[2] + 1) * (FIM[2] != 48) + 1 * (FIM[2] == 48))
-        serie_out <- ts(serie_out, start = INI, freq = S)
-    }
+predict.mod_eol <- function(object, n.ahead, ...) {
 
     pred_func <- match.call()
     pred_func[[1]] <- as.name(paste0("pred_", attr(object, "tipo")))
     prev <- eval(pred_func, parent.frame())
-
-    if(plot) {
-        S      <- frequency(object$serie_in)
-        eixo_x <- c(start(object$serie_in)[1] + start(object$serie_in)[2] / S, NA)
-        if(!is.null(prev)) {
-            eixo_x[2] <- end(prev[, 1])[1] + end(prev[, 1])[2] / S
-        } else {
-            eixo_x[2] <- end(object$serie_in)[1] + end(object$serie_in)[2] / S
-        }
-
-        plot(object, xlim = eixo_x, ylim = range(object$serie_in) * c(1, 1.2), legend = FALSE)
-        lines(serie_out)
-        lines(prev[, 1], col = 4)
-        legend("topright", inset = 0.02,
-            legend = c("Serie", "Ajuste", "Previsao"),
-            lty = c(1, 2, 1), col = c(1, 4, 4))
-    }
 
     return(prev)
 }
@@ -481,7 +446,7 @@ janelamovel.ts <- function(serie, tipo, largura, n.ahead = 1L, refit_cada = NA, 
         iniregdata <- (largura + i)
         fimregdata <- (largura + i + n.ahead - 1)
         inewdata <- regdata[iniregdata:fimregdata, , drop = FALSE]
-        prev <- predict(fit, n.ahead = n.ahead, plot = FALSE, newdata = inewdata)
+        prev <- predict(fit, n.ahead = n.ahead, newdata = inewdata)
 
         # Salva na lista
         l_prev[[i]] <- prev
