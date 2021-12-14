@@ -1,16 +1,27 @@
 Package: modprev
-Title: What the Package Does (One Line, Title Case)
+Title: Interface Unificada Para Estimacao E Uso De Modelos
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Lucas",
+           family = "Khenayfis",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+           email = "lucaskhenayfis@gmail.com")
+Description: Este pacote fornece um arcabouco unificado para estimacao, previsao, simulacao e etc de
+    diversos tipos de modelos (SARIMA, espaco de estados e etc), incluindo aqueles com variaveis
+    explicativas. Alem de wrappers para metodos tradicionais de modelos estatisticos, e implementada
+    uma funcao para modelagem e previsao em horizonte rolante, facilitando testes com novos modelos.
+    As funcoes do pacote operam em grande parte como wrappers em torno dos metodos especificos de 
+    cada tipo de modelo, visando apresentar uma interface comum para uso de todos eles, tal que a 
+    adicao de novos modelos e relativamente direta. 
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Depends: 
+    KFAS (>= 1.4.4),
+    forecast (>= 8.12),
+    R (>= 4)
