@@ -22,6 +22,7 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Depends: 
+    data.table (>= 1.14.0),
     KFAS (>= 1.4.4),
     forecast (>= 8.12),
     R (>= 4.0)
