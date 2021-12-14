@@ -24,4 +24,4 @@ Config/testthat/edition: 3
 Depends: 
     KFAS (>= 1.4.4),
     forecast (>= 8.12),
-    R (>= 4)
+    R (>= 4.0)
