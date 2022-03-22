@@ -1,25 +1,8 @@
-# prevtemporeal
+# modprev
 
 Conjunto de funcoes para estimacao de modelos e subsequente previsao da geracao eolica em
 curtissimoprazo. Estas funcoes sao um wrapper de diversas formas de modelagem, com o objetivo de
 apresentar uma interface comum independente do tipo de modelo ajustado
-
-## Arquivo de configuracao
-
-Todas as parametrizacoes deste pacote, como janela de dados para estimacao, horario para reajuste
-dos modelos diariamente e etc, sao definidas em um arquivo especifico por fora dos codigos. Isto e
-feito pois cada script e monitorado pelo git, de tal modo que mudancas simples de parametrizacao
-para testes criariam confusao e poderiam levar a commits erroneos causando erros na
-operacionalizacao.Por motivos similares nao esta incluso um arquivo de configuracao no repositorio:
-cada clone e fork pode ter o seu sem risco de corromper os de outros desenvolvedores e/ou oficial da
-operacao.
-
-Esta incluso no repositorio um programa gerador de config padrao, chamado `default_config.bat`, com
-todos os campos especificados em seus valores iguais aqueles utilizados operacionalmente. Uma nota
-neste ponto e o campo **raiz** na chave **CAMINHOS**. Este campo determina onde serao buscados
-essencialmente todos os dados necessarios e, por padrao, aponta para a maquina 01 onde o codigo foi
-testado inicialmente. Ao ser aplicado em outras maquinas este campo deve ser atualizado de acordo.
-Toda execucao deste programa emitira um aviso lembrando desta necessidade.
 
 ## Modelos implementados
 
@@ -100,25 +83,22 @@ janela <- janelamovel(serie_longa, tipo = "ss", largura = 480L, n.ahead = 10L,
 
 ## Adicionando novos modelos
 
-A incorporacao de novos modelos e relativamente simples. Como mencionado anteriormente, as funcoes
-deste pacote sao wrappers de outras, se apresentando como uma interface unificada. Cada uma das
-funcoes `estimamodelo`, `predict` e `update` chama uma helper especifica, dependendo do `tipo` de
-modelo especificado no ajuste.
+A incorporacao de novos modelos e simples. Cada um dos tipos de modelo e implementado no pacote como
+uma classe S3 especifica, com seus proprios metodos de previsao, atualizacao e etc. A seguir serao
+descritos os requisistos para compatibilizacao de um novo modelo com as funcoes ja existentes,
+tomando como exemplo o espaco de estados AR(1) + Sazonalidade.
 
-Tomando como exemplo `ss_ar1_saz`, ao executar
+Para estimacao, espera-se que o `tipo` de modelo especificado para `estimamodelo` corresponda ao
+nome de uma funcao que realize seu ajuste. Por exemplo, ao executar
 
 ```r
 fit <- estimamodelo(serie, tipo = "ss_ar1_saz")
 ```
 
-Por baixo dos panos o codigo executa uma funcao chamada `fit_ss_ar1_saz`, que recebe o parametro
-`serie` e retorna um modelo ajustado. Este modelo e um objeto de qualquer tipo, apenas sendo
-necessario que possua um metodo `predict` definido.
-
-Ainda no caso do tipo `ss_ar1_saz`, a funcao helper e defifida
+A chamada sera repassada para uma funcao `ss_ar1_saz` que retorna um modelo ajustado
 
 ```r
-fit_ss_ar1_saz <- function(serie, ...) {
+ss_ar1_saz <- function(serie, ...) {
 
     # Matrizes de sistema
     Z <- matrix(c(1, 1), 1)
@@ -140,40 +120,26 @@ fit_ss_ar1_saz <- function(serie, ...) {
     }
     fit <- fitSSM(mod, inits = c(mean(serie),0,0,0), updatefn = upfunc, method = "BFGS")
 
-    # Retorna apenas modelo ajustado
+    # Retorna apenas modelo ajustado (o KFAS ainda devolve saida do optim em fitSSM)
     return(fit$model)
 }
 ```
 
-O obeto `fit$model` retornado e um objeto da classe `SSModel` do pacote `KFAS`, de modo que o
-arcabouco padrao de funcoes do R se aplica naturalmente. Outros parametros podem ser passados
-atraves de `...`.
+Ao definir a funcao com nome `tipo` que retorna o modelo ajustado e adicionar esta opcao a
+`estimamodelo`, a nova modelagem estara automaticamente disponivel. Esta funcao retornara um objeto
+com classes `c(tipo, "mod_eol")`, uma lista cujo primeiro elemento e o modelo ajustado e segundo a
+serie passada.
 
-O mesmo fluxo se aplica a `predict` e `update`, sendo agora os prefixos para definicao das helpers
-`pred_*` e `upd_*`. 
-
-No caso da primeira, a funcao deve receber um modelo ajustado e o parametro `n.ahead` e devolver uma
-matriz contendo a media prevista na primeira coluna e desvio padrao na segunda. A seguir esta
-`pred_sarima` como exemplo
+Os metodos especificos de cada modelo devem ser definidos como metodos S3 comuns. Por exemplo, ao
+chamarmos
 
 ```r
-# model e um objeto da classe Arima, como retornado pelo ajuste com arima() ou forecast::Arima()
-pred_sarima <- function(model, ...) {
-    prev <- predict(model, ...) # a funcao tira proveito da infraestrutura de previsao ja existente
-    prev <- do.call(cbind, prev)
-    colnames(prev) <- c("prev", "sd")
-    prev
-}
+predict(fit, n.ahead = 20)
 ```
 
-Por fim, para a helper de update, deve ser informado o modelo e o argumento `newdata` para
-atualizacao, e retornar o modelo com os novos dados incorporados.
+Deve existir um metodo `predict.ss_ar1_saz` para realizar a previsao e retorna-la. **IMPORTANTE**: a
+saida dos predicts deve ser uma **MATRIZ** cuja primeira coluna e o valor previsto e a segunda o
+desvio padrao associado.
 
-
-```r
-upd_sarima <- function(model, newdata) Arima(newdata, model = model)
-```
-
-**IMPORTANTE**: tanto em `pred_*` quanto `upd_*` o argumento `model` **NAO** e a saida de
-`estimamodelo`, mas sim um objeto da classe correspondento ao tipo de modelo. O que e retornado da
-`estimamodelo` possui classe e informacoes diferentes, utilizadas em outras situacoes.
+Demais argumentos necessarios para a execucao dos metodos de um determinado modelo devem ser
+passados aos metodos especificos e apropriadamente documentados em suas funcoes.
