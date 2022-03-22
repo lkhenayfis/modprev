@@ -111,8 +111,10 @@ deltats <- function(ini, delta, freq) {
 #' das máquinas virtuais, de modo que \code{path_principal} precisa conter o restante do trajeto até
 #' o diretório onde o arquivo de configuração se encontra. Ver Exemplos
 #' 
-#' @param path_principal caminho a partir de \code{file_p} ate o diretorio do arquivo de
-#'     configuracao. Ver Detalhes e Exemplos
+#' @param path caminho completo até o diretório onde o arquivo de configuração se  encontra. 
+#'     Ver Exemplo
+#' @param nome o nome do arquivo, com extensão. O nome pode variar, mas deve necessariamente ser um 
+#'     "json" ou "jsonc"
 #' 
 #' @examples
 #' 
@@ -121,15 +123,18 @@ deltats <- function(ini, delta, freq) {
 #' file_p <- "D:/ModeloPrevEolico"
 #' 
 #' # a funcao deve entao ser chamada como
-#' localizaconf("ModEolPtoConex/VersaoAutomatica/Codigos/pastaqualquer") # pastaqualquer deve conter um arquivo conf.jsonc
+#' path <- file.path(file_p, "ModEolPtoConex/VersaoAutomatica/pasta/contendo/conf")
+#' localizaconf(path)
 #' }
 #' 
 #' @return lista contendo o caminho ate arquivo localizado no primeiro elemento e lista de
 #'     configuracoes no segundo
 #' 
+#' @importFrom jsonlite read_json
+#' 
 #' @export
 
-localizaconf <- function(path_principal) {
+localizaconf <- function(path, nome = "conf.jsonc") {
 
     # Numa rodada por cmd, o diretorio do arquivo pode ser localizado facilmente
     args <- commandArgs()
@@ -149,15 +154,15 @@ localizaconf <- function(path_principal) {
     # Em ultimo caso, se estiver sendo rodado pelo codigo principal, acha o root pelo nome completo
     wd0 <- getwd()
     setwd(dir)
-    if(file.exists("conf.jsonc")) {
+    if(file.exists(nome)) {
         root <- getwd()
-        CONFIG <- jsonlite::read_json("conf.jsonc", simplifyVector = TRUE)
+        CONFIG <- read_json(nome, simplifyVector = TRUE)
     } else if(file.exists("../conf.jsonc")) {
         root <- file.path("..")
-        CONFIG <- jsonlite::read_json("../conf.jsonc", simplifyVector = TRUE)
-    } else if(exists("file_p")) {
-        root   <- file.path(file_p, path_principal)
-        CONFIG <- jsonlite::read_json(file.path(root, "conf.jsonc"), simplifyVector = TRUE)
+        CONFIG <- read_json("../conf.jsonc", simplifyVector = TRUE)
+    } else if(!missing(path)) {
+        root   <- path
+        CONFIG <- read_json(file.path(root, nome), simplifyVector = TRUE)
     } else {
         # Se nada funcionar, emite erro
         stop("Nao foi possivel localizar um arquivo de configuracoes")

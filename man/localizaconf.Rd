@@ -4,11 +4,14 @@
 \alias{localizaconf}
 \title{Detecção De Arquivo De Configuração}
 \usage{
-localizaconf(path_principal)
+localizaconf(path, nome = "conf.jsonc")
 }
 \arguments{
-\item{path_principal}{caminho a partir de \code{file_p} ate o diretorio do arquivo de
-configuracao. Ver Detalhes e Exemplos}
+\item{path}{caminho completo até o diretório onde o arquivo de configuração se  encontra.
+Ver Exemplo}
+
+\item{nome}{o nome do arquivo, com extensão. O nome pode variar, mas deve necessariamente ser um
+"json" ou "jsonc"}
 }
 \value{
 lista contendo o caminho ate arquivo localizado no primeiro elemento e lista de
@@ -43,7 +46,8 @@ o diretório onde o arquivo de configuração se encontra. Ver Exemplos
 file_p <- "D:/ModeloPrevEolico"
 
 # a funcao deve entao ser chamada como
-localizaconf("ModEolPtoConex/VersaoAutomatica/Codigos/pastaqualquer") # pastaqualquer deve conter um arquivo conf.jsonc
+path <- file.path(file_p, "ModEolPtoConex/VersaoAutomatica/pasta/contendo/conf")
+localizaconf(path)
 }
 
 }
