@@ -1,6 +1,11 @@
 test_that("Localizacao de arquivo de conf", {
     wd0 <- getwd()
     wd <- system.file("inst/extdata", package = "modprev")
+
+    # quando rodando pelo check o pacote e instalado, ai extdata vai pro root do pacote, de modo que
+    # inst/extdata nao existe mais
+    if(wd == "") wd <- system.file("extdata", package = "modprev")
+
     setwd(wd)
     ll <- localizaconf()
 

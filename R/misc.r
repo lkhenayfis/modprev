@@ -117,8 +117,8 @@ deltats <- function(ini, fim, delta, freq) {
 #' file_p <- "D:/ModeloPrevEolico"
 #' 
 #' # a funcao deve entao ser chamada como
-#' localizaconf("ModEolPtoConex/VersaoAutomatica/Codigos/pastaqualquer") # pastaqualquer deve conter
-#' um arquivo conf.jsonc }
+#' localizaconf("ModEolPtoConex/VersaoAutomatica/Codigos/pastaqualquer") # pastaqualquer deve conter um arquivo conf.jsonc
+#' }
 #' 
 #' @return lista contendo o caminho ate arquivo localizado no primeiro elemento e lista de
 #'     configuracoes no segundo

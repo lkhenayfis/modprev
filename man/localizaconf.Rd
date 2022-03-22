@@ -43,7 +43,7 @@ o diretório onde o arquivo de configuração se encontra. Ver Exemplos
 file_p <- "D:/ModeloPrevEolico"
 
 # a funcao deve entao ser chamada como
-localizaconf("ModEolPtoConex/VersaoAutomatica/Codigos/pastaqualquer") # pastaqualquer deve conter
-um arquivo conf.jsonc }
+localizaconf("ModEolPtoConex/VersaoAutomatica/Codigos/pastaqualquer") # pastaqualquer deve conter um arquivo conf.jsonc
+}
 
 }
