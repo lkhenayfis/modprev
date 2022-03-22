@@ -25,4 +25,7 @@ Depends:
     data.table (>= 1.14.0),
     KFAS (>= 1.4.4),
     forecast (>= 8.12),
-    R (>= 4.0)
+    jsonlite (>= 1.7.2),
+    R (>= 4.0),
+    stats (>= 4.1.0),
+    graphics (>= 4.1.0)
