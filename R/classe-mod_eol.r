@@ -47,7 +47,7 @@
 #' # ajustando uma regressao dinamica (com dado dummy interno do pacote)
 #' serie <- window(datregdin[[1]], 1, 100)
 #' varex <- window(datregdin[[2]], 1, 100)
-#' mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "reg_din")
+#' mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
 #' 
 #' @return objeto da classe mod_eol contendo modelo (classe dependente do modelo ajustato), serie
 #'     ajustada e, caso \code{out_sample > 0}, a parte reservada para comparação
@@ -67,9 +67,14 @@ estimamodelo.numeric <- function(serie, tipo, ...) estimamodelo.ts(ts(serie), ti
 estimamodelo.ts <- function(serie, tipo = c("sarima", "ss_ar1_saz", "ss_reg_din"), ...) {
 
     tipo <- match.arg(tipo)
-    fit_func <- match.call()
-    fit_func[[1]] <- as.name(tipo)
-    fit_mod <- eval(fit_func, parent.frame())
+
+    # originalmente isso foi implementado com um eval de match.call trocando o nome da funcao, mas
+    # tem uns problemas pra resolver de scoping. Eventualmente essa melhoria precisa ser feita
+    fit_mod <- switch(tipo,
+        "sarima" = sarima(serie, ...),
+        "ss_ar1_saz" = ss_ar1_saz(serie, ...),
+        "ss_reg_din" = ss_reg_din(serie, ...)
+    )
 
     out <- new_mod_eol(fit_mod, serie, tipo)
 

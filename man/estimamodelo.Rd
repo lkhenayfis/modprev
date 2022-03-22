@@ -56,7 +56,7 @@ coef(mod_sarima_semsazo)
 # ajustando uma regressao dinamica (com dado dummy interno do pacote)
 serie <- window(datregdin[[1]], 1, 100)
 varex <- window(datregdin[[2]], 1, 100)
-mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "reg_din")
+mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
 
 }
 \seealso{
