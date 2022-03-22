@@ -52,6 +52,8 @@
 #' @return objeto da classe mod_eol contendo modelo (classe dependente do modelo ajustato), serie
 #'     ajustada e, caso \code{out_sample > 0}, a parte reservada para comparação
 #' 
+#' @family metodos_mod_eol
+#' 
 #' @export
 
 estimamodelo <- function(serie, tipo, ...) UseMethod("estimamodelo")
@@ -119,6 +121,8 @@ new_mod_eol <- function(fit, serie, tipo) {
 #' 
 #' @return série temporal multivariada contendo a previsão e o desvio padrão associado
 #' 
+#' @family metodos_mod_eol
+#' 
 #' @export
 
 predict.mod_eol <- function(object, n.ahead, ...) {
@@ -159,6 +163,8 @@ predict.mod_eol <- function(object, n.ahead, ...) {
 #' }
 #' 
 #' @return modelo com novos dados e possivelmente reajustado
+#' 
+#' @family metodos_mod_eol
 #' 
 #' @export
 
