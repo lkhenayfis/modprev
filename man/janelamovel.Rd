@@ -4,7 +4,7 @@
 \alias{janelamovel}
 \title{Previsão Em Horizonte Rolante}
 \usage{
-janelamovel(serie, ...)
+janelamovel(serie, tipo, largura, n.ahead, refit_cada, verbose, regdata)
 }
 \arguments{
 \item{serie}{serie temporal pela qual passar a janela movel}

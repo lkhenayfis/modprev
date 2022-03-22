@@ -17,7 +17,7 @@ NULL
 #' 
 #' @rdname modelos_sarima
 
-sarima <- function(serie, ...) {
+sarima <- function(serie) {
     out <- auto.arima(serie, allowdrift = FALSE)
     return(out)
 }
@@ -26,6 +26,7 @@ sarima <- function(serie, ...) {
 
 #' @param object objeto com classes \code{c("sarima", "mod_eol")} contendo modelo
 #' @param n.ahead numero de passos a frente para previsao
+#' @param ... demais argumentos passados a \code{\link[stats]{predict.Arima}}
 #' 
 #' @return \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
 #'     previsao;
@@ -46,6 +47,7 @@ predict.sarima <- function(object, n.ahead, ...) {
 
 #' @param newseries nova serie com a qual atualizar o modelo
 #' @param refit booleano indicando se o modelo deve ou nao ser reajustado
+#' @param ... existe apenas para consistência com a genérica
 #' 
 #' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado;
 #' 

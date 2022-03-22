@@ -17,7 +17,7 @@ NULL
 #' 
 #' @rdname modelos_ss_ar1_saz
 
-ss_ar1_saz <- function(serie, ...) {
+ss_ar1_saz <- function(serie) {
 
     Z <- matrix(c(1, 1), 1)
     T <- matrix(c(1, 0, 0, 0), 2)
@@ -54,6 +54,7 @@ ss_ar1_saz <- function(serie, ...) {
 
 #' @param object objeto com classes \code{c("ss_ar1_saz", "mod_eol")} contendo modelo
 #' @param n.ahead numero de passos a frente para previsao
+#' @param ... demais argumentos passados a \code{\link[KFAS]{predict.SSModel}}
 #' 
 #' @return \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
 #'     previsao;
@@ -82,6 +83,7 @@ predict.ss_ar1_saz <- function(object, n.ahead, ...) {
 #' 
 #' @param newseries nova serie com a qual atualizar o modelo
 #' @param refit booleano indicando se o modelo deve ou nao ser reajustado
+#' @param ... existe apenas para consistência com a genérica
 #' 
 #' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado;
 #' 

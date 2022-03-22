@@ -7,9 +7,9 @@
 \method{plot}{mod_eol}(x, ...)
 }
 \arguments{
-\item{...}{demais parametros repassados para \code{plot}}
+\item{x}{objeto para plotar}
 
-\item{fit}{objeto para plotar}
+\item{...}{demais parametros repassados para \code{plot}}
 }
 \value{
 plot da serie e ajuste realizado

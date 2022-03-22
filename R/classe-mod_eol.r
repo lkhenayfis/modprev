@@ -102,7 +102,7 @@ new_mod_eol <- function(fit, serie, tipo) {
 #' 
 #' @param object modelo ajustado através de \code{\link{estimamodelo}}
 #' @param n.ahead numero de passos a frente para prever
-#' @param ... parametros extras passados para o metodo de \code{predict} apropriado. Ver Detalhes
+#' @param ... existe apenas para consistência com a genérica
 #' 
 #' @examples
 #' 
@@ -146,10 +146,10 @@ predict.mod_eol <- function(object, n.ahead, ...) {
 #' na forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas.
 #' Se houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal.
 #' 
-#' @param fit modelo ajustado atraves de estimamodelo
+#' @param object modelo ajustado atraves de \code{estimamodelo}
 #' @param newseries nova serie para associar ao modelo
 #' @param refit booleano indicando se o modelo deve ser reajustado
-#' @param ... demais parâmetros passados para as updates específicas. Ver Detalhes
+#' @param ... existe apenas para consistência com a genérica
 #' 
 #' @examples 
 #' 
@@ -236,11 +236,13 @@ update.mod_eol <- function(object, newseries, refit = FALSE, ...) {
 #' 
 #' @export
 
-janelamovel <- function(serie, ...) UseMethod("janelamovel")
+janelamovel <- function(serie, tipo, largura, n.ahead, refit_cada, verbose, regdata) UseMethod("janelamovel")
 
 #' @export
 
-janelamovel.numeric <- function(serie, ...) janelamovel.ts(ts(serie), ...)
+janelamovel.numeric <- function(serie, tipo, largura, n.ahead, refit_cada, verbose, regdata) {
+    janelamovel.ts(ts(serie), tipo, largura, n.ahead, refit_cada, verbose, regdata)
+}
 
 #' @export
 

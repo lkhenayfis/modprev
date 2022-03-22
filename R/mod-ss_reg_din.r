@@ -18,7 +18,7 @@ NULL
 #' 
 #' @rdname modelos_ss_reg_din
 
-ss_reg_din <- function(serie, regdata, ...) {
+ss_reg_din <- function(serie, regdata) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
 
@@ -41,6 +41,7 @@ ss_reg_din <- function(serie, regdata, ...) {
 #' @param object objeto com classes \code{c("ss_reg_din", "mod_eol")} contendo modelo
 #' @param newdata vetor, matriz ou data.frame contendo variaveis explicativas fora da amostra
 #' @param n.ahead numero de passos a frente para previsao
+#' @param ... demais argumentos passados a \link[KFAS]{\code{predict.SSModel}}
 #' 
 #' @return \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
 #'     previsao;
@@ -85,6 +86,8 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
 #'     se o modelo deve ou nao ser reajustado
 #' @param newregdata vetor, matriz ou data.frame contendo variaveis explicativas associadas a nova 
 #'     amostra
+#' @param refit booleano indicando se o modelo deve ou nao ser reajustado
+#' @param ... demais argumentos passados a \code{\link[KFAS]{predict.SSModel}}
 #' 
 #' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado;
 #' 
@@ -111,7 +114,7 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
         }
 
         # Se modelo nao convergiu, tenta reestimar
-        if(all(is.na(modelo$Z))) return(estimamodelo(neseries, tipo = "ss_ar1_saz", regdata = newregdata)$modelo)
+        if(all(is.na(modelo$Z))) return(estimamodelo(newseries, tipo = "ss_ar1_saz", regdata = newregdata)$modelo)
 
         # Do contrario, atualiza normalmente
         Hmat <- modelo["H"]

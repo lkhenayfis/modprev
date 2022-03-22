@@ -7,13 +7,13 @@
 \method{update}{mod_eol}(object, newseries, refit = FALSE, ...)
 }
 \arguments{
+\item{object}{modelo ajustado atraves de \code{estimamodelo}}
+
 \item{newseries}{nova serie para associar ao modelo}
 
 \item{refit}{booleano indicando se o modelo deve ser reajustado}
 
-\item{...}{demais parâmetros passados para as updates específicas. Ver Detalhes}
-
-\item{fit}{modelo ajustado atraves de estimamodelo}
+\item{...}{existe apenas para consistência com a genérica}
 }
 \value{
 modelo com novos dados e possivelmente reajustado

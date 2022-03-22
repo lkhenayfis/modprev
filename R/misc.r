@@ -36,6 +36,8 @@
 
 extraiserie <- function(dat, data_ini, hora_ini = "00:00", data_fim, hora_fim = "23:30", num_dias) {
 
+    data <- hora <- verif <- NULL
+
     dat <- as.data.table(dat)
 
     # Identifica qual tipo de parametro foi fornecido

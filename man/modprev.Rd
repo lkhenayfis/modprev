@@ -4,3 +4,6 @@
 \name{modprev}
 \alias{modprev}
 \title{Interface Unificada Para Modelagem}
+\description{
+Pacote contendo um arcabouco unificado para estimacao e manipulacao de diversos tipos de modelos
+}

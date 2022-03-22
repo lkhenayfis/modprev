@@ -11,7 +11,7 @@
 
 \item{n.ahead}{numero de passos a frente para prever}
 
-\item{...}{parametros extras passados para o metodo de \code{predict} apropriado. Ver Detalhes}
+\item{...}{existe apenas para consistência com a genérica}
 }
 \value{
 série temporal multivariada contendo a previsão e o desvio padrão associado

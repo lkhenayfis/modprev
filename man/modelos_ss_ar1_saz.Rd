@@ -7,7 +7,7 @@
 \alias{update.ss_ar1_saz}
 \title{Modelos \code{ss_ar1_saz}}
 \usage{
-ss_ar1_saz(serie, ...)
+ss_ar1_saz(serie)
 
 \method{predict}{ss_ar1_saz}(object, n.ahead, ...)
 
@@ -19,6 +19,8 @@ ss_ar1_saz(serie, ...)
 \item{object}{objeto com classes \code{c("ss_ar1_saz", "mod_eol")} contendo modelo}
 
 \item{n.ahead}{numero de passos a frente para previsao}
+
+\item{...}{existe apenas para consistência com a genérica}
 
 \item{newseries}{nova serie com a qual atualizar o modelo}
 

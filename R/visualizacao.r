@@ -6,7 +6,7 @@
 #' 
 #' Metodo para plotar ajustes \code{mod_eol}
 #' 
-#' @param fit objeto para plotar
+#' @param x objeto para plotar
 #' @param ... demais parametros repassados para \code{plot}
 #' 
 #' @return plot da serie e ajuste realizado

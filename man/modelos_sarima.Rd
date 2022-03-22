@@ -7,7 +7,7 @@
 \alias{update.sarima}
 \title{Modelos \code{sarima}}
 \usage{
-sarima(serie, ...)
+sarima(serie)
 
 \method{predict}{sarima}(object, n.ahead, ...)
 
@@ -19,6 +19,8 @@ sarima(serie, ...)
 \item{object}{objeto com classes \code{c("sarima", "mod_eol")} contendo modelo}
 
 \item{n.ahead}{numero de passos a frente para previsao}
+
+\item{...}{existe apenas para consistência com a genérica}
 
 \item{newseries}{nova serie com a qual atualizar o modelo}
 
