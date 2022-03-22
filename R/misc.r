@@ -70,20 +70,24 @@ extraiserie <- function(dat, data_ini, hora_ini = "00:00", data_fim, hora_fim = 
 
 #' Índice De Tempo Por Delta Em Série Temporal
 #' 
-#' Calcula índice no sistema de tempo de um ts especificada para um dado delta
+#' Calcula índice no sistema de tempo de um \code{ts} especificada para um dado delta
+#' 
+#' Função interna utilizada no escopo da janela rolante. Calcula o índice temporal do final de uma
+#' janela iniciada em \code{ini} com largura \code{delta}.
+#' 
+#' @param ini indice temporal no formato (x, y) de serie temporal indicando inicio da janela 
+#' @param delta numero de observacoes que a janela deve conter 
+#' @param freq frequencia/sazonalidade da serie
+#' 
+#' @return Se forncecidos \code{ini} e \code{delta}, o índice no sistema de tempo \code{ts}
+#'     indicando o final da janela
 
-deltats <- function(ini, fim, delta, freq) {
-    tem_ini <- !missing(ini)
-    tem_fim <- !missing(fim)
-    tem_dlt <- !missing(delta)
-
-    if(tem_ini & !tem_fim & tem_dlt) {
-        fim  <- c(NA, NA)
-        aux <- ini[2] + delta
-        fim[2] <- aux %% freq
-        fim[1] <- ini[1] + aux %/% freq
-        return(fim)
-    }
+deltats <- function(ini, delta, freq) {
+    fim  <- c(NA, NA)
+    aux <- ini[2] + delta
+    fim[2] <- aux %% freq
+    fim[1] <- ini[1] + aux %/% freq
+    return(fim)
 }
 
 #' Detecção De Arquivo De Configuração

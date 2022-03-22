@@ -4,8 +4,23 @@
 \alias{deltats}
 \title{Índice De Tempo Por Delta Em Série Temporal}
 \usage{
-deltats(ini, fim, delta, freq)
+deltats(ini, delta, freq)
+}
+\arguments{
+\item{ini}{indice temporal no formato (x, y) de serie temporal indicando inicio da janela}
+
+\item{delta}{numero de observacoes que a janela deve conter}
+
+\item{freq}{frequencia/sazonalidade da serie}
+}
+\value{
+Se forncecidos \code{ini} e \code{delta}, o índice no sistema de tempo \code{ts}
+indicando o final da janela
 }
 \description{
-Calcula índice no sistema de tempo de um ts especificada para um dado delta
+Calcula índice no sistema de tempo de um \code{ts} especificada para um dado delta
+}
+\details{
+Função interna utilizada no escopo da janela rolante. Calcula o índice temporal do final de uma
+janela iniciada em \code{ini} com largura \code{delta}.
 }
