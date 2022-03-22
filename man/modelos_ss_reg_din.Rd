@@ -25,8 +25,11 @@ ss_reg_din(serie, regdata, ...)
 \item{n.ahead}{numero de passos a frente para previsao}
 
 \item{newseries}{nova serie com a qual atualizar o modelo @param newregdata vetor, matriz ou
-data.frame contendo variaveis explicativas na nova amostra @param refit booleano indicando se o
-modelo deve ou nao ser reajustado}
+data.frame contendo variaveis explicativas na nova amostra @param refit booleano indicando
+se o modelo deve ou nao ser reajustado}
+
+\item{newregdata}{vetor, matriz ou data.frame contendo variaveis explicativas associadas a nova
+amostra}
 }
 \value{
 \code{ss_reg_din} retorna modelo de regressao dinamica simples

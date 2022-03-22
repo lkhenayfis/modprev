@@ -81,8 +81,10 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
 #' \code{refit}
 #' 
 #' @param newseries nova serie com a qual atualizar o modelo @param newregdata vetor, matriz ou
-#' data.frame contendo variaveis explicativas na nova amostra @param refit booleano indicando se o
-#' modelo deve ou nao ser reajustado
+#'     data.frame contendo variaveis explicativas na nova amostra @param refit booleano indicando
+#'     se o modelo deve ou nao ser reajustado
+#' @param newregdata vetor, matriz ou data.frame contendo variaveis explicativas associadas a nova 
+#'     amostra
 #' 
 #' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado;
 #' 
