@@ -1,0 +1,14 @@
+{
+    "NIVEL_1":
+    {
+        "indice1": 1,
+        "indice2": "teste",
+        "indice3": [1, 2, 3, 4]
+    },
+    "NIVEL_2": 
+    {
+        "indice1": 2,
+        "indice2": "aabb",
+        "indice3": {"a": 1, "b": 2}
+    }
+}
