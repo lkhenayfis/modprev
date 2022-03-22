@@ -1,18 +1,17 @@
 Package: modprev
 Title: Interface Unificada Para Estimacao E Uso De Modelos
-Version: 0.0.0.9000
+Version: 1.0
 Authors@R: 
     person(given = "Lucas",
            family = "Khenayfis",
            role = c("aut", "cre"),
            email = "lucaskhenayfis@gmail.com")
-Description: Este pacote fornece um arcabouco unificado para estimacao, previsao, simulacao e etc de
-    diversos tipos de modelos (SARIMA, espaco de estados e etc), incluindo aqueles com variaveis
-    explicativas. Alem de wrappers para metodos tradicionais de modelos estatisticos, e implementada
-    uma funcao para modelagem e previsao em horizonte rolante, facilitando testes com novos modelos.
-    As funcoes do pacote operam em grande parte como wrappers em torno dos metodos especificos de 
-    cada tipo de modelo, visando apresentar uma interface comum para uso de todos eles, tal que a 
-    adicao de novos modelos e relativamente direta. 
+Description: Arcabouco unificado para estimacao, previsao, simulacao e etc de diversos tipos de 
+    modelos, incluindo aqueles com variaveis explicativas. Alem de wrappers para metodos 
+    tradicionais de modelos estatisticos, e implementada uma funcao para modelagem e previsao em
+    horizonte rolante, facilitando testes com novos modelos. As funcoes do pacote operam em grande
+    parte como wrappers em torno dos metodos especificos de cada tipo de modelo, visando apresentar
+    uma interface comum para uso de todos eles, tal que a adicao de novos modelos seja simples. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
