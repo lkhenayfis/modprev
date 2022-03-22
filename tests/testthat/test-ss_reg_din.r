@@ -59,8 +59,7 @@ test_that("Atualizacao de modelo S.S. RegDin", {
 
     mod_refit <- update(mod, serie2, newregdata = varex2, refit = TRUE)
     expect_equal(c(mod_refit$modelo$y), c(serie2))
-    expect_snapshot_value(mod$modelo["Q"], style = "deparse")
-    expect_snapshot_value(mod$modelo["H"], style = "deparse")
-    expect_snapshot_value(mod$modelo["Z"], style = "deparse")
-    expect_snapshot_value(mod$modelo["T"], style = "deparse")
+    expect_equal(round(mod_refit$modelo["Q"][, , 1], 8), 0.03101488)
+    expect_equal(round(mod_refit$modelo["H"][, , 1], 8), 0.02001851)
+    expect_equal(mod_refit$modelo["Z"][, 2, ], c(varex2[[1]]))
 })

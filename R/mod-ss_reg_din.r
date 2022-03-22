@@ -56,8 +56,8 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
 
     newdata <- as.matrix(newdata)
 
-    if("n.ahead" %in% names(list(...))) {
-        regobs <- min(list(...)$n.ahead, nrow(newdata))
+    if(!missing(n.ahead)) {
+        regobs <- min(n.ahead, nrow(newdata))
         newdata <- newdata[seq(regobs), , drop = FALSE]
     }
 
