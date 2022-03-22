@@ -4,7 +4,7 @@ test_that("Estimacao de modelo S.S. RegDin - regressao simples", {
     varex <- data.frame(venprev = window(datregdin[[2]], 1, 200))
     mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg")
 
-    expect_equal("ss_reg_din", attr(mod, "tipo"))
+    expect_equal("ss_reg_din", class(mod)[1])
     expect_equal(mod$modelo["Q"][1, 1, 1], 0.059735078) # precalculados e testados para garantir
     expect_equal(mod$modelo["H"][1, 1, 1], 0.67102834)
 

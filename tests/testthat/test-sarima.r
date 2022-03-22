@@ -3,7 +3,7 @@ test_that("Estimacao de modelo SARIMA", {
     compmod <- forecast::auto.arima(AirPassengers)
     mod     <- estimamodelo(AirPassengers, tipo = "sarima")
 
-    expect_equal("sarima", attr(mod, "tipo"))
+    expect_equal("sarima", class(mod)[1])
     expect_equal(coef(compmod), coef(mod$model))
 
     serie <- c(AirPassengers)
