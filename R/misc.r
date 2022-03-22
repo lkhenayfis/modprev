@@ -85,3 +85,79 @@ deltats <- function(ini, fim, delta, freq) {
         return(fim)
     }
 }
+
+#' Detecção De Arquivo De Configuração
+#' 
+#' Busca arquivo de configuração segundo regras que contemplam a execução operacional
+#' 
+#' Esta função não é necessária para uso do pacote. Ela existe e é fornecida apenas para facilitar
+#' as distintas aplicações, removendo a necessidade de repetir esse código para achar a configuração
+#' em todos os arquivos. Cada aplicação terá seu conjunto de configurações necessárias, de modo que
+#' isto deve ser especificado claramente em cada projeto, não aqui.
+#' 
+#' O caminho de busca e composto por tres diretorios:
+#' 
+#' 1. diretorio de trabalho atual
+#' 2. diretorio um nivel acima do de trabalho
+#' 3. caminho composto a partir de \code{file_p} e argumento \code{path_principal}
+#' 
+#' As opcoes 1 e 2 sao dedicadas às rodadas via linha de comando e sessões interativas,
+#' respectivamente. A terceira opcao é necessária quando o script for rodado de dentro do codigo
+#' principal da eólica. Nesse caso, \code{file_p} corresponderá normalmente ao caminho do D: de uma
+#' das máquinas virtuais, de modo que \code{path_principal} precisa conter o restante do trajeto até
+#' o diretório onde o arquivo de configuração se encontra. Ver Exemplos
+#' 
+#' @param path_principal caminho a partir de \code{file_p} ate o diretorio do arquivo de
+#'     configuracao. Ver Detalhes e Exemplos
+#' 
+#' @examples
+#' 
+#' \dontrun{
+#' # numa rodada pelo codigo principal, file_p sera criado como, por exemplo
+#' file_p <- "D:/ModeloPrevEolico"
+#' 
+#' # a funcao deve entao ser chamada como
+#' localizaconf("ModEolPtoConex/VersaoAutomatica/Codigos/pastaqualquer") # pastaqualquer deve conter
+#' um arquivo conf.jsonc }
+#' 
+#' @return lista contendo o caminho ate arquivo localizado no primeiro elemento e lista de
+#'     configuracoes no segundo
+#' 
+#' @export
+
+localizaconf <- function(path_principal) {
+
+    # Numa rodada por cmd, o diretorio do arquivo pode ser localizado facilmente
+    args <- commandArgs()
+    dir  <- sapply(args, function(arg) grepl("\\-\\-file", arg))
+    if(any(dir)) {
+        dir <- args[[which(dir)]]
+        dir <- sub("\\-\\-file\\=", "", dir)
+        dir <- gsub("\\\\", "/", dir)
+        dir <- strsplit(dir, "/")[[1]]
+        dir <- do.call(file.path, as.list(dir[-length(dir)]))
+    } else {
+        # Em rodadas interativas, dir e o diretorio de trabalho sao o mesmo
+        dir <- getwd()
+    }
+
+    # Procura root ou no wd atual ou um nivel acima (vai acontecer em rodada agendada)
+    # Em ultimo caso, se estiver sendo rodado pelo codigo principal, acha o root pelo nome completo
+    wd0 <- getwd()
+    setwd(dir)
+    if(file.exists("conf.jsonc")) {
+        root <- getwd()
+        CONFIG <- jsonlite::read_json("conf.jsonc", simplifyVector = TRUE)
+    } else if(file.exists("../conf.jsonc")) {
+        root <- file.path("..")
+        CONFIG <- jsonlite::read_json("../conf.jsonc", simplifyVector = TRUE)
+    } else if(exists("file_p")) {
+        root   <- file.path(file_p, path_principal)
+        CONFIG <- jsonlite::read_json(file.path(root, "conf.jsonc"), simplifyVector = TRUE)
+    } else {
+        # Se nada funcionar, emite erro
+        stop("Nao foi possivel localizar um arquivo de configuracoes")
+    }
+
+    return(list(root, CONFIG))
+}
