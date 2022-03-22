@@ -1,8 +1,8 @@
 ####################################################################################################
-# FUNCOES DE ESTIMACAO E PREVISAO DE MODELOS PARA TEMPO REAL
+# SUPERCLASSE ABSTRATA DOS DIFERENTES TIPOS DE MODELOS
 ####################################################################################################
 
-# ESTIMACAO ----------------------------------------------------------------------------------------
+# CONSTRUTOR ---------------------------------------------------------------------------------------
 
 #' Ajuste De Modelos
 #' 
@@ -66,73 +66,22 @@ estimamodelo.ts <- function(serie, tipo = c("sarima", "ss_ar1_saz", "ss_reg_din"
 
     tipo <- match.arg(tipo)
     fit_func <- match.call()
-    fit_func[[1]] <- as.name(paste0("fit_", tipo))
+    fit_func[[1]] <- as.name(tipo)
     fit_mod <- eval(fit_func, parent.frame())
 
-    out <- list(modelo = fit_mod, serie = serie)
-    class(out) <- "mod_eol"
-    attr(out, "tipo") <- tipo
+    out <- new_mod_eol(fit_mod, serie, tipo)
 
     return(out)
 }
 
-fit_sarima <- function(serie, ...) {
-    out <- auto.arima(serie, allowdrift = FALSE)
-    return(out)
+new_mod_eol <- function(fit, serie, tipo) {
+    new <- list(modelo = fit, serie = serie)
+    class(new) <- c(tipo, "mod_eol")
+
+    return(new)
 }
 
-fit_ss_ar1_saz <- function(serie, ...) {
-
-    Z <- matrix(c(1, 1), 1)
-    T <- matrix(c(1, 0, 0, 0), 2)
-    R <- matrix(c(0, 1), 2)
-
-    if(frequency(serie) == 1) {
-        mod <- SSModel(serie ~ -1 +
-            SSMcustom(Z = Z, T = T, R = R, a1 = c(1, 0), Q = NA),
-            H = 0)
-    } else {
-        mod <- SSModel(serie ~ -1 +
-            SSMcustom(Z = Z, T = T, R = R, a1 = c(1, 0), Q = NA) +
-            SSMseasonal(period = frequency(serie), sea.type = "dummy", Q = NA),
-            H = 0)
-    }
-    upfunc <- function(par, model) {
-        model["Z", "custom"][1] <- par[1]
-        model["T", "custom"][2, 2] <- par[2] / sqrt(1 + par[2]^2)
-        model["Q", etas = "custom"] <- exp(par[3])
-        model["Q", etas = "seasonal"] <- exp(par[4])
-        model["P1", "custom"][2, 2] <- exp(par[3]) / (1 - (par[2] / sqrt(1 + par[2]^2))^2)
-        model
-    }
-    fit <- fitSSM(mod, inits = c(mean(serie), 0, 0, 0), updatefn = upfunc, method = "BFGS")
-
-    if(abs(logLik(fit$model)) < 1e-10) {
-        fit$model$Z[] <- NA
-    }
-
-    return(fit$model)
-}
-
-fit_ss_reg_din <- function(serie, regdata, ...) {
-
-    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
-
-    regdata <- as.matrix(regdata)
-
-    nvars <- ncol(regdata)
-
-    mod <- SSModel(serie ~ SSMregression(~ regdata, Q = diag(NA_real_, nvars)), H = matrix(NA))
-    fit <- fitSSM(mod, rep(0, 2), method = "BFGS")
-
-    if(fit$optim.out$convergence < 0) {
-        fit$model$Z[] <- NA
-    }
-
-    return(fit$model)
-}
-
-# PREVISAO -----------------------------------------------------------------------------------------
+# METODOS -----------------------------------------------------------------------------------------
 
 #' Previsão De Modelos \code{mod_eol}
 #' 
@@ -146,7 +95,7 @@ fit_ss_reg_din <- function(serie, regdata, ...) {
 #' 
 #' @param object modelo ajustado através de \code{\link{estimamodelo}}
 #' @param n.ahead numero de passos a frente para prever
-#' @param ... parametros extras passados para o metodo de \code{predict} apropriado. Ver detalhes
+#' @param ... parametros extras passados para o metodo de \code{predict} apropriado. Ver Detalhes
 #' 
 #' @examples
 #' 
@@ -173,56 +122,8 @@ fit_ss_reg_din <- function(serie, regdata, ...) {
 #' @export
 
 predict.mod_eol <- function(object, n.ahead, ...) {
-
-    pred_func <- match.call()
-    pred_func[[1]] <- as.name(paste0("pred_", attr(object, "tipo")))
-    prev <- eval(pred_func, parent.frame())
-
-    return(prev)
+    stop(paste0("Modelo do tipo ", class(object)[1], " nao possui metodo 'predict'"))
 }
-
-pred_sarima <- function(object, ...) {
-    modelo <- object$modelo
-
-    prev <- predict(modelo, ...)
-    prev <- do.call(cbind, prev)
-    colnames(prev) <- c("prev", "sd")
-
-    return(prev)
-}
-
-pred_ss_ar1_saz <- function(object, ...) {
-    modelo <- object$modelo
-
-    prev <- predict(modelo, se.fit = TRUE, filter = TRUE, ...)
-    colnames(prev) <- c("prev", "sd")
-
-    return(prev)
-}
-
-pred_ss_reg_din <- function(object, newdata, ...) {
-    modelo <- object$modelo
-
-    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro newdata")
-
-    newdata <- as.matrix(newdata)
-
-    if("n.ahead" %in% names(list(...))) {
-        regobs <- min(list(...)$n.ahead, nrow(newdata))
-        newdata <- newdata[seq(regobs), , drop = FALSE]
-    }
-
-    Hmat <- modelo["H"]
-    Qmat <- modelo["Q"]
-    extmod <- SSModel(rep(NA_real_, nrow(newdata)) ~ SSMregression(~ newdata, Q = Qmat), H = Hmat)
-
-    prev <- predict(modelo, newdata = extmod, se.fit = TRUE, filtered = TRUE, ...)
-    colnames(prev) <- c("prev", "sd")
-
-    return(prev)
-}
-
-# ATUALIZACAO --------------------------------------------------------------------------------------
 
 #' Atualizacao De Modelos mod_eol
 #' 
@@ -262,65 +163,7 @@ pred_ss_reg_din <- function(object, newdata, ...) {
 #' @export
 
 update.mod_eol <- function(object, newseries, refit = FALSE, ...) {
-
-    tipo <- attr(object, "tipo")
-
-    if(refit) {
-        call <- list(...)
-        call <- c(list(quote(estimamodelo), serie = newseries, tipo = tipo), call)
-        names(call)[grep("newregdata", names(call))] <- "regdata"
-        object <- eval(as.call(call), parent.frame())
-    } else {
-        upd_func <- match.call()
-        upd_func[[1]] <- as.name(paste0("upd_", tipo))
-        object$modelo <- eval(upd_func, parent.frame())
-        object[[2]] <- newseries
-    }
-
-    return(object)
-}
-
-upd_sarima <- function(object, newseries, ...) Arima(newseries, model = object$modelo)
-
-upd_ss_ar1_saz <- function(object, newseries, ...) {
-
-    modelo <- object$modelo
-
-    # Se modelo nao convergiu, tenta reestimar
-    if(all(is.na(modelo$Z))) return(estimamodelo(newseries, tipo = "ss_ar1_saz")$modelo)
-
-    # Do contrario, atualiza normalmente
-    modelo$y <- newseries
-    attr(modelo$y, "dim") <- c(length(newseries), 1)
-    attr(modelo, "n") <- as.integer(length(newseries))
-
-    return(modelo)
-}
-
-upd_ss_reg_din <- function(object, newseries, newregdata, ...) {
-
-    modelo <- object$modelo
-
-    if(missing(newregdata)) {
-        stop("Forneca nova variavel explicativa atraves do parametro newregdata")
-    }
-
-    if("data.frame" %in% class(newregdata)) {
-        colnames(newregdata) <- "xvar"
-    } else {
-        newregdata <- data.frame(xvar = newregdata)
-    }
-
-    # Se modelo nao convergiu, tenta reestimar
-    if(all(is.na(modelo$Z))) return(estimamodelo(neseries, tipo = "ss_ar1_saz", regdata = newregdata)$modelo)
-
-    # Do contrario, atualiza normalmente
-    Hmat <- modelo["H"]
-    Qmat <- modelo["Q"]
-    newmod <- SSModel(
-        newseries ~ SSMregression(~ xvar, data = newregdata, Q = Qmat), H = Hmat)
-
-    return(newmod)
+    stop(paste0("Modelo do tipo ", class(object)[1], " nao possui metodo 'update'"))
 }
 
 # JANELA MOVEL -------------------------------------------------------------------------------------
