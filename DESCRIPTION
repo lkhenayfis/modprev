@@ -1,6 +1,6 @@
 Package: modprev
 Title: Interface Unificada Para Estimacao E Uso De Modelos
-Version: 1.0
+Version: 1.0.0.9000
 Authors@R: 
     person(given = "Lucas",
            family = "Khenayfis",

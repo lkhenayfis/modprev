@@ -101,20 +101,23 @@ deltats <- function(ini, delta, freq) {
 #' em todos os arquivos. Cada aplicação terá seu conjunto de configurações necessárias, de modo que
 #' isto deve ser especificado claramente em cada projeto, não aqui.
 #' 
-#' O caminho de busca e composto por tres diretorios:
+#' A função busca um arquivo de configuração chamado \code{nome} no caminho de busca composto por
 #' 
-#' 1. diretorio de trabalho atual
-#' 2. diretorio um nivel acima do de trabalho
+#' 1. diretório de trabalho atual 
+#' 2. diretório um nível acima do de trabalho
 #' 3. caminho composto a partir de \code{file_p} e argumento \code{path_principal}
 #' 
-#' As opcoes 1 e 2 sao dedicadas às rodadas via linha de comando e sessões interativas,
-#' respectivamente. A terceira opcao é necessária quando o script for rodado de dentro do codigo
+#' Em cada um dos níveis também será avaliado se existe um diretório nomeado 'conf', 'confs' ou
+#' 'config' no qual está o arquivo \code{nome}.
+#' 
+#' As opções 1 e 2 sao dedicadas às rodadas via linha de comando e sessões interativas,
+#' respectivamente. A terceira opção é necessária quando o script for rodado de dentro do código
 #' principal da eólica. Nesse caso, \code{file_p} corresponderá normalmente ao caminho do D: de uma
 #' das máquinas virtuais, de modo que \code{path_principal} precisa conter o restante do trajeto até
 #' o diretório onde o arquivo de configuração se encontra. Ver Exemplos
 #' 
-#' @param path caminho completo até o diretório onde o arquivo de configuração se  encontra. 
-#'     Ver Exemplo
+#' @param path caminho completo até o diretório onde o arquivo de configuração se encontra.
+#'     Ver Exemplo 
 #' @param nome o nome do arquivo, com extensão. O nome pode variar, mas deve necessariamente ser um 
 #'     "json" ou "jsonc"
 #' 
@@ -136,7 +139,7 @@ deltats <- function(ini, delta, freq) {
 #' 
 #' @export
 
-localizaconf <- function(path, nome = "conf.jsonc") {
+localizaconf <- function(path = Sys.getenv("HOME"), nome = "conf.jsonc") {
 
     # Numa rodada por cmd, o diretorio do arquivo pode ser localizado facilmente
     args <- commandArgs()
@@ -152,23 +155,21 @@ localizaconf <- function(path, nome = "conf.jsonc") {
         dir <- getwd()
     }
 
-    # Procura root ou no wd atual ou um nivel acima (vai acontecer em rodada agendada)
-    # Em ultimo caso, se estiver sendo rodado pelo codigo principal, acha o root pelo nome completo
-    wd0 <- getwd()
-    setwd(dir)
-    if(file.exists(nome)) {
-        root <- getwd()
-        CONFIG <- read_json(nome, simplifyVector = TRUE)
-    } else if(file.exists("../conf.jsonc")) {
-        root <- file.path("..")
-        CONFIG <- read_json("../conf.jsonc", simplifyVector = TRUE)
-    } else if(!missing(path)) {
-        root   <- path
-        CONFIG <- read_json(file.path(root, nome), simplifyVector = TRUE)
-    } else {
-        # Se nada funcionar, emite erro
-        stop("Nao foi possivel localizar um arquivo de configuracoes")
+    searchpath <- c(
+        file.path(nome), file.path(c("conf", "confs", "config"), nome),
+        file.path("..", nome), file.path("..", c("conf", "confs", "config"), nome),
+        file.path(path, nome), file.path(path, c("conf", "confs", "config"), nome)
+    )
+
+    CONFIG <- NULL
+    for(sp in searchpath) {
+        if(file.exists(sp)) {
+            root <- sub(nome, "", sp)
+            CONFIG <- read_json(sp, simplifyVector = TRUE)
+            break
+        }
     }
+    if(is.null(CONFIG)) stop("Nao foi possivel localizar um arquivo de configuracoes")
 
     return(list(root, CONFIG))
 }

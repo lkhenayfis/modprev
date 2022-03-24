@@ -4,10 +4,10 @@
 \alias{localizaconf}
 \title{Detecção De Arquivo De Configuração}
 \usage{
-localizaconf(path, nome = "conf.jsonc")
+localizaconf(path = Sys.getenv("HOME"), nome = "conf.jsonc")
 }
 \arguments{
-\item{path}{caminho completo até o diretório onde o arquivo de configuração se  encontra.
+\item{path}{caminho completo até o diretório onde o arquivo de configuração se encontra.
 Ver Exemplo}
 
 \item{nome}{o nome do arquivo, com extensão. O nome pode variar, mas deve necessariamente ser um
@@ -26,15 +26,18 @@ as distintas aplicações, removendo a necessidade de repetir esse código para 
 em todos os arquivos. Cada aplicação terá seu conjunto de configurações necessárias, de modo que
 isto deve ser especificado claramente em cada projeto, não aqui.
 
-O caminho de busca e composto por tres diretorios:
+A função busca um arquivo de configuração chamado \code{nome} no caminho de busca composto por
 \enumerate{
-\item diretorio de trabalho atual
-\item diretorio um nivel acima do de trabalho
+\item diretório de trabalho atual
+\item diretório um nível acima do de trabalho
 \item caminho composto a partir de \code{file_p} e argumento \code{path_principal}
 }
 
-As opcoes 1 e 2 sao dedicadas às rodadas via linha de comando e sessões interativas,
-respectivamente. A terceira opcao é necessária quando o script for rodado de dentro do codigo
+Em cada um dos níveis também será avaliado se existe um diretório nomeado 'conf', 'confs' ou
+'config' no qual está o arquivo \code{nome}.
+
+As opções 1 e 2 sao dedicadas às rodadas via linha de comando e sessões interativas,
+respectivamente. A terceira opção é necessária quando o script for rodado de dentro do código
 principal da eólica. Nesse caso, \code{file_p} corresponderá normalmente ao caminho do D: de uma
 das máquinas virtuais, de modo que \code{path_principal} precisa conter o restante do trajeto até
 o diretório onde o arquivo de configuração se encontra. Ver Exemplos

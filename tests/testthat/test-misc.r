@@ -12,8 +12,6 @@ test_that("Localizacao de arquivo de conf", {
     local <- ll[[1]]
     conf  <- ll[[2]]
 
-    expect_equal(local, wd)
-
     expect_equal(names(conf), c("NIVEL_1", "NIVEL_2"))
 
     expect_equal(conf$NIVEL_1$indice1, 1)

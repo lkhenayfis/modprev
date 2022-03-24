@@ -1,3 +1,12 @@
+# master
+
+## New features
+
+### Minor
+
+* `localizaoconf()` agora procura por diretorios `conf`, `confs` ou `config` em cada nivel do
+  searchpath
+
 # modprev 1.0
 
 Arcabouco unificado para estimacao, previsao, simulacao e etc de diversos tipos de 
