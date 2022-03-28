@@ -21,10 +21,10 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Depends: 
-    data.table (>= 1.14.0),
+    data.table (>= 1.12.8),
     KFAS (>= 1.4.4),
     forecast (>= 8.12),
-    jsonlite (>= 1.7.2),
-    R (>= 4.0),
-    stats (>= 4.1.0),
-    graphics (>= 4.1.0)
+    jsonlite (>= 1.6.1),
+    R (>= 3.6),
+    stats (>= 3.6),
+    graphics (>= 3.6)
