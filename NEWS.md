@@ -4,8 +4,10 @@
 
 ### Minor
 
-* `localizaoconf()` agora procura por diretorios `conf`, `confs` ou `config` em cada nivel do
-  searchpath
+* `localizaconf()` agora procura por diretorios `conf`, `confs` ou `config` em cada nivel do
+  searchpath. Tambem passa a retornar em `raiz` o diretorio que contem o arquivo ou o pai do
+  diretorio `conf`, `confs` ou `config` caso exista. O objetivo disso e que `raiz` corresponda a 
+  raiz do projeto contendo os programas, nao o caminho ate o arquivo de confifuracao
 
 # modprev 1.0
 

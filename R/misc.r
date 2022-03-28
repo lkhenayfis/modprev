@@ -99,38 +99,28 @@ deltats <- function(ini, delta, freq) {
 #' Esta função não é necessária para uso do pacote. Ela existe e é fornecida apenas para facilitar
 #' as distintas aplicações, removendo a necessidade de repetir esse código para achar a configuração
 #' em todos os arquivos. Cada aplicação terá seu conjunto de configurações necessárias, de modo que
-#' isto deve ser especificado claramente em cada projeto, não aqui.
+#' isto deve ser especificado claramente nos projetos em si, não aqui.
 #' 
-#' A função busca um arquivo de configuração chamado \code{nome} no caminho de busca composto por
+#' A função executa uma busca simples por um arquivo de configuração chamado \code{arq} em um 
+#' search path de dois níveis principais:
 #' 
-#' 1. diretório de trabalho atual 
+#' 1. diretório de trabalho atual
 #' 2. diretório um nível acima do de trabalho
-#' 3. caminho composto a partir de \code{file_p} e argumento \code{path_principal}
 #' 
-#' Em cada um dos níveis também será avaliado se existe um diretório nomeado 'conf', 'confs' ou
-#' 'config' no qual está o arquivo \code{nome}.
+#' A cada nível será checado se existe o aquivo \code{arq} e, alternativamente, se existem os
+#' diretórios 'conf', 'config' ou 'confs' no nível que possam conter \code{arq}.
 #' 
-#' As opções 1 e 2 sao dedicadas às rodadas via linha de comando e sessões interativas,
-#' respectivamente. A terceira opção é necessária quando o script for rodado de dentro do código
-#' principal da eólica. Nesse caso, \code{file_p} corresponderá normalmente ao caminho do D: de uma
-#' das máquinas virtuais, de modo que \code{path_principal} precisa conter o restante do trajeto até
-#' o diretório onde o arquivo de configuração se encontra. Ver Exemplos
+#' O argumento \code{path} permite informar diretamente o caminho até o \bold{diretório} que contém 
+#' \code{arq}. Caso seja fornecido, um novo nível será adicionado no topo do search path 
+#' correspondendo ao caminho informado no argumento \code{path}.
+#' 
+#' Normalmente \code{path} não tem muita utilidade. Em rodadas interativas ou por cmd apenas os dois 
+#' níveis padrão são necessários. No código principal o caminho do script já deve ser conhecido para
+#' execução, de modo que a busca por configuração em referência a ele é simples
 #' 
 #' @param path caminho completo até o diretório onde o arquivo de configuração se encontra.
-#'     Ver Exemplo 
-#' @param nome o nome do arquivo, com extensão. O nome pode variar, mas deve necessariamente ser um 
+#' @param arq o nome do arquivo, com extensão. O nome pode variar, mas deve necessariamente ser um 
 #'     "json" ou "jsonc"
-#' 
-#' @examples
-#' 
-#' \dontrun{
-#' # numa rodada pelo codigo principal, file_p sera criado como, por exemplo
-#' file_p <- "D:/ModeloPrevEolico"
-#' 
-#' # a funcao deve entao ser chamada como
-#' path <- file.path(file_p, "ModEolPtoConex/VersaoAutomatica/pasta/contendo/conf")
-#' localizaconf(path)
-#' }
 #' 
 #' @return lista contendo o caminho ate arquivo localizado no primeiro elemento e lista de
 #'     configuracoes no segundo
@@ -139,7 +129,9 @@ deltats <- function(ini, delta, freq) {
 #' 
 #' @export
 
-localizaconf <- function(path = Sys.getenv("HOME"), nome = "conf.jsonc") {
+localizaconf <- function(path, arq = "conf.jsonc") {
+
+    if(!grepl(".jsonc?", arq)) stop("Arquivo de configuracao invalido -- deve ser .json ou .jsonc")
 
     # Numa rodada por cmd, o diretorio do arquivo pode ser localizado facilmente
     args <- commandArgs()
@@ -156,15 +148,17 @@ localizaconf <- function(path = Sys.getenv("HOME"), nome = "conf.jsonc") {
     }
 
     searchpath <- c(
-        file.path(nome), file.path(c("conf", "confs", "config"), nome),
-        file.path("..", nome), file.path("..", c("conf", "confs", "config"), nome),
-        file.path(path, nome), file.path(path, c("conf", "confs", "config"), nome)
+        file.path(".", arq), file.path(".", c("conf", "confs", "config"), arq),
+        file.path("..", arq), file.path("..", c("conf", "confs", "config"), arq)
     )
+
+    if(!missing("path")) searchpath <- c(searchpath,
+        file.path(path, arq), file.path(path, c("conf", "confs", "config"), arq))
 
     CONFIG <- NULL
     for(sp in searchpath) {
         if(file.exists(sp)) {
-            root <- sub(nome, "", sp)
+            root <- sub(paste0("(/conf(s|ig)?)?/", arq), "", sp)
             CONFIG <- read_json(sp, simplifyVector = TRUE)
             break
         }
