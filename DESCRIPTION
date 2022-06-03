@@ -2,29 +2,30 @@ Package: modprev
 Title: Interface Unificada Para Estimacao E Uso De Modelos
 Version: 1.0.0.9000
 Authors@R: 
-    person(given = "Lucas",
-           family = "Khenayfis",
-           role = c("aut", "cre"),
-           email = "lucaskhenayfis@gmail.com")
-Description: Arcabouco unificado para estimacao, previsao, simulacao e etc de diversos tipos de 
-    modelos, incluindo aqueles com variaveis explicativas. Alem de wrappers para metodos 
-    tradicionais de modelos estatisticos, e implementada uma funcao para modelagem e previsao em
-    horizonte rolante, facilitando testes com novos modelos. As funcoes do pacote operam em grande
-    parte como wrappers em torno dos metodos especificos de cada tipo de modelo, visando apresentar
-    uma interface comum para uso de todos eles, tal que a adicao de novos modelos seja simples. 
+    person("Lucas", "Khenayfis", , "lucaskhenayfis@gmail.com", role = c("aut", "cre"))
+Description: Arcabouco unificado para estimacao, previsao, simulacao e etc
+    de diversos tipos de modelos, incluindo aqueles com variaveis
+    explicativas. Alem de wrappers para metodos tradicionais de modelos
+    estatisticos, e implementada uma funcao para modelagem e previsao em
+    horizonte rolante, facilitando testes com novos modelos. As funcoes do
+    pacote operam em grande parte como wrappers em torno dos metodos
+    especificos de cada tipo de modelo, visando apresentar uma interface
+    comum para uso de todos eles, tal que a adicao de novos modelos seja
+    simples.
 License: MIT + file LICENSE
+Depends:
+    graphics (>= 3.6),
+    R (>= 3.6),
+    stats (>= 3.6)
+Imports: 
+    data.table (>= 1.12.8),
+    forecast (>= 8.12),
+    jsonlite (>= 1.6.1),
+    KFAS (>= 1.4.4)
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Suggests: 
-    testthat (>= 3.0.0)
-Config/testthat/edition: 3
-Depends: 
-    data.table (>= 1.12.8),
-    KFAS (>= 1.4.4),
-    forecast (>= 8.12),
-    jsonlite (>= 1.6.1),
-    R (>= 3.6),
-    stats (>= 3.6),
-    graphics (>= 3.6)
