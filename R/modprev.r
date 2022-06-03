@@ -5,10 +5,7 @@
 #' @docType package
 #' @name modprev
 #' 
-#' @import data.table
-#' @import forecast
-#' @import KFAS
+#' @import data.table forecast KFAS stats
 #' 
 #' @importFrom graphics grid lines title
-#' @importFrom stats fitted frequency logLik predict start ts update window
 NULL

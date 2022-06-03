@@ -13,25 +13,34 @@ NULL
 
 #' @param serie serie para ajustar
 #' @param regdata vetor, matriz ou data.frame contendo variaveis explicativas
+#' @param formula opcional, formula da regressao. Se for omitido, todas as variaveis em 
+#'     \code{regdata} serao utilizadas
 #' 
 #' @return \code{ss_reg_din} retorna modelo de regressao dinamica simples
 #' 
 #' @rdname modelos_ss_reg_din
 
-ss_reg_din <- function(serie, regdata) {
+ss_reg_din <- function(serie, regdata, formula) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
 
-    regdata <- as.matrix(regdata)
+    if(missing(formula)) {
+        formula <- colnames(regdata)
+        if(length(formula) > 1) formula <- paste0(colnames(regdata), collapse = " + ")
+        formula <- paste0("~ ", formula)
+        formula <- as.formula(formula)
+    }
 
-    nvars <- ncol(regdata)
+    nvars <- ncol(model.matrix(formula, data = regdata)) - 1 # model.matrix inclui intercept
 
-    mod <- SSModel(serie ~ SSMregression(~ regdata, Q = diag(NA_real_, nvars)), H = matrix(NA))
-    fit <- fitSSM(mod, rep(0, 2), method = "BFGS")
+    mod <- SSModel(serie ~ SSMregression(formula, regdata, Q = diag(NA_real_, nvars)), H = matrix(NA))
+    fit <- fitSSM(mod, rep(0, nvars + 1), method = "BFGS")
 
     if(fit$optim.out$convergence < 0) {
         fit$model$Z[] <- NA
     }
+
+    attr(fit$model, "formula") <- formula
 
     return(fit$model)
 }
@@ -40,7 +49,8 @@ ss_reg_din <- function(serie, regdata) {
 
 #' @param object objeto com classes \code{c("ss_reg_din", "mod_eol")} contendo modelo
 #' @param newdata vetor, matriz ou data.frame contendo variaveis explicativas fora da amostra
-#' @param n.ahead numero de passos a frente para previsao
+#' @param n.ahead numero de passos a frente para previsao. Este argumento nao e necessario, caso nao
+#'     seja informado a previsao sera feita tantos passos a frente quanto amostras em \code{newdata}
 #' @param ... demais argumentos passados a \link[KFAS]{\code{predict.SSModel}}
 #' 
 #' @return \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
@@ -55,8 +65,6 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
 
     if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro newdata")
 
-    newdata <- as.matrix(newdata)
-
     if(!missing(n.ahead)) {
         regobs <- min(n.ahead, nrow(newdata))
         newdata <- newdata[seq(regobs), , drop = FALSE]
@@ -64,7 +72,9 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
 
     Hmat <- modelo["H"]
     Qmat <- modelo["Q"]
-    extmod <- SSModel(rep(NA_real_, nrow(newdata)) ~ SSMregression(~ newdata, Q = Qmat), H = Hmat)
+    extserie <- rep(NA_real_, nrow(newdata))
+    formula  <- attr(modelo, "formula")
+    extmod <- SSModel(extserie ~ SSMregression(formula, newdata, Q = Qmat), H = Hmat)
 
     prev <- predict(modelo, newdata = extmod, se.fit = TRUE, filtered = TRUE, ...)
     colnames(prev) <- c("prev", "sd")
@@ -81,11 +91,8 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
 #' da pra estimar direito. Nesses casos ele tenta reestimar o modelo independentemente de 
 #' \code{refit}
 #' 
-#' @param newseries nova serie com a qual atualizar o modelo @param newregdata vetor, matriz ou
-#'     data.frame contendo variaveis explicativas na nova amostra @param refit booleano indicando
-#'     se o modelo deve ou nao ser reajustado
-#' @param newregdata vetor, matriz ou data.frame contendo variaveis explicativas associadas a nova 
-#'     amostra
+#' @param newseries nova serie com a qual atualizar o modelo
+#' @param newregdata vetor, matriz ou data.frame contendo variaveis explicativas na nova amostra
 #' @param refit booleano indicando se o modelo deve ou nao ser reajustado
 #' @param ... demais argumentos passados a \code{\link[KFAS]{predict.SSModel}}
 #' 
@@ -98,7 +105,8 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
 update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...) {
 
     if(refit) {
-        object <- estimamodelo(newseries, "ss_reg_din", regdata = newregdata)
+        formula <- attr(object$modelo, "formula")
+        object  <- estimamodelo(newseries, "ss_reg_din", regdata = newregdata, formula = formula)
     } else {
 
         modelo <- object$modelo
@@ -107,20 +115,17 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
             stop("Forneca nova variavel explicativa atraves do parametro newregdata")
         }
 
-        if("data.frame" %in% class(newregdata)) {
-            colnames(newregdata) <- "xvar"
-        } else {
-            newregdata <- data.frame(xvar = newregdata)
-        }
-
         # Se modelo nao convergiu, tenta reestimar
-        if(all(is.na(modelo$Z))) return(estimamodelo(newseries, tipo = "ss_ar1_saz", regdata = newregdata)$modelo)
+        if(all(is.na(modelo$Z))) {
+            mod <- estimamodelo(newseries, tipo = "ss_ar1_saz", regdata = newregdata)$modelo
+            return(mod)
+        }
 
         # Do contrario, atualiza normalmente
         Hmat <- modelo["H"]
         Qmat <- modelo["Q"]
-        modelo <- SSModel(
-            newseries ~ SSMregression(~ xvar, data = newregdata, Q = Qmat), H = Hmat)
+        form <- attr(modelo, "formula")
+        modelo <- SSModel(newseries ~ SSMregression(form, newregdata, Q = Qmat), H = Hmat)
 
         object$modelo <- modelo
     }

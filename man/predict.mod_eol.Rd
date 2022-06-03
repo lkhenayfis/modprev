@@ -38,12 +38,12 @@ predict(mod)
 # em modelos de regressao, deve ser passada a variavel explicativa via newdata
 
 serie <- window(datregdin[[1]], 1, 200)
-varex <- window(datregdin[[2]], 1, 200)
+varex <- datregdin[1:200, 2, drop = FALSE]
 mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
 
 \dontrun{
-    newdata <- window(datregdin[[2]], 201, 230)
-    predict(mod_regdin, newdata = newdata)
+newdata <- datregdin[201:230, 2, drop = FALSE]
+predict(mod_regdin, newdata = newdata)
 }
 
 }
