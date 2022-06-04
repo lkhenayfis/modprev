@@ -7,7 +7,7 @@
 \alias{update.ss_reg_din}
 \title{Modelos \code{ss_reg_din}}
 \usage{
-ss_reg_din(serie, regdata, formula)
+ss_reg_din(serie, regdata, formula, vardin = FALSE)
 
 \method{predict}{ss_reg_din}(object, newdata, n.ahead, ...)
 
@@ -20,6 +20,10 @@ ss_reg_din(serie, regdata, formula)
 
 \item{formula}{opcional, formula da regressao. Se for omitido, todas as variaveis em
 \code{regdata} serao utilizadas}
+
+\item{vardin}{booleano ou inteiro indicando se deve ser estimado modelo com heterocedasticidade.
+Caso \code{TRUE} tenta pegar a sazonalidade da serie, se for um numero inteiro assume este
+valor como a sazonalidade}
 
 \item{object}{objeto com classes \code{c("ss_reg_din", "mod_eol")} contendo modelo}
 

@@ -15,12 +15,15 @@ NULL
 #' @param regdata vetor, matriz ou data.frame contendo variaveis explicativas
 #' @param formula opcional, formula da regressao. Se for omitido, todas as variaveis em 
 #'     \code{regdata} serao utilizadas
+#' @param vardin booleano ou inteiro indicando se deve ser estimado modelo com heterocedasticidade.
+#'     Caso \code{TRUE} tenta pegar a sazonalidade da serie, se for um numero inteiro assume este
+#'     valor como a sazonalidade
 #' 
 #' @return \code{ss_reg_din} retorna modelo de regressao dinamica simples
 #' 
 #' @rdname modelos_ss_reg_din
 
-ss_reg_din <- function(serie, regdata, formula) {
+ss_reg_din <- function(serie, regdata, formula, vardin = FALSE) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
 
@@ -31,16 +34,50 @@ ss_reg_din <- function(serie, regdata, formula) {
         formula <- as.formula(formula)
     }
 
-    nvars <- ncol(model.matrix(formula, data = regdata)) - 1 # model.matrix inclui intercept
+    nvars  <- ncol(model.matrix(formula, data = regdata)) - 1 # model.matrix inclui intercept
 
-    mod <- SSModel(serie ~ SSMregression(formula, regdata, Q = diag(NA_real_, nvars)), H = matrix(NA))
-    fit <- fitSSM(mod, rep(0, nvars + 1), method = "BFGS")
+    if(vardin & (frequency(serie) == 1)) warning("'vardin' e TRUE mas 'serie' nao possui sazonalidade")
+    vardin <- vardin * 1
+
+    if(vardin != 0) {
+
+        saz <- frequency(serie) * (vardin == 1) + vardin * (vardin > 1)
+        upfunc <- function(par, mod, ...) {
+            parH <- par[1:2]
+            uH   <- cos(0:(saz - 1) * 2 * pi / saz)
+            vH   <- sin(0:(saz - 1) * 2 * pi / saz)
+            mod["H"][] <- rep(exp(parH[1] * uH + parH[2] * vH), length.out = dim(mod["H"])[3])
+
+            parQ <- par[-c(1:2)]
+            for(i in seq_along(parQ)) mod["Q"][i, i, 1] <- exp(parQ[i])
+
+            return(mod)
+        }
+
+    } else {
+
+        saz <- 1
+        upfunc <- function(par, mod, ...) {
+            mod["H"][1, 1, 1] <- exp(par[1])
+
+            parQ <- par[-1]
+            for(i in seq_along(parQ)) mod["Q"][i, i, 1] <- exp(parQ[i])
+
+            return(mod)
+        }
+    }
+
+    mod <- SSModel(serie ~ SSMregression(formula, regdata, Q = diag(NA_real_, nvars)),
+            H = array(NA_real_, c(1, 1, saz)))
+    fit <- fitSSM(mod, rep(0, nvars + 1 + (vardin != 0)), upfunc, method = "BFGS")
 
     if(fit$optim.out$convergence < 0) {
         fit$model$Z[] <- NA
     }
 
     attr(fit$model, "formula") <- formula
+    attr(fit$model, "vardin")  <- vardin
+    attr(fit$model, "saz")     <- saz
 
     return(fit$model)
 }
