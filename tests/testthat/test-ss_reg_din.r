@@ -94,7 +94,6 @@ test_that("Estimacao de modelo S.S. RegDin - regressao multipla", {
     expect_warning(estimamodelo(serie, formula = ~ V1 + V2 * V3, regdata = varex_cna, tipo = "ss_reg"))
 })
 
-
 test_that("Previsao de modelo S.S. RegDin - regressao multipla", {
 
     dados <- geradado()
@@ -145,4 +144,36 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla", {
     expect_true(all(c(mod_upd$modelo$y) - newseries == 0))
     expect_snapshot_value(round(mod$modelo["Q"][, , 1], 10), style = "deparse")
     expect_snapshot_value(round(mod$modelo["H"][, , 1], 10), style = "deparse")
+})
+
+test_that("Estimacao de modelo S.S. RegDin - regressao multipla heterocedastica", {
+
+    dados <- geradado()
+
+    # Serie temporal com sazonalidade especificada e vardin = TRUE
+
+    serie <- window(dados[[2]], 1, 150)
+    serie <- ts(c(serie), freq = 10)
+    varex <- dados[[1]][1:150, ]
+
+    mod1 <- estimamodelo(serie, "ss_reg", regdata = varex, formula = ~ V1 + V2 * V3, vardin = TRUE)
+
+    expect_equal("ss_reg_din", class(mod1)[1])
+    expect_equal(attr(mod1$model, "vardin"), 1)
+    matH <- matrix(c(mod1$model["H"]), 10)
+    expect_true(all(apply(matH, 1, function(v) all(v == v[1]))))
+    expect_snapshot_value(round(mod1$modelo["Q"][, , 1], 10), style = "deparse")
+    expect_snapshot_value(round(mod1$modelo["H"][1, 1, 1:10], 10), style = "deparse")
+
+    # Serie temporal sem sazonalidade com vardin = 10
+
+    serie <- c(serie)
+    expect_warning(
+        mod2 <- estimamodelo(serie, "ss_reg", regdata = varex, formula = ~ V1 + V2 * V3, vardin = 10)
+    )
+
+    expect_equal("ss_reg_din", class(mod2)[1])
+    expect_equal(attr(mod2$model, "vardin"), 10)
+    expect_equal(c(mod2$model["H"]), c(mod1$model["H"]))
+    expect_equal(c(mod2$model["Q"]), c(mod1$model["Q"]))
 })
