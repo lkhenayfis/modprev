@@ -179,10 +179,24 @@ expandejanelas <- function(serie, janela, passo) {
     return(janelas)
 }
 
+#' Indices De Tempo Para Reajustar Modelo
+#' 
+#' Interpreta os argumentos passados a \code{\link{janelamovel}} a respeito dos reajustes
+#' 
+#' O vetor retornado sempre tera a primeira posicao igual a \code{FALSE}, pois no ambito da 
+#' janelamovel a primeira janela sempre corresponde a primeira estimacao do modelo, uma que e feita
+#' por fora da janela movel.
+#' 
+#' @param janelas lista de inicios e finais de janelas retornada por \code{\link{expandejanelas}}
+#' @param refit.cada inteiro indicando de quantos em quantos instantes o modelo deve ser reajustado
+#' 
+#' @return vetor logico do mesmo tamanho de \code{janelas} indicando em quais janelas o modelo deve
+#'     ser reestimado
+
 expanderefit <- function(janelas, refit.cada) {
 
     nj <- length(janelas)
-    if(is.na(refit.cada)) refit.cada <- length(janelas)
+    if((length(refit.cada) == 1) && is.na(refit.cada)) refit.cada <- length(janelas)
 
     if(length(refit.cada) == 1) {
         v_refit <- seq(1, nj, by = refit.cada)

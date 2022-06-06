@@ -69,3 +69,21 @@ test_that("Expansoes de janelas", {
 
     expect_true(tail(tail(sj, 1)[[1]], 1) == tail(ss, 1))
 })
+
+test_that("Vetor de reajustes", {
+
+    ss <- ts(seq(40), freq = 10)
+
+    jj <- expandejanelas(ss, 20, 1)
+
+    rr <- expanderefit(jj, 1)
+    expect_equal(length(rr), length(jj))
+    expect_true(!rr[1])
+    expect_true(all(rr[-1]))
+
+    rr <- expanderefit(jj, NA)
+    expect_equal(length(rr), length(jj))
+    expect_true(all(!rr))
+
+    expect_error(rr <- expanderefit(jj, c(1, 4, 6)))
+})
