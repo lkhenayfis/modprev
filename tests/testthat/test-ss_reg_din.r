@@ -178,6 +178,33 @@ test_that("Estimacao de modelo S.S. RegDin - regressao multipla heterocedastica"
     expect_equal(c(mod2$model["Q"]), c(mod1$model["Q"]))
 })
 
+test_that("Previsao de modelo S.S. RegDin - regressao multipla - heterocedastica", {
+
+    dados <- geradado()
+    serie <- window(dados[[2]], 1, 150)
+    serie <- ts(serie, freq = 10)
+    varex <- dados[[1]][1:150, ]
+
+    mod <- estimamodelo(serie, "ss_reg", formula = ~ V1 + V2 * V3, regdata = varex, vardin = TRUE)
+
+    newdata <- dados[[1]][151:170, ]
+    prev    <- predict(mod, newdata = newdata)
+
+    expect_true(all(dim(prev) == c(20, 2)))
+    expect_equal(c("prev", "sd"), colnames(prev))
+
+    expect_snapshot_value(round(c(prev), 10), style = "deparse")
+
+    prev <- predict(mod, newdata = newdata, n.ahead = 10)
+
+    expect_true(all(dim(prev) == c(10, 2)))
+    expect_equal(c("prev", "sd"), colnames(prev))
+
+    expect_snapshot_value(round(c(prev), 10), style = "deparse")
+
+    expect_error(predict(mod))
+})
+
 test_that("Atualizacao de modelo S.S. RegDin - regressao multipla heterocedastica", {
 
     # os testes aqui se focam mais no encadeamento correto do array de variancias H

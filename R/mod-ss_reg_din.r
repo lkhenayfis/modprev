@@ -107,11 +107,9 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
         newdata <- newdata[seq(regobs), , drop = FALSE]
     }
 
-    Hmat <- modelo["H"]
-    Qmat <- modelo["Q"]
+    # Como extserie nao tem sazonalidade, update vai lancar um aviso que nao tem utilidade aqui
     extserie <- rep(NA_real_, nrow(newdata))
-    formula  <- attr(modelo, "formula")
-    extmod <- SSModel(extserie ~ SSMregression(formula, newdata, Q = Qmat), H = Hmat)
+    extmod   <- suppressWarnings(update(object, extserie, newdata)$modelo)
 
     prev <- predict(modelo, newdata = extmod, se.fit = TRUE, filtered = TRUE, ...)
     colnames(prev) <- c("prev", "sd")
@@ -157,7 +155,7 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
         saz <- attr(modelo, "saz")
 
         desloc <- parsedesloc(object$serie, newseries, saz)
-  
+
         Hmat <- modelo["H"][, , seq_len(saz), drop = FALSE]
         Hmat <- Hmat[, , shift(seq_len(saz), desloc), drop = FALSE]
 
