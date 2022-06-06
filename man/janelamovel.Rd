@@ -60,8 +60,9 @@ serie <- ts(window(datregdin[[1]], 1, 720), freq = 48)
 jm <- janelamovel(serie, "ss_ar1_saz", 480, refit_cada = 48)
 
 serie <- ts(window(datregdin[[1]], 1, 250))
-varex <- ts(window(datregdin[[2]], 1, 255))
+varex <- datregdin[1:255, 2, drop = FALSE]
 jm <- janelamovel(serie, "ss_reg_din", 200, 5L, refit_cada = 10, regdata = varex)
+
 # como esta funcao pode demorar um tempo para rodar (especialmente com multiplos refits), pode
 # ser conveniente mandar o log para um arquivo
 sink("log_janelamovel.txt")

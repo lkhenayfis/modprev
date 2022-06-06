@@ -46,7 +46,7 @@
 #' 
 #' # ajustando uma regressao dinamica (com dado dummy interno do pacote)
 #' serie <- window(datregdin[[1]], 1, 100)
-#' varex <- window(datregdin[[2]], 1, 100)
+#' varex <- datregdin[1:100, 2, drop = FALSE]
 #' mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
 #' 
 #' @return objeto da classe mod_eol contendo modelo (classe dependente do modelo ajustato), serie
@@ -116,12 +116,12 @@ new_mod_eol <- function(fit, serie, tipo) {
 #' # em modelos de regressao, deve ser passada a variavel explicativa via newdata
 #' 
 #' serie <- window(datregdin[[1]], 1, 200)
-#' varex <- window(datregdin[[2]], 1, 200)
+#' varex <- datregdin[1:200, 2, drop = FALSE]
 #' mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
 #' 
 #' \dontrun{
-#'     newdata <- window(datregdin[[2]], 201, 230)
-#'     predict(mod_regdin, newdata = newdata)
+#' newdata <- datregdin[201:230, 2, drop = FALSE]
+#' predict(mod_regdin, newdata = newdata)
 #' }
 #' 
 #' @return série temporal multivariada contendo a previsão e o desvio padrão associado
@@ -223,8 +223,9 @@ update.mod_eol <- function(object, newseries, refit = FALSE, ...) {
 #' jm <- janelamovel(serie, "ss_ar1_saz", 480, refit_cada = 48)
 #' 
 #' serie <- ts(window(datregdin[[1]], 1, 250))
-#' varex <- ts(window(datregdin[[2]], 1, 255))
+#' varex <- datregdin[1:255, 2, drop = FALSE]
 #' jm <- janelamovel(serie, "ss_reg_din", 200, 5L, refit_cada = 10, regdata = varex)
+#' 
 #' # como esta funcao pode demorar um tempo para rodar (especialmente com multiplos refits), pode
 #' # ser conveniente mandar o log para um arquivo
 #' sink("log_janelamovel.txt")

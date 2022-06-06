@@ -7,7 +7,7 @@
 \alias{update.ss_reg_din}
 \title{Modelos \code{ss_reg_din}}
 \usage{
-ss_reg_din(serie, regdata)
+ss_reg_din(serie, regdata, formula, vardin = FALSE)
 
 \method{predict}{ss_reg_din}(object, newdata, n.ahead, ...)
 
@@ -18,20 +18,25 @@ ss_reg_din(serie, regdata)
 
 \item{regdata}{vetor, matriz ou data.frame contendo variaveis explicativas}
 
+\item{formula}{opcional, formula da regressao. Se for omitido, todas as variaveis em
+\code{regdata} serao utilizadas}
+
+\item{vardin}{booleano ou inteiro indicando se deve ser estimado modelo com heterocedasticidade.
+Caso \code{TRUE} tenta pegar a sazonalidade da serie, se for um numero inteiro assume este
+valor como a sazonalidade}
+
 \item{object}{objeto com classes \code{c("ss_reg_din", "mod_eol")} contendo modelo}
 
 \item{newdata}{vetor, matriz ou data.frame contendo variaveis explicativas fora da amostra}
 
-\item{n.ahead}{numero de passos a frente para previsao}
+\item{n.ahead}{numero de passos a frente para previsao. Este argumento nao e necessario, caso nao
+seja informado a previsao sera feita tantos passos a frente quanto amostras em \code{newdata}}
 
 \item{...}{demais argumentos passados a \code{\link[KFAS]{predict.SSModel}}}
 
-\item{newseries}{nova serie com a qual atualizar o modelo @param newregdata vetor, matriz ou
-data.frame contendo variaveis explicativas na nova amostra @param refit booleano indicando
-se o modelo deve ou nao ser reajustado}
+\item{newseries}{nova serie com a qual atualizar o modelo}
 
-\item{newregdata}{vetor, matriz ou data.frame contendo variaveis explicativas associadas a nova
-amostra}
+\item{newregdata}{vetor, matriz ou data.frame contendo variaveis explicativas na nova amostra}
 
 \item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
 }
