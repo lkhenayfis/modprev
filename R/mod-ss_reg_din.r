@@ -169,3 +169,57 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
 
     return(object)
 }
+
+# HELPERS ------------------------------------------------------------------------------------------
+
+#' Deslocamento Do Array De Variancias
+#' 
+#' Identifica a necessidade de deslocar o array H dependendo de em que instante cada serie comeca
+#' 
+#' Modelos com heterocedasticidade tem um array de variancias H, ao inves de uma matriz simples. 
+#' Isto significa que, dependendo de em que indice sazonal a serie original e nova comecam, pode ser
+#' necessario deslocar o array um numero de posicoes de modo que as variancias corretas estejam
+#' associadas as novas observacoes. Por exemplo, se serie original tem freq = 4, H seria um array de
+#' quatro posicoes ao longo da terceira dimensao. Se serie comecava em (XX, 3), as variancias em H
+#' estao associadas aos indices 3, 4, 1, 2. Desta forma, se newseries comeca em (YY, 2), H deve ser
+#' deslocado uma posicao a direita, de modo que o array resultante tenha, em ordem, as variacias 
+#' associadas aos indices 2, 3, 4, 1, o que e a ordem em que se encontram em newseries.
+#' 
+#' Tudo isso so faz sentido se assumirmos que tanto serie quanto newseries foram fornecidos
+#' como objetos de serie temporal, de modo que e possivel identificar esse tipo de coisa. 
+#' Caso serie tenha sido um vetor, sera assumido que comeca no indice sazonal 1, o que pode
+#' estar errado. Similarmente, se newseries for um vetor simples, sera assumido que comeca
+#' no instante de tempo imediatamente apos o final da serie original.
+#' 
+#' @param serie a serie original do modelo
+#' @param newseries nova serie para update
+#' @param saz frequencia da heterocedasticidade
+#' 
+#' @return inteiro indicando numero de posicoes a deslocar por \code{\link{shift}}
+
+parsedesloc <- function(serie, newseries, saz) {
+
+    freq_old <- frequency(serie)
+    freq_new <- frequency(newseries)
+
+    if(freq_old != saz) {
+        wrn <- paste0("O modelo foi ajustado com heterocedasticidade, mas 'serie' nao era um objeto",
+            "ts -- Sera transformado com inicio = c(1, 1) e frequecia igual a da heterocedasticidade")
+        warning(wrn)
+        serie <- ts(serie, freq = saz)
+    }
+    init_old <- start(serie)[2]
+
+    if(freq_new != saz) {
+        wrn <- paste0("'newseries' nao e serie temporal ou nao tem sazonalidade igual a da",
+            " heterocedasticidade -- Sera transformada para uma ts iniciando imediatamente apos ",
+            "o termino da serie original")
+        warning(wrn)
+        newseries <- ts(newseries, start = deltats(end(serie), 1, saz), freq = saz)
+    }
+    init_new <- start(newseries)[2]
+
+    desloc <- init_old - init_new
+
+    return(desloc)
+}

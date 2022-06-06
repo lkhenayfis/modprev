@@ -177,3 +177,65 @@ test_that("Estimacao de modelo S.S. RegDin - regressao multipla heterocedastica"
     expect_equal(c(mod2$model["H"]), c(mod1$model["H"]))
     expect_equal(c(mod2$model["Q"]), c(mod1$model["Q"]))
 })
+
+test_that("Identificacao de deslocamento de array", {
+
+    # Quando ambas as series tem sazonalidade especificada
+    
+    s1 <- ts(seq(100), start = c(1, 4), freq = 10)
+
+    s2 <- ts(seq(100), start = c(11, 7), freq = 10)
+    expect_equal(parsedesloc(s1, s2, 10), -3)
+
+    s3 <- ts(seq(100), start = c(11, 1), freq = 10)
+    expect_equal(parsedesloc(s1, s3, 10), 3)
+
+    s4 <- ts(seq(100), start = c(11, 5), freq = 10)
+    expect_equal(parsedesloc(s1, s4, 10), -1)
+
+    s5 <- ts(seq(100), start = c(11, 3), freq = 10)
+    expect_equal(parsedesloc(s1, s5, 10), 1)
+
+    # serie original sem sazonalidade especificada
+
+    s1 <- seq(100)
+
+    s2 <- ts(seq(100), start = c(11, 7), freq = 10)
+    expect_warning(expect_equal(parsedesloc(s1, s2, 10), -6))
+
+    s3 <- ts(seq(100), start = c(11, 1), freq = 10)
+    expect_warning(expect_equal(parsedesloc(s1, s3, 10), 0))
+
+    s4 <- ts(seq(100), start = c(11, 5), freq = 10)
+    expect_warning(expect_equal(parsedesloc(s1, s4, 10), -4))
+
+    s5 <- ts(seq(100), start = c(11, 3), freq = 10)
+    expect_warning(expect_equal(parsedesloc(s1, s5, 10), -2))
+
+    # newseries sem sazonalidade especificada
+
+    s1 <- ts(seq(100), start = c(1, 4), freq = 10)
+    s2 <- seq(100)
+    expect_warning(expect_equal(parsedesloc(s1, s2, 10), 0))
+
+    s1 <- ts(seq(101), start = c(1, 4), freq = 10)
+    s2 <- seq(100)
+    expect_warning(expect_equal(parsedesloc(s1, s2, 10), -1))
+
+    s1 <- ts(seq(99), start = c(1, 4), freq = 10)
+    s2 <- seq(100)
+    expect_warning(expect_equal(parsedesloc(s1, s2, 10), 1))
+
+    # nenhuma das duas tem sazonalidade especificada
+
+    s2 <- seq(99)
+
+    s1 <- seq(100)
+    expect_warning(expect_warning(expect_equal(parsedesloc(s1, s2, 10), 0)))
+
+    s1 <- seq(101)
+    expect_warning(expect_warning(expect_equal(parsedesloc(s1, s2, 10), -1)))
+
+    s1 <- seq(99)
+    expect_warning(expect_warning(expect_equal(parsedesloc(s1, s2, 10), -9)))
+})
