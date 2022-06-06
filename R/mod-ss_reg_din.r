@@ -143,7 +143,9 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
 
     if(refit) {
         formula <- attr(object$modelo, "formula")
-        object  <- estimamodelo(newseries, "ss_reg_din", regdata = newregdata, formula = formula)
+        vardin  <- attr(object$modelo, "vardin")
+        object  <- estimamodelo(newseries, "ss_reg_din", regdata = newregdata, formula = formula,
+            vardin = vardin)
     } else {
 
         modelo <- object$modelo
@@ -152,19 +154,19 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
             stop("Forneca nova variavel explicativa atraves do parametro newregdata")
         }
 
-        # Se modelo nao convergiu, tenta reestimar
-        if(all(is.na(modelo$Z))) {
-            mod <- estimamodelo(newseries, tipo = "ss_ar1_saz", regdata = newregdata)$modelo
-            return(mod)
-        }
+        saz <- attr(modelo, "saz")
 
-        # Do contrario, atualiza normalmente
-        Hmat <- modelo["H"]
+        desloc <- parsedesloc(object$serie, newseries, saz)
+  
+        Hmat <- modelo["H"][, , seq_len(saz), drop = FALSE]
+        Hmat <- Hmat[, , shift(seq_len(saz), desloc), drop = FALSE]
+
         Qmat <- modelo["Q"]
         form <- attr(modelo, "formula")
         modelo <- SSModel(newseries ~ SSMregression(form, newregdata, Q = Qmat), H = Hmat)
 
         object$modelo <- modelo
+        object$serie  <- newseries
     }
 
     return(object)

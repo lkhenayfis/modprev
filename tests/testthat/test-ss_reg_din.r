@@ -55,7 +55,7 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao simples", {
     expect_equal(c(mod$modelo["H"]), c(mod_upd$modelo["H"]))
     expect_equal(c(mod$modelo["T"]), c(mod_upd$modelo["T"]))
     expect_equal(mod_upd$modelo["Z"][, 2, ], c(varex2[[1]]))
-    expect_equal(c(mod_upd$modelo$y), c(serie2))
+    expect_true(all(mod_upd$serie - serie2 == 0))
 
     mod_refit <- update(mod, serie2, newregdata = varex2, refit = TRUE)
     expect_equal(c(mod_refit$modelo$y), c(serie2))
@@ -136,12 +136,12 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla", {
     expect_equal(c(mod$modelo["H"]), c(mod_upd$modelo["H"]))
     expect_equal(c(mod$modelo["T"]), c(mod_upd$modelo["T"]))
     expect_true(all(mod_upd$modelo["Z"][, 2:4, ] - t(data.matrix(newregdata)) == 0))
-    expect_true(all(c(mod_upd$modelo$y) - newseries == 0))
+    expect_true(all(mod_upd$serie - newseries == 0))
 
     mod_refit <- update(mod, newseries = newseries, newregdata = newregdata, refit = TRUE)
 
     expect_true(all(mod_upd$modelo["Z"][, 2:4, ] - t(data.matrix(newregdata)) == 0))
-    expect_true(all(c(mod_upd$modelo$y) - newseries == 0))
+    expect_true(all(mod_upd$serie - newseries == 0))
     expect_snapshot_value(round(mod$modelo["Q"][, , 1], 10), style = "deparse")
     expect_snapshot_value(round(mod$modelo["H"][, , 1], 10), style = "deparse")
 })
@@ -176,6 +176,37 @@ test_that("Estimacao de modelo S.S. RegDin - regressao multipla heterocedastica"
     expect_equal(attr(mod2$model, "vardin"), 10)
     expect_equal(c(mod2$model["H"]), c(mod1$model["H"]))
     expect_equal(c(mod2$model["Q"]), c(mod1$model["Q"]))
+})
+
+test_that("Atualizacao de modelo S.S. RegDin - regressao multipla heterocedastica", {
+
+    # os testes aqui se focam mais no encadeamento correto do array de variancias H
+    # a determinacao do tipo de deslocamento, dependnendo dos atributos de serie e newseries, fica
+    # concentrado nos testes de desloc espceficicamente
+
+    dados <- geradado()
+    serie <- window(dados[[2]], 1, 100)
+    serie <- ts(serie, start = c(1, 3), freq = 10)
+    varex <- dados[[1]][1:100, ]
+
+    mod <- estimamodelo(serie, "ss_reg", formula = ~ V1 + V2 * V3, regdata = varex, vardin = TRUE)
+
+    newregdata <- dados[[1]][1:20, ]
+
+    newseries  <- ts(seq(20), start = c(2, 4), freq = 10)
+    mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
+    desloc     <- parsedesloc(serie, newseries, 10)
+    expect_equal(mod_upd$modelo["H"][1, 1, 1:10], shift(mod$modelo["H"][1, 1, 1:10], desloc))
+    
+    newseries  <- ts(seq(20), start = c(2, 10), freq = 10)
+    mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
+    desloc     <- parsedesloc(serie, newseries, 10)
+    expect_equal(mod_upd$modelo["H"][1, 1, 1:10], shift(mod$modelo["H"][1, 1, 1:10], desloc))
+    
+    newseries  <- ts(seq(20), start = c(2, 2), freq = 10)
+    mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
+    desloc     <- parsedesloc(serie, newseries, 10)
+    expect_equal(mod_upd$modelo["H"][1, 1, 1:10], shift(mod$modelo["H"][1, 1, 1:10], desloc))
 })
 
 test_that("Identificacao de deslocamento de array", {
