@@ -1,3 +1,11 @@
+# redoc
+
+## New features
+
+* Reformulacao extensiva da documentacao do pacote, com inclusao de novos exemplos
+* Muda o dado interno de exemplos do pacote para algo que permite exemplificar regressoes dinamicas
+  de forma mais completa
+
 # regdin
 
 ## New features
