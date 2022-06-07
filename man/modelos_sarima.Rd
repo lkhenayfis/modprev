@@ -18,22 +18,29 @@ sarima(serie)
 
 \item{object}{objeto com classes \code{c("sarima", "mod_eol")} contendo modelo}
 
-\item{n.ahead}{numero de passos a frente para previsao}
+\item{n.ahead}{número de passos à frente para previsão}
 
 \item{...}{existe apenas para consistência com a genérica}
 
-\item{newseries}{nova serie com a qual atualizar o modelo}
+\item{newseries}{nova série com a qual atualizar o modelo}
 
-\item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
+\item{refit}{booleano indicando se o modelo deve ou não ser reajustado}
 }
 \value{
-\code{sarima} retorna modelo sarima estimado;
+\code{sarima} retorna modelo sarima estimado. Este objeto será utilizado para compor a
+saída de \code{\link{estimamodelo}};
 
-\code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
-previsao;
+\code{predict} retorna uma série temporal multivariada contendo valor esperado e desvio
+padrão da previsão \code{n.ahead} passos à frente;
 
-\code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado;
+\code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado.
+Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{mod_eol};
 }
 \description{
-Estimacao e metodos de modelos da classe \code{sarima}
+Estimação e métodos de modelos da classe \code{sarima}
+}
+\details{
+Esta especificação identifica e ajusta um modelo SARIMA(p, d, q)(P, D, Q)^s através da função
+\code{\link[forecast]{auto.arima}}, que realiza uma busca no espaço de hiperparâmetros de ordem
+do modelo por aquele conjunto com menor BIC.
 }

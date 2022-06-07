@@ -24,7 +24,7 @@ extraiserie(
 
 \item{hora_fim}{string (formato "HH:MM") indicando hora final da janela. Padrao "23:00"}
 
-\item{num_dias}{parametro opcional, se fornecido deve ser um inteiro indicando numero total de
+\item{num_dias}{parametro opcional, se fornecido deve ser um inteiro indicando número total de
 dias para extracao}
 }
 \value{
@@ -34,6 +34,8 @@ serie temporal na janela especificada
 Função para facilitar isolamento de uma parte da série de históricos no formato padrão
 }
 \details{
+\emph{Função deprecada, sera removida na proxima versao}
+
 O formato padrao ao qual se refere é aquele mais tipicamente encontrado nos históricos dos
 modelos de eólica e solar, isto é, data.frames de 49 colunas onde a primeira corresponde a data
 e as seguintes valores por meia hora do dia\tabular{llllll}{

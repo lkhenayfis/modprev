@@ -15,20 +15,37 @@
 #' \describe{
 #'     \item{\code{sarima}}{SARIMA(p, d, q)(P, D, Q)}
 #'     \item{\code{ss_ar1_saz}}{Espaço de estados composto por processo AR(1) + Sazonalidade}
-#'     \item{\code{ss_reg_din}}{Regressão univariada dinâmica}
+#'     \item{\code{ss_reg_din}}{Regressão dinâmica}
 #' }
 #' 
-#' Deve ser notado que no caso dos modelos com sazonalidade, o argumento \code{serie} \emph{DEVE SER
-#' UM OBJETO SERIE TEMPORAL COM PERIODO ESPECIFICADO}. Isto e necessario para que a função possa 
-#' automaticamente lidar com diversos tipos de séries sem a necessidade de demais argumentos.
+#' Os modelos \code{sarima} são, por natureza, univariados, enquanto ambas as estruturas em espaço
+#' de estados podem ser estimadas para séries multivariadas. Este comportamento não é testado nem
+#' suportado explicitamente até a presente versão. Consulte as páginas de ajuda de cada 
+#' especificação para maiores detalhes acerca de sua estimação, previsão e etc.
 #' 
-#' No caso de modelos com variaveis explicativas deve ser fornecido um parametro \code{regdata} na
-#' forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas. Se
-#' houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal.
+#' A principio \code{serie} pode ser um vetor simples, porém isto não é recomendável por uma série
+#' de razões. A principal delas diz respeito à sazonalidade: os modelos \code{sarima} e 
+#' \code{ss_ar1_saz} podem ou não conter dinâmicas sazonais, e esta decisão será tomada com base na
+#' frequência da série obtida por \code{frequency(serie)}. Embora seja possível estimar modelos 
+#' sazonais com séries sem este atributo, são necessárias uma série de implementações extras e por
+#' vezes suposições pouco intuitivas acerca do dado. Desta forma este pacote \bold{NECESSITA} que
+#' \code{serie} seja uma série temporal com sazonalidade para estimação de modelos com tal dinâmica.
+#' Por fim, deve ser notado que se \code{serie} for um vetor, sera convertido internamente para 
+#' \code{ts} com \code{start = c(1, 1), frequency = 1}.
+#' 
+#' \bold{Modelos com variáveis explicativas:}
+#' 
+#' No caso de modelos que contenham variáveis explicativas, dois argumentos extras se tornam 
+#' relevantes: \code{regdata} e \code{formula}. O primeiro deve ser um \code{data.frame}-like 
+#' contendo as variáveis utilizadas na modelagem. \code{formula} é um argumento opcional 
+#' especificando uma função linear das variáveis em \code{regdata}, sem LHS. Caso este seja omitido, 
+#' será estimada uma função simples (somente termos aditivos) de todas as variáveis contidas em 
+#' \code{regdata}. Estes argumentos devem ser passados em \code{...}
 #' 
 #' @param serie série para ajustar
 #' @param tipo tipo de modelo a ser ajustado. Ver Detalhes
-#' @param ... demais parâmetros passados para as funções de fit específicas de cada modelo
+#' @param ... demais parâmetros passados para as funções de fit específicas de cada modelo. Ver
+#'     Detalhes
 #' 
 #' @examples 
 #' 
@@ -49,10 +66,16 @@
 #' varex <- datregdin[1:100, 2, drop = FALSE]
 #' mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
 #' 
-#' @return objeto da classe mod_eol contendo modelo (classe dependente do modelo ajustato), serie
-#'     ajustada e, caso \code{out_sample > 0}, a parte reservada para comparação
+#' # Visualizacao -----------------------------------------
 #' 
-#' @family metodos_mod_eol
+#' \dontrun{
+#' plot(mod_regdin)
+#' }
+#' 
+#' @return Objeto da classe mod_eol e subclasse igual a \code{tipo}, uma lista de dois elementos:
+#'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
+#' 
+#' @family Metodos mod_eol
 #' 
 #' @export
 
@@ -81,6 +104,17 @@ estimamodelo.ts <- function(serie, tipo = c("sarima", "ss_ar1_saz", "ss_reg_din"
     return(out)
 }
 
+#' Contrutor Interno De \code{mod_eol}
+#' 
+#' Função interna, não deve ser chamada diretamente pelo usuário
+#' 
+#' @param fit modelo estimado
+#' @param serie serie para qual o modelo foi estimado
+#' @param tipo string indicando espcificação do modelo
+#' 
+#' @return Objeto da classe mod_eol e subclasse igual a \code{tipo}, uma lista de dois elementos:
+#'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada 
+
 new_mod_eol <- function(fit, serie, tipo) {
     new <- list(modelo = fit, serie = serie)
     class(new) <- c(tipo, "mod_eol")
@@ -92,26 +126,27 @@ new_mod_eol <- function(fit, serie, tipo) {
 
 #' Previsão De Modelos \code{mod_eol}
 #' 
-#' Wrapper para previsão e plot de modelos ajustados por \code{estimamodelo}
+#' Wrapper para previsão de modelos ajustados por \code{\link{estimamodelo}}
+#' 
+#' A previsão destes modelos funciona da forma mais padrão, com \code{object} contendo um modelo
+#' estimado por \code{\link{estimamodelo}} e \code{n.ahead} um inteiro indicando número de passos à
+#' frente para prever. Em modelos de séries temporais simples, isto é tudo.
+#' 
+#' \bold{Modelos com variáveis explicativas:}
 #' 
 #' No caso de modelos com variáveis explicativas deve ser fornecido um parâmetro \code{newdata} na
-#' forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas. Se
-#' houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal. Nestes
-#' modelos, se o argumento \code{n.ahead} também tiver sido fornecido, \code{newdata} será reduzida 
-#' às \code{n.ahead} primeiras observações.
+#' forma de code{data.frame}-like contendo as variáveis necessárias para o modelo. Usualmente a 
+#' previsão será feita tantos passos à frente quanto há observações em \code{newdata}, porém se
+#' \code{n.ahead} for fornecido será usado com precedência sobre o número de observações novas.
 #' 
 #' @param object modelo ajustado através de \code{\link{estimamodelo}}
-#' @param n.ahead numero de passos a frente para prever
+#' @param n.ahead número de passos à frente para prever
 #' @param ... existe apenas para consistência com a genérica
 #' 
 #' @examples
 #' 
 #' mod <- estimamodelo(AirPassengers, tipo = "sarima")
-#' 
-#' \dontrun{
-#' predict(mod, n.ahead = 24)
-#' predict(mod)
-#' }
+#' pred <- predict(mod, n.ahead = 24)
 #' 
 #' # em modelos de regressao, deve ser passada a variavel explicativa via newdata
 #' 
@@ -119,14 +154,13 @@ new_mod_eol <- function(fit, serie, tipo) {
 #' varex <- datregdin[1:200, 2, drop = FALSE]
 #' mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
 #' 
-#' \dontrun{
 #' newdata <- datregdin[201:230, 2, drop = FALSE]
-#' predict(mod_regdin, newdata = newdata)
-#' }
+#' pred <- predict(mod_regdin, newdata = newdata)
 #' 
-#' @return série temporal multivariada contendo a previsão e o desvio padrão associado
+#' @return série temporal multivariada contendo a previsão e o desvio padrão associado para os
+#'     passos de tempo \code{1:n.ahead}
 #' 
-#' @family metodos_mod_eol
+#' @family Metodos mod_eol
 #' 
 #' @export
 
@@ -134,17 +168,19 @@ predict.mod_eol <- function(object, n.ahead, ...) {
     stop(paste0("Modelo do tipo ", class(object)[1], " nao possui metodo 'predict'"))
 }
 
-#' Atualizacao De Modelos mod_eol
+#' Atualizacao De Modelos \code{mod_eol}
 #' 
 #' Wrapper para atualizar e possivelmete reajustar modelos \code{mod_eol}
 #' 
-#' O padrão desta função é simplesmente substituir \code{newseries} no modelo ajustado \code{fit}, 
-#' isto é, mantendo todos os hiperparâmetros estimados originalmente. Através do argumento
-#' \code{refit} é possível realizar o reajuste do modelo para a nova série.
+#' O padrão desta função é simplesmente substituir \code{newseries} no modelo ajustado 
+#' \code{object}, isto é, mantendo todos os hiperparâmetros estimados originalmente. Através do 
+#' argumento \code{refit} é possível realizar o reajuste do modelo para a nova série.
 #' 
-#' No caso de modelos com variaveis explicativas deve ser fornecido um parametro \code{newregdata} 
-#' na forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas.
-#' Se houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal.
+#' \bold{Modelos com variáveis explicativas:}
+#' 
+#' No caso de modelos com variáveis explicativas, deve ser fornecido um argumento \code{newregdata} 
+#' na forma de um \code{data.frame}-like contendo as variáveis explicativas necessárias associadas
+#' às novas observações em \code{newseries}.
 #' 
 #' @param object modelo ajustado atraves de \code{estimamodelo}
 #' @param newseries nova serie para associar ao modelo
@@ -161,15 +197,34 @@ predict.mod_eol <- function(object, n.ahead, ...) {
 #' mod_refit <- update(mod_orig, serie2, refit = TRUE)
 #' 
 #' \dontrun{
-#' # comparando os casos
-#' coef(mod_orig$modelo)
-#' coef(mod_upd$modelo)
-#' coef(mod_refit$modelo)
+#' layout(matrix(1:3))
+#' plot(mod_orig)
+#' plot(mod_upd)
+#' plot(mod_refit)
 #' }
 #' 
-#' @return modelo com novos dados e possivelmente reajustado
+#' # Com variaveis explicativas ---------------------------
 #' 
-#' @family metodos_mod_eol
+#' serie <- window(datregdin[[1]], 1, 100)
+#' varex <- datregdin[1:100, 2, drop = FALSE]
+#' mod_orig <- estimamodelo(serie, "ss_reg_din", regdata = varex)
+#' 
+#' newserie <- window(datregdin[[1]], 101, 200)
+#' newvarex <- datregdin[101:200, 2, drop = FALSE]
+#' 
+#' mod_upd   <- update(mod_orig, newserie, newregdata = newvarex, refit = FALSE)
+#' mod_refit <- update(mod_orig, newserie, newregdata = newvarex, refit = TRUE)
+#' 
+#' \dontrun{
+#' layout(matrix(1:3))
+#' plot(mod_orig)
+#' plot(mod_upd)
+#' plot(mod_refit)
+#' }
+#' 
+#' @return modelo com novos dados, possivelmente reajustado
+#' 
+#' @family Metodos mod_eol
 #' 
 #' @export
 

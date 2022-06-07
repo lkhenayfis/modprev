@@ -7,20 +7,35 @@
 deltats(ini, delta, freq)
 }
 \arguments{
-\item{ini}{indice temporal no formato (x, y) de serie temporal indicando inicio da janela}
+\item{ini}{índice temporal no formato (x, y) de série temporal indicando início da janela}
 
-\item{delta}{numero de observacoes que a janela deve conter}
+\item{delta}{passos de tempo a deslocar a partir de \code{ini}. Pode ser positivo ou negativo}
 
-\item{freq}{frequencia/sazonalidade da serie}
+\item{freq}{frequência/sazonalidade da série}
 }
 \value{
-Se forncecidos \code{ini} e \code{delta}, o índice no sistema de tempo \code{ts}
-indicando o final da janela
+O índice no sistema de tempo \code{ts} indicando o final da janela
 }
 \description{
 Calcula índice no sistema de tempo de um \code{ts} especificada para um dado delta
 }
 \details{
-Função interna utilizada no escopo da janela rolante. Calcula o índice temporal do final de uma
-janela iniciada em \code{ini} com largura \code{delta}.
+Função interna utilizada no escopo da janela rolante. Calcula o índice no tempo \code{delta}
+instantes após um início \code{ini}, num sistema com sazonalidade de \code{freq} períodos.
+}
+\examples{
+
+# exemplo com uma serie bimestral (frequencia = 6)
+tempo <- c(2, 4)
+freq  <- 6 
+
+# deslocando + 1
+tempo_desloc <- modprev:::deltats(tempo, 1, freq) # c(2, 5)
+
+# deslocando + 5, de modo que vire o ano
+tempo_desloc <- modprev:::deltats(tempo, 5, freq) # c(3, 3)
+
+# deslocando - 5
+tempo_desloc <- modprev:::deltats(tempo, -5, freq) # c(1, 5)
+
 }

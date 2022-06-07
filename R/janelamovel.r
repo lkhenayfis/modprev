@@ -4,18 +4,31 @@
 #' 
 #' Função para realizar previsões e reajustes em janela móvel
 #' 
-#' Para cada janela de tamanho \code{largura} na \code{serie} fornecida será realizada uma previsão
-#' \code{n.ahead} passos à frente, retornadas em uma lista. Isto significa que a última previsão 
-#' realizada cobrirá até \code{n.ahead} além da última observação em \code{serie}.
+#' Os argumentos \code{serie} e \code{tipo} tem exatamente o mesmo efeito daqueles descritos em 
+#' \code{\link{estimamodelo}}.
+#' 
+#' \code{janela} pode ser ou um escalar ou um vetor de dois elementos inteiros. No primeiro caso, 
+#' entende-se que deverao ser rodadas janelas de tamanho \code{janela}. Quando este argumento e um
+#' vetor entende-se que todas as janelas devem iniciar no instante de tempo \code{janela[1]} com 
+#' largura inicial \code{janela[2]}. Essencialmente estas duas formas permitem a execucao em janela
+#' rolante ou expansivel, respectivamente.
+#' 
+#' O argumento \code{passo} permite especificar quantas novas observacoes sao incorporadas entre 
+#' janelas adjacentes. No caso de janela rolante, cada janela incorpora \code{passos} novos pontos e
+#' abandona os \code{passos} valores mais antigos, de modo que todas tem o mesmo tamanho; janelas 
+#' expansiveis vao simplesmente agregando novas observacoes. Deve ser observado que, no caso de 
+#' janelas rolantes, sempre havera uma janela contendo o final da serie, mesmo que passos seja um
+#' número tal que da penultima para a ultima janela ocorra um intervalo menor que \code{passos}.
 #' 
 #' O comportamento dessa função é mais fortemente impactado por \code{refit.cada}. Através deste 
-#' argumento é possível indicar observações ou intervalos de tempo nos quais o modelo será 
-#' reestimado. Nas demais janelas será feita apenas a atualização das informações.
+#' argumento é possível indicar intervalos de tempo nos quais o modelo será reestimado. Nas demais 
+#' janelas será feita apenas a atualização das informações. Caso \code{refit.cada = NA} (o padrão),
+#' o modelo só será ajustado uma vez e atualizado a cada nova janela.
 #' 
-#' Caso o modelo escolhido necessite de variáveis explicativas, é necessário que o argumento 
-#' \code{regdata} seja passado na forma de uma matriz ou data.frame contendo apenas as colunas com 
-#' variáveis a serem utilizadas. Se houver apenas uma variável explicativa, pode ser passada como um
-#' vetor ou série temporal.
+#' \bold{Modelos com variáveis explicativas:}
+#' 
+#' Caso o modelo escolhido use de variáveis explicativas, é necessário que o \code{regdata} seja 
+#' passado na forma de um \code{data.frame}-like contendo as variáveis a serem utilizadas.
 #' 
 #' Este argumento \emph{DEVE CONTER AS VARIÁVEIS EXPLICATIVAS CORRESPONDENTES A TODAS AS OBSERVAÇÕES
 #' DA SÉRIE MAIS \code{n.ahead} À FRENTE}. A primeira parte dessa restrição é natural, pois são 
@@ -24,14 +37,15 @@
 #' últimas janelas.
 #' 
 #' @param serie serie temporal pela qual passar a janela movel
-#' @param tipo tipo de modelo a ser ajustado, caso \code{objeto} seja uma serie temporal
-#' @param largura numero de observacoes na janela movel
-#' @param n.ahead numero de passos a frente para prever a cada passo
-#' @param refit.cada escalar ou vetor inteiro. Se escalar, reajusta o modelo a cada 
-#'     \code{refit.cada} observacoes. Se vetor, reajusta apos cada indice de \code{refit.cada}
+#' @param tipo tipo de modelo a ser ajustado. Ver \code{\link{estimamodelo}}.
+#' @param janela especificação da janela móvel ou expansível
+#' @param passo inteiro de saltos temporais entre cada janela. Ver Detalhes
+#' @param n.ahead número de passos à frente para prever a cada passo
+#' @param refit.cada escalar indicando de quantas em quantas observacoes o modelo deve ser 
+#'     reajustado
 #' @param verbose Escalar inteiro indicando quanta informacao a ser emitida durante rodada. 
-#'     0 = nenhuma, 1: toda vez que reajusta modelo, 2: todo horizonte de previsao e reajuste
-#' @param ... demais parametros pertinentes a cada tipo específico de modelagem
+#'     0 = nenhuma, 1: toda vez que reajusta modelo, 2: todo horizonte de previsão e reajuste
+#' @param ... não possui uso até a versão corrente
 #' 
 #' @examples 
 #' 
@@ -53,7 +67,7 @@
 #' sink()
 #' }
 #' 
-#' @return lista contendo previsoes de 1 a n.ahead passos a frente para cada janela
+#' @return lista contendo previsoes de 1 a n.ahead passos à frente para cada janela
 #' 
 #' @export
 
@@ -142,7 +156,7 @@ JANELAMOVEL.ss_reg_din <- function(tipo, serie, janela, passo, n.ahead, refit.ca
 #' Retorna uma funcao para prints informativos durante a execucao
 #' 
 #' @param verbose inteiro indicando o nivel de detalhe a ser informado:
-#'     0 = nada, 1: toda vez que reajusta modelo, 2: todo horizonte de previsao e reajuste
+#'     0 = nada, 1: toda vez que reajusta modelo, 2: todo horizonte de previsão e reajuste
 #' 
 #' @return funcao para uso interno na janela movel que printa o estado de execucao
 
@@ -176,7 +190,7 @@ verbose_fun <- function(verbose) {
 #' abandona os \code{passos} valores mais antigos, de modo que todas tem o mesmo tamanho; janelas 
 #' expansiveis vao simplesmente agregando novas observacoes. Deve ser observado que, no caso de 
 #' janelas rolantes, sempre havera uma janela contendo o final da serie, mesmo que passos seja um
-#' numero tal que da penultima para a ultima janela ocorra um intervalo menor que \code{passos}.
+#' número tal que da penultima para a ultima janela ocorra um intervalo menor que \code{passos}.
 #' 
 #' @param serie a serie sobre a qual sera passada a janela movel
 #' @param janela escalar ou vetor especificando a janela. Ver Detalhes
@@ -185,6 +199,8 @@ verbose_fun <- function(verbose) {
 #' @return lista na qual cada elemento e uma lista de dois elementos, contendo o instante inicial e
 #'     final de \code{serie} a considerar em cada janela, no sistema de tempo \code{ts}. Deve ser 
 #'     notado que os instantes definem uma janela fechada no inicio e aberta no final
+#' 
+#' @importFrom utils tail
 
 expandejanelas <- function(serie, janela, passo) {
 

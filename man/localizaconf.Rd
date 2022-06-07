@@ -20,6 +20,8 @@ configuracoes no segundo
 Busca arquivo de configuração segundo regras que contemplam a execução operacional
 }
 \details{
+\emph{Função deprecada, sera removida na proxima versao}
+
 Esta função não é necessária para uso do pacote. Ela existe e é fornecida apenas para facilitar
 as distintas aplicações, removendo a necessidade de repetir esse código para achar a configuração
 em todos os arquivos. Cada aplicação terá seu conjunto de configurações necessárias, de modo que

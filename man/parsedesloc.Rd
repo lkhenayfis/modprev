@@ -14,7 +14,7 @@ parsedesloc(serie, newseries, saz)
 \item{saz}{frequencia da heterocedasticidade}
 }
 \value{
-inteiro indicando numero de posicoes a deslocar por \code{\link{shift}}
+inteiro indicando número de posicoes a deslocar por \code{\link{shift}}
 }
 \description{
 Identifica a necessidade de deslocar o array H dependendo de em que instante cada serie comeca
@@ -22,7 +22,7 @@ Identifica a necessidade de deslocar o array H dependendo de em que instante cad
 \details{
 Modelos com heterocedasticidade tem um array de variancias H, ao inves de uma matriz simples.
 Isto significa que, dependendo de em que indice sazonal a serie original e nova comecam, pode ser
-necessario deslocar o array um numero de posicoes de modo que as variancias corretas estejam
+necessario deslocar o array um número de posicoes de modo que as variancias corretas estejam
 associadas as novas observacoes. Por exemplo, se serie original tem freq = 4, H seria um array de
 quatro posicoes ao longo da terceira dimensao. Se serie comecava em (XX, 3), as variancias em H
 estao associadas aos indices 3, 4, 1, 2. Desta forma, se newseries comeca em (YY, 2), H deve ser

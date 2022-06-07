@@ -33,5 +33,5 @@ janelas adjacentes. No caso de janela rolante, cada janela incorpora \code{passo
 abandona os \code{passos} valores mais antigos, de modo que todas tem o mesmo tamanho; janelas
 expansiveis vao simplesmente agregando novas observacoes. Deve ser observado que, no caso de
 janelas rolantes, sempre havera uma janela contendo o final da serie, mesmo que passos seja um
-numero tal que da penultima para a ultima janela ocorra um intervalo menor que \code{passos}.
+número tal que da penultima para a ultima janela ocorra um intervalo menor que \code{passos}.
 }

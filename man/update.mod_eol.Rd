@@ -2,7 +2,7 @@
 % Please edit documentation in R/classe-mod_eol.r
 \name{update.mod_eol}
 \alias{update.mod_eol}
-\title{Atualizacao De Modelos mod_eol}
+\title{Atualizacao De Modelos \code{mod_eol}}
 \usage{
 \method{update}{mod_eol}(object, newseries, refit = FALSE, ...)
 }
@@ -16,19 +16,21 @@
 \item{...}{existe apenas para consistência com a genérica}
 }
 \value{
-modelo com novos dados e possivelmente reajustado
+modelo com novos dados, possivelmente reajustado
 }
 \description{
 Wrapper para atualizar e possivelmete reajustar modelos \code{mod_eol}
 }
 \details{
-O padrão desta função é simplesmente substituir \code{newseries} no modelo ajustado \code{fit},
-isto é, mantendo todos os hiperparâmetros estimados originalmente. Através do argumento
-\code{refit} é possível realizar o reajuste do modelo para a nova série.
+O padrão desta função é simplesmente substituir \code{newseries} no modelo ajustado
+\code{object}, isto é, mantendo todos os hiperparâmetros estimados originalmente. Através do
+argumento \code{refit} é possível realizar o reajuste do modelo para a nova série.
 
-No caso de modelos com variaveis explicativas deve ser fornecido um parametro \code{newregdata}
-na forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas.
-Se houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal.
+\bold{Modelos com variáveis explicativas:}
+
+No caso de modelos com variáveis explicativas, deve ser fornecido um argumento \code{newregdata}
+na forma de um \code{data.frame}-like contendo as variáveis explicativas necessárias associadas
+às novas observações em \code{newseries}.
 }
 \examples{
 
@@ -40,16 +42,35 @@ mod_upd   <- update(mod_orig, serie2, refit = FALSE)
 mod_refit <- update(mod_orig, serie2, refit = TRUE)
 
 \dontrun{
-# comparando os casos
-coef(mod_orig$modelo)
-coef(mod_upd$modelo)
-coef(mod_refit$modelo)
+layout(matrix(1:3))
+plot(mod_orig)
+plot(mod_upd)
+plot(mod_refit)
+}
+
+# Com variaveis explicativas ---------------------------
+
+serie <- window(datregdin[[1]], 1, 100)
+varex <- datregdin[1:100, 2, drop = FALSE]
+mod_orig <- estimamodelo(serie, "ss_reg_din", regdata = varex)
+
+newserie <- window(datregdin[[1]], 101, 200)
+newvarex <- datregdin[101:200, 2, drop = FALSE]
+
+mod_upd   <- update(mod_orig, newserie, newregdata = newvarex, refit = FALSE)
+mod_refit <- update(mod_orig, newserie, newregdata = newvarex, refit = TRUE)
+
+\dontrun{
+layout(matrix(1:3))
+plot(mod_orig)
+plot(mod_upd)
+plot(mod_refit)
 }
 
 }
 \seealso{
-Other metodos_mod_eol: 
+Other Metodos mod_eol: 
 \code{\link{estimamodelo}()},
 \code{\link{predict.mod_eol}()}
 }
-\concept{metodos_mod_eol}
+\concept{Metodos mod_eol}

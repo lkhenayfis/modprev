@@ -11,11 +11,12 @@ estimamodelo(serie, tipo, ...)
 
 \item{tipo}{tipo de modelo a ser ajustado. Ver Detalhes}
 
-\item{...}{demais parâmetros passados para as funções de fit específicas de cada modelo}
+\item{...}{demais parâmetros passados para as funções de fit específicas de cada modelo. Ver
+Detalhes}
 }
 \value{
-objeto da classe mod_eol contendo modelo (classe dependente do modelo ajustato), serie
-ajustada e, caso \code{out_sample > 0}, a parte reservada para comparação
+Objeto da classe mod_eol e subclasse igual a \code{tipo}, uma lista de dois elementos:
+\code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 }
 \description{
 Wrapper de estimação para múltiplos modelos com interface e saída unificadas
@@ -28,16 +29,32 @@ através de \code{serie} é selecionado através do argumento \code{tipo}, poden
 \describe{
 \item{\code{sarima}}{SARIMA(p, d, q)(P, D, Q)}
 \item{\code{ss_ar1_saz}}{Espaço de estados composto por processo AR(1) + Sazonalidade}
-\item{\code{ss_reg_din}}{Regressão univariada dinâmica}
+\item{\code{ss_reg_din}}{Regressão dinâmica}
 }
 
-Deve ser notado que no caso dos modelos com sazonalidade, o argumento \code{serie} \emph{DEVE SER
-UM OBJETO SERIE TEMPORAL COM PERIODO ESPECIFICADO}. Isto e necessario para que a função possa
-automaticamente lidar com diversos tipos de séries sem a necessidade de demais argumentos.
+Os modelos \code{sarima} são, por natureza, univariados, enquanto ambas as estruturas em espaço
+de estados podem ser estimadas para séries multivariadas. Este comportamento não é testado nem
+suportado explicitamente até a presente versão. Consulte as páginas de ajuda de cada
+especificação para maiores detalhes acerca de sua estimação, previsão e etc.
 
-No caso de modelos com variaveis explicativas deve ser fornecido um parametro \code{regdata} na
-forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas. Se
-houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal.
+A principio \code{serie} pode ser um vetor simples, porém isto não é recomendável por uma série
+de razões. A principal delas diz respeito à sazonalidade: os modelos \code{sarima} e
+\code{ss_ar1_saz} podem ou não conter dinâmicas sazonais, e esta decisão será tomada com base na
+frequência da série obtida por \code{frequency(serie)}. Embora seja possível estimar modelos
+sazonais com séries sem este atributo, são necessárias uma série de implementações extras e por
+vezes suposições pouco intuitivas acerca do dado. Desta forma este pacote \bold{NECESSITA} que
+\code{serie} seja uma série temporal com sazonalidade para estimação de modelos com tal dinâmica.
+Por fim, deve ser notado que se \code{serie} for um vetor, sera convertido internamente para
+\code{ts} com \code{start = c(1, 1), frequency = 1}.
+
+\bold{Modelos com variáveis explicativas:}
+
+No caso de modelos que contenham variáveis explicativas, dois argumentos extras se tornam
+relevantes: \code{regdata} e \code{formula}. O primeiro deve ser um \code{data.frame}-like
+contendo as variáveis utilizadas na modelagem. \code{formula} é um argumento opcional
+especificando uma função linear das variáveis em \code{regdata}, sem LHS. Caso este seja omitido,
+será estimada uma função simples (somente termos aditivos) de todas as variáveis contidas em
+\code{regdata}. Estes argumentos devem ser passados em \code{...}
 }
 \examples{
 
@@ -58,10 +75,16 @@ serie <- window(datregdin[[1]], 1, 100)
 varex <- datregdin[1:100, 2, drop = FALSE]
 mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
 
+# Visualizacao -----------------------------------------
+
+\dontrun{
+plot(mod_regdin)
+}
+
 }
 \seealso{
-Other metodos_mod_eol: 
+Other Metodos mod_eol: 
 \code{\link{predict.mod_eol}()},
 \code{\link{update.mod_eol}()}
 }
-\concept{metodos_mod_eol}
+\concept{Metodos mod_eol}

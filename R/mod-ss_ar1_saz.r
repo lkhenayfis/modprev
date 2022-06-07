@@ -4,7 +4,11 @@
 
 #' Modelos \code{ss_ar1_saz}
 #' 
-#' Estimacao e metodos de modelos da classe \code{ss_ar1_saz}
+#' Estimação e métodos de modelos da classe \code{ss_ar1_saz}
+#' 
+#' Esta especificação corresponde a um modelo em espaço de estados com um estado AR1 e outro de 
+#' sazonalidade correspondente à frequência de \code{serie}. O coeficiente autoregressivo será 
+#' estimado sob restrição de estacionariedade, assumindo valores necessariamente entre -1 e 1.
 #' 
 #' @name modelos_ss_ar1_saz
 NULL
@@ -13,7 +17,8 @@ NULL
 
 #' @param serie serie para ajustar
 #' 
-#' @return \code{ss_ar1_saz} retorna modelo espaco de estados AR(1) + SAZ estimado
+#' @return \code{ss_ar1_saz} retorna modelo SS estimado. Este objeto será utilizado para compor a
+#'     saída de \code{\link{estimamodelo}};
 #' 
 #' @rdname modelos_ss_ar1_saz
 
@@ -52,12 +57,20 @@ ss_ar1_saz <- function(serie) {
 
 # METODOS ------------------------------------------------------------------------------------------
 
-#' @param object objeto com classes \code{c("ss_ar1_saz", "mod_eol")} contendo modelo
-#' @param n.ahead numero de passos a frente para previsao
-#' @param ... demais argumentos passados a \code{\link[KFAS]{predict.SSModel}}
+#' \bold{Predict}:
 #' 
-#' @return \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
-#'     previsao;
+#' A previsão destes modelos é feita com alguns argumetnos opcionais já passados por padrão que
+#' não podem ser modificados. Estes são: \code{se.fit = TRUE, filter = TRUE}. O primeiro retorna
+#' além do valor previsto o desvio padrão associado, o segundo garante que são retornados os valores
+#' advindos da distribuição preditiva e não de suavização. Considerando estes fatores, \code{...} 
+#' não pode conter \code{n.ahead} ou estes dois outros, ou então ocorrerá erro.
+#' 
+#' @param object objeto com classes \code{c("ss_ar1_saz", "mod_eol")} contendo modelo
+#' @param n.ahead número de passos à frente para previsão
+#' @param ... demais argumentos passados a \code{\link[KFAS]{predict.SSModel}}. Ver Detalhes
+#' 
+#' @return \code{predict} retorna uma série temporal multivariada contendo valor esperado e desvio 
+#'     padrao da previsão \code{n.ahead} passos à frente;
 #' 
 #' @rdname modelos_ss_ar1_saz
 #' 
@@ -76,16 +89,17 @@ predict.ss_ar1_saz <- function(object, n.ahead, ...) {
 #' 
 #' \bold{Update}:
 #' 
-#' A atualizacao de modelos \code{ss_ar1_saz} sempre vai checar se o modelo passado foi estimado
-#' corretamente. Como modelos em espaco de estados dependem bastante de inicializacao, as vezes nao
-#' da pra estimar direito. Nesses casos ele tenta reestimar o modelo independentemente de 
+#' A atualização de modelos \code{ss_ar1_saz} sempre vai checar se o modelo passado foi estimado
+#' corretamente. Como modelos em espaçoo de estados dependem bastante de inicialização, às vezes não
+#' dá para estimar direito. Nesses casos ele tenta reestimar o modelo independentemente de 
 #' \code{refit}
 #' 
-#' @param newseries nova serie com a qual atualizar o modelo
-#' @param refit booleano indicando se o modelo deve ou nao ser reajustado
+#' @param newseries nova série com a qual atualizar o modelo
+#' @param refit booleano indicando se o modelo deve ou não ser reajustado
 #' @param ... existe apenas para consistência com a genérica
 #' 
-#' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado;
+#' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
+#'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{mod_eol};
 #' 
 #' @rdname modelos_ss_ar1_saz
 #' 
@@ -98,7 +112,7 @@ update.ss_ar1_saz <- function(object, newseries, refit = FALSE, ...) {
     } else {
         modelo <- object$modelo
 
-        # Se modelo nao convergiu, tenta reestimar
+        # Se modelo não convergiu, tenta reestimar
         if(all(is.na(modelo$Z))) return(estimamodelo(newseries, tipo = "ss_ar1_saz")$modelo)
 
         # Do contrario, atualiza normalmente

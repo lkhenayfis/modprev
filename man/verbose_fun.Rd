@@ -8,7 +8,7 @@ verbose_fun(verbose)
 }
 \arguments{
 \item{verbose}{inteiro indicando o nivel de detalhe a ser informado:
-0 = nada, 1: toda vez que reajusta modelo, 2: todo horizonte de previsao e reajuste}
+0 = nada, 1: toda vez que reajusta modelo, 2: todo horizonte de previsão e reajuste}
 }
 \value{
 funcao para uso interno na janela movel que printa o estado de execucao

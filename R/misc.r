@@ -6,6 +6,8 @@
 #' 
 #' Função para facilitar isolamento de uma parte da série de históricos no formato padrão
 #' 
+#' \emph{Função deprecada, sera removida na proxima versao}
+#' 
 #' O formato padrao ao qual se refere é aquele mais tipicamente encontrado nos históricos dos 
 #' modelos de eólica e solar, isto é, data.frames de 49 colunas onde a primeira corresponde a data
 #' e as seguintes valores por meia hora do dia
@@ -27,7 +29,7 @@
 #' @param hora_ini string (formato "HH:MM") indicando hora inicial da janela. Padrao "00:00"
 #' @param data_fim inteiro (formato numerico aaaammdd) indicando data final da janela
 #' @param hora_fim string (formato "HH:MM") indicando hora final da janela. Padrao "23:00"
-#' @param num_dias parametro opcional, se fornecido deve ser um inteiro indicando numero total de 
+#' @param num_dias parametro opcional, se fornecido deve ser um inteiro indicando número total de 
 #'     dias para extracao
 #' 
 #' @return serie temporal na janela especificada
@@ -35,6 +37,8 @@
 #' @export
 
 extraiserie <- function(dat, data_ini, hora_ini = "00:00", data_fim, hora_fim = "23:30", num_dias) {
+
+    .Deprecated(msg = "Funcao deprecada, sera removida na proxima versao")
 
     data <- hora <- verif <- NULL
 
@@ -74,6 +78,8 @@ extraiserie <- function(dat, data_ini, hora_ini = "00:00", data_fim, hora_fim = 
 #' 
 #' Busca arquivo de configuração segundo regras que contemplam a execução operacional
 #' 
+#' \emph{Função deprecada, sera removida na proxima versao}
+#' 
 #' Esta função não é necessária para uso do pacote. Ela existe e é fornecida apenas para facilitar
 #' as distintas aplicações, removendo a necessidade de repetir esse código para achar a configuração
 #' em todos os arquivos. Cada aplicação terá seu conjunto de configurações necessárias, de modo que
@@ -108,6 +114,8 @@ extraiserie <- function(dat, data_ini, hora_ini = "00:00", data_fim, hora_fim = 
 #' @export
 
 localizaconf <- function(path, arq = "conf.jsonc") {
+
+    .Deprecated(msg = "Funcao deprecada, sera removida na proxima versao")
 
     if(!grepl(".jsonc?", arq)) stop("Arquivo de configuracao invalido -- deve ser .json ou .jsonc")
 

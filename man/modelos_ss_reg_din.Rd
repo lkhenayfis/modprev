@@ -14,48 +14,74 @@ ss_reg_din(serie, regdata, formula, vardin = FALSE)
 \method{update}{ss_reg_din}(object, newseries, newregdata, refit = FALSE, ...)
 }
 \arguments{
-\item{serie}{serie para ajustar}
+\item{serie}{série para ajustar}
 
-\item{regdata}{vetor, matriz ou data.frame contendo variaveis explicativas}
+\item{regdata}{\code{data.frame}-like contendo variáveis explicativas}
 
-\item{formula}{opcional, formula da regressao. Se for omitido, todas as variaveis em
-\code{regdata} serao utilizadas}
+\item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
+\code{regdata} serão utilizadas}
 
 \item{vardin}{booleano ou inteiro indicando se deve ser estimado modelo com heterocedasticidade.
-Caso \code{TRUE} tenta pegar a sazonalidade da serie, se for um numero inteiro assume este
+Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro assume este
 valor como a sazonalidade}
 
 \item{object}{objeto com classes \code{c("ss_reg_din", "mod_eol")} contendo modelo}
 
-\item{newdata}{vetor, matriz ou data.frame contendo variaveis explicativas fora da amostra}
+\item{newdata}{\code{data.frame}-like contendo variéveis explicativas fora da amostra}
 
-\item{n.ahead}{numero de passos a frente para previsao. Este argumento nao e necessario, caso nao
-seja informado a previsao sera feita tantos passos a frente quanto amostras em \code{newdata}}
+\item{n.ahead}{número de passos à frente para previsão. Este argumento não é necessario, caso não
+seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}}
 
 \item{...}{demais argumentos passados a \code{\link[KFAS]{predict.SSModel}}}
 
-\item{newseries}{nova serie com a qual atualizar o modelo}
+\item{newseries}{nova série com a qual atualizar o modelo}
 
-\item{newregdata}{vetor, matriz ou data.frame contendo variaveis explicativas na nova amostra}
+\item{newregdata}{\code{data.frame}-like contendo variáveis explicativas na nova amostra}
 
 \item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
 }
 \value{
-\code{ss_reg_din} retorna modelo de regressao dinamica simples
+\code{ss_reg_din} retorna modelo de regressão dinâmica. Este objeto será utilizado para
+compor a saída de \code{link{estimamodelo}}
 
 \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
-previsao;
+previsão \code{n.ahead} passos à frente;
 
-\code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado;
+\code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado.
+Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{mod_eol};
 }
 \description{
-Estimacao e metodos de modelos da classe \code{ss_reg_din}
+Estimação e métodos de modelos da classe \code{ss_reg_din}
+
+Os modelos de regressão dinâmica estão entre os mais complexos deste pacote. Para sua estimação,
+além de ser fornecido o arumento \code{serie} também deve ser necessariamente informado
+\code{regdata}, um \code{data.frame}-like contendo as variáveis explicativas necessárias.
+
+A previsão destes modelos é feita com alguns argumetnos opcionais já passados por padrão que
+não podem ser modificados. Estes são: \code{se.fit = TRUE, filter = TRUE}. O primeiro retorna
+além do valor previsto o desvio padrão associado, o segundo garante que são retornados os valores
+advindos da distribuição preditiva e não de suavização. Considerando estes fatores, \code{...}
+não pode conter \code{n.ahead} ou estes dois outros, ou então ocorrerá erro.
 }
 \details{
+Opcionalmente pode ser informado o argumento \code{formula} contendo a especificação da regressão
+linear, no formato padrão do R (veja \code{\link{formula}}) porém sem o LHS. Caso \code{formula}
+seja omitido, todas as variáveis em \code{regdata} serão utilizadas aditivamemte, i.e. se existem
+as colunas \code{c("V1", "V2", "V3")}, formula sera \code{~ V1 + V2 + V3}.
+
+\code{vardin} controla se o modelo será estimado com variâncias variantes no tempo ou não. Caso
+seja \code{FALSE} um modelo homocedástico é estimado; \code{TRUE} tenta buscar sazonalidade nos
+atributos de \code{serie} para heterocedasticidade e, por fim, se \code{vardin} for um inteiro
+utiliza este número como sazonalidade.
+
+As variâncias variantes no tempo são modeladas como função de variáveis circulares determinadas
+a partir da sazonalidade. Isto garante que os valores sejam consistentes entre se e, mais
+importante, só possui um parâmetro a mais em relação aos modelos homocedásticos.
+
 \bold{Update}:
 
-A atualizacao de modelos \code{ss_reg_din} sempre vai checar se o modelo passado foi estimado
-corretamente. Como modelos em espaco de estados dependem bastante de inicializacao, as vezes nao
-da pra estimar direito. Nesses casos ele tenta reestimar o modelo independentemente de
+A atualização de modelos \code{ss_ar1_saz} sempre vai checar se o modelo passado foi estimado
+corretamente. Como modelos em espaçoo de estados dependem bastante de inicialização, às vezes não
+dá para estimar direito. Nesses casos ele tenta reestimar o modelo independentemente de
 \code{refit}
 }
