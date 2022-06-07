@@ -93,6 +93,48 @@ JANELAMOVEL.default <- function(tipo, serie, janela, passo, n.ahead, refit.cada,
     return(jm)
 }
 
+JANELAMOVEL.ss_reg_din <- function(tipo, serie, janela, passo, n.ahead, refit.cada, verbose,
+    formula, regdata, ...) {
+
+    if(!is.ts(serie)) serie <- ts(serie)
+
+    if(length(serie) + n.ahead > nrow(regdata)) {
+        warning("'regdata' deve conter 'length(serie) + n.ahead' observacoes -- reduzindo 'serie'")
+
+        reduz <- length(serie) + n.ahead - nrow(regdata)
+        serie <- window(serie, start(serie), deltats(end(serie), -reduz, frequency(serie)))
+    }
+
+    verb_func <- verbose_fun(verbose)
+    janelas <- expandejanelas(serie, janela, passo)
+    v_refit <- expanderefit(janelas, refit.cada)
+
+    aux <- ts(seq_len(nrow(regdata)), start = start(serie), frequency = frequency(serie))
+
+    # Estima um modelo inicial que vai ser usado na primeira janela e atualizado dali em diante
+    ij <- janelas[[1]]
+    iserie   <- window(serie, ij[[1]], ij[[2]])
+    iregdata <- regdata[window(aux, ij[[1]], ij[[2]]), , drop = FALSE]
+    mod      <- estimamodelo(serie = iserie, tipo = tipo, regdata = iregdata)
+
+    jm <- lapply(seq(janelas), function(i) {
+
+        verb_func(janelas[[i]][[1]], janelas[[i]][[2]], v_refit[i])
+
+        ij <- janelas[[i]]
+        iserie   <- window(serie, ij[[1]], ij[[2]])
+        iregdata <- regdata[window(aux, ij[[1]], ij[[2]]), , drop = FALSE]
+        mod      <- update(mod, iserie, newregdata = iregdata, refit = v_refit[i])
+
+        ijn <- list(deltats(ij[[2]], 1, frequency(aux)), deltats(ij[[2]], n.ahead, frequency(aux)))
+        inewdata <- regdata[window(aux, ijn[[1]], ijn[[2]]), , drop = FALSE]
+        predict(mod, newdata = inewdata)
+    })
+
+    # Retorna
+    return(jm)
+}
+
 # HELPERS ------------------------------------------------------------------------------------------
 
 #' Selecao Da Funcao De Log

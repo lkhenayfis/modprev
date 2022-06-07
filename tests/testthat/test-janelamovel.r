@@ -96,13 +96,33 @@ geraserie <- function(n, f, seed = 1234) {
     ts(ar1 + 2.5 * saz, freq = f)
 }
 
+# helper para gerar dados de regressao multipla
+geradado <- function(n = 200, seed = 1234) {
+    set.seed(seed)
+    X <- data.frame(V1 = rnorm(n), V2 = rnorm(n, sd = .5), V3 = rnorm(n, sd = 2))
+    y <- ts(2 * X$V1 + .7 * X$V2 - 1.1 * X$V3 + .8 * X$V2 * X$V3 + rnorm(n, sd = .25))
+    return(list(X, y))
+}
+
 test_that("Testes de previsao em janela", {
 
     # Modelo sem variavel explicativa -------------------------------
+
     serie <- geraserie(100, 4)
 
     jm <- janelamovel(serie, "ss_ar1_saz", 48, 12, 6)
 
     expect_equal(length(jm), 6)
     expect_true(all(sapply(jm, function(m) all(dim(m) == c(6, 2)))))
+
+    # Modelo regressao dinamica -------------------------------------
+
+    dados <- geradado()
+    ss <- window(dados[[2]], 1, 195)
+    regd <- dados[[1]]
+
+    jm <- janelamovel(ss, "ss_reg_din", 150, passo = 5, n.ahead = 5, regdata = regd)
+
+    expect_equal(length(jm), 10)
+    expect_true(all(sapply(jm, function(m) all(dim(m) == c(5, 2)))))
 })
