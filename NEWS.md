@@ -8,6 +8,17 @@
   sazonais. Isto e feito atraves de variaveis circulares, nao dummies, de modo que a carga extra
   para estimacao e de apenas um novo hiperparametero
 
+# janelamovel
+
+## New features
+
+* `janelamovel` tem dois novos argumentos: `passo` e `largura`:
+  * `passo` permite informar saltos de tempo entre janelas, possibilitando a rodada de menos janelas
+    sobre uma mesma serie
+  * `janela` substitui o antigo argumento `largura`, permitindo mais flexibilidade. Quando e um 
+    escalar, funciona exatamente como `largura`, porem pode tambem ser um vetor indicando na 
+    primeira posicao uma observacao fixa para o inicio da janela e na segunda a largura inicial. 
+    Estas duas formas configuram uma janela rolante ou expansivel, respectivamente.
 
 # master
 

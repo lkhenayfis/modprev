@@ -27,7 +27,7 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
 
-    if(missing(formula)) {
+    if(missing(formula) || is.null(formula)) {
         formula <- colnames(regdata)
         if(length(formula) > 1) formula <- paste0(colnames(regdata), collapse = " + ")
         formula <- paste0("~ ", formula)
@@ -162,6 +162,10 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
         Qmat <- modelo["Q"]
         form <- attr(modelo, "formula")
         modelo <- SSModel(newseries ~ SSMregression(form, newregdata, Q = Qmat), H = Hmat)
+
+        attr(modelo, "formula") <- attr(object$modelo, "formula")
+        attr(modelo, "vardin")  <- attr(object$modelo, "vardin")
+        attr(modelo, "saz")     <- attr(object$modelo, "saz")
 
         object$modelo <- modelo
         object$serie  <- newseries
