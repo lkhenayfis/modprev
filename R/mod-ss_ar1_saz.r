@@ -107,6 +107,7 @@ update.ss_ar1_saz <- function(object, newseries, refit = FALSE, ...) {
         attr(modelo, "n") <- as.integer(length(newseries))
 
         object$modelo <- modelo
+        object$serie  <- if(is.ts(newseries)) newseries else ts(newseries)
     }
 
     return(object)

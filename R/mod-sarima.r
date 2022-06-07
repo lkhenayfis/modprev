@@ -60,6 +60,7 @@ update.sarima <- function(object, newseries, refit = FALSE, ...) {
         object <- estimamodelo(newseries, "sarima")
     } else {
         object$modelo <- Arima(newseries, model = object$modelo)
+        object$serie  <- if(is.ts(newseries)) newseries else ts(newseries)
     }
 
     return(object)

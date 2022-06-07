@@ -31,6 +31,11 @@
   diretorio `conf`, `confs` ou `config` caso exista. O objetivo disso e que `raiz` corresponda a 
   raiz do projeto contendo os programas, nao o caminho ate o arquivo de confifuracao
 
+## Bug fixes
+
+* Corrige `update` de `sarima` e `ss_ar1_saz`. Estava retornando o objeto com apenas o modelo 
+  atualizado, mantendo a serie antiga. Agora atualiza a serie para `newseries`
+
 # modprev 1.0
 
 Arcabouco unificado para estimacao, previsao, simulacao e etc de diversos tipos de 
