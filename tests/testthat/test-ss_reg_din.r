@@ -1,30 +1,30 @@
 
 test_that("Estimacao de modelo S.S. RegDin - regressao simples", {
-    serie <- window(datregdin[[1]], 1, 200)
-    varex <- data.frame(venprev = window(datregdin[[2]], 1, 200))
+    serie <- window(datregdin$obs, 1, 200)
+    varex <- datregdin$varex[, "V1", drop = FALSE]
     mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg")
 
     expect_equal("ss_reg_din", class(mod)[1])
-    expect_equal(mod$modelo["Q"][1, 1, 1], 0.059735078) # precalculados e testados para garantir
-    expect_equal(mod$modelo["H"][1, 1, 1], 0.67102834)
+    expect_snapshot_value(round(mod$modelo["Q"][1, 1, 1], 10), style = "deparse")
+    expect_snapshot_value(round(mod$modelo["H"][1, 1, 1], 10), style = "deparse")
 
     serie <- c(serie)
     mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg")
 
     expect_error(estimamodelo(serie, tipo = "ss_reg"))
 
-    serie <- datregdin[[1]]
-    varex <- data.frame(venprev = datregdin[[2]])
+    serie <- datregdin$obs
+    varex <- data.frame(venprev = datregdin$varex)
+    varex[c(1, 10, 20), ] <- NA_real_
     expect_warning(estimamodelo(serie, regdata = varex, tipo = "ss_reg"))
 })
 
-
 test_that("Previsao de modelo S.S. RegDin - regressao simples", {
-    serie <- window(datregdin[[1]], 1, 200)
-    varex <- data.frame(venprev = window(datregdin[[2]], 1, 200))
+    serie <- window(datregdin$obs, 1, 100)
+    varex <- datregdin$varex[1:100, "V1", drop = FALSE]
     mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg")
 
-    newdata <- data.frame(venprev = window(datregdin[[2]], 201, 220))
+    newdata <- datregdin$varex[101:120, "V1", drop = FALSE]
     prev    <- predict(mod, newdata = newdata)
 
     expect_true(all(dim(prev) == c(20, 2)))
@@ -43,10 +43,10 @@ test_that("Previsao de modelo S.S. RegDin - regressao simples", {
 })
 
 test_that("Atualizacao de modelo S.S. RegDin - regressao simples", {
-    serie1 <- window(datregdin[[1]], 1, 300)
-    varex1 <- data.frame(venprev = window(datregdin[[2]], 1, 300))
-    serie2 <- window(datregdin[[1]], 501, 900)
-    varex2 <- data.frame(venprev = window(datregdin[[2]], 501, 900))
+    serie1 <- window(datregdin$obs, 1, 100)
+    varex1 <- datregdin$varex[1:100, "V1", drop = FALSE]
+    serie2 <- window(datregdin$obs, 101, 200)
+    varex2 <- datregdin$varex[101:200, "V1", drop = FALSE]
 
     mod <- estimamodelo(serie1, tipo = "ss_reg_din", regdata = varex1)
 
@@ -63,28 +63,19 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao simples", {
 
     mod_refit <- update(mod, serie2, newregdata = varex2, refit = TRUE)
     expect_equal(c(mod_refit$modelo$y), c(serie2))
-    expect_equal(round(mod_refit$modelo["Q"][, , 1], 8), 0.03101488)
-    expect_equal(round(mod_refit$modelo["H"][, , 1], 8), 0.02001851)
+    expect_snapshot_value(round(mod_refit$modelo["Q"][, , 1], 8), style = "deparse")
+    expect_snapshot_value(round(mod_refit$modelo["H"][, , 1], 8), style = "deparse")
     expect_equal(mod_refit$modelo["Z"][, 2, ], c(varex2[[1]]))
-    
+
     expect_equal(attr(mod_upd$model, "formula"), attr(mod$model, "formula"))
     expect_equal(attr(mod_upd$model, "vardin"), attr(mod$model, "vardin"))
     expect_equal(attr(mod_upd$model, "saz"), attr(mod$model, "saz"))
 })
 
-# helper para gerar dados de regressao multipla
-geradado <- function(n = 200, seed = 1234) {
-    set.seed(seed)
-    X <- data.frame(V1 = rnorm(n), V2 = rnorm(n, sd = .5), V3 = rnorm(n, sd = 2))
-    y <- ts(2 * X$V1 + .7 * X$V2 - 1.1 * X$V3 + .8 * X$V2 * X$V3 + rnorm(n, sd = .25))
-    return(list(X, y))
-}
-
 test_that("Estimacao de modelo S.S. RegDin - regressao multipla", {
 
-    dados <- geradado()
-    serie <- window(dados[[2]], 1, 150)
-    varex <- dados[[1]][1:150, ]
+    serie <- window(datregdin$obs, 1, 150)
+    varex <- datregdin$varex[1:150, ]
 
     mod <- estimamodelo(serie, "ss_reg", regdata = varex, formula = ~ V1 + V2 * V3)
 
@@ -104,13 +95,12 @@ test_that("Estimacao de modelo S.S. RegDin - regressao multipla", {
 
 test_that("Previsao de modelo S.S. RegDin - regressao multipla", {
 
-    dados <- geradado()
-    serie <- window(dados[[2]], 1, 150)
-    varex <- dados[[1]][1:150, ]
+    serie <- window(datregdin$obs, 1, 150)
+    varex <- datregdin$varex[1:150, ]
 
     mod <- estimamodelo(serie, formula = ~ V1 + V2 * V3, regdata = varex, tipo = "ss_reg")
 
-    newdata <- dados[[1]][151:170, ]
+    newdata <- datregdin$varex[151:170, ]
     prev    <- predict(mod, newdata = newdata)
 
     expect_true(all(dim(prev) == c(20, 2)))
@@ -130,14 +120,13 @@ test_that("Previsao de modelo S.S. RegDin - regressao multipla", {
 
 test_that("Atualizacao de modelo S.S. RegDin - regressao multipla", {
 
-    dados <- geradado()
-    serie <- window(dados[[2]], 1, 150)
-    varex <- dados[[1]][1:150, ]
+    serie <- window(datregdin$obs, 1, 150)
+    varex <- datregdin$varex[1:150, ]
 
     mod <- estimamodelo(serie, formula = ~ V1 + V2 * V3, regdata = varex, tipo = "ss_reg")
 
-    newseries  <- window(dados[[2]], 151, 200)
-    newregdata <- dados[[1]][151:200, ]
+    newseries  <- window(datregdin$obs, 151, 200)
+    newregdata <- datregdin$varex[151:200, ]
     mod_upd   <- update(mod, newseries = newseries, newregdata = newregdata)
 
     expect_equal(c(mod$modelo["Q"]), c(mod_upd$modelo["Q"]))
@@ -164,13 +153,12 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla", {
 
 test_that("Estimacao de modelo S.S. RegDin - regressao multipla heterocedastica", {
 
-    dados <- geradado()
 
     # Serie temporal com sazonalidade especificada e vardin = TRUE
 
-    serie <- window(dados[[2]], 1, 150)
+    serie <- window(datregdin$obs, 1, 150)
     serie <- ts(c(serie), freq = 10)
-    varex <- dados[[1]][1:150, ]
+    varex <- datregdin$varex[1:150, ]
 
     mod1 <- estimamodelo(serie, "ss_reg", regdata = varex, formula = ~ V1 + V2 * V3, vardin = TRUE)
 
@@ -196,14 +184,13 @@ test_that("Estimacao de modelo S.S. RegDin - regressao multipla heterocedastica"
 
 test_that("Previsao de modelo S.S. RegDin - regressao multipla - heterocedastica", {
 
-    dados <- geradado()
-    serie <- window(dados[[2]], 1, 150)
+    serie <- window(datregdin$obs, 1, 150)
     serie <- ts(serie, freq = 10)
-    varex <- dados[[1]][1:150, ]
+    varex <- datregdin$varex[1:150, ]
 
     mod <- estimamodelo(serie, "ss_reg", formula = ~ V1 + V2 * V3, regdata = varex, vardin = TRUE)
 
-    newdata <- dados[[1]][151:170, ]
+    newdata <- datregdin$varex[151:170, ]
     prev    <- predict(mod, newdata = newdata)
 
     expect_true(all(dim(prev) == c(20, 2)))
@@ -227,14 +214,13 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla heterocedastic
     # a determinacao do tipo de deslocamento, dependnendo dos atributos de serie e newseries, fica
     # concentrado nos testes de desloc espceficicamente
 
-    dados <- geradado()
-    serie <- window(dados[[2]], 1, 100)
+    serie <- window(datregdin$obs, 1, 100)
     serie <- ts(serie, start = c(1, 3), freq = 10)
-    varex <- dados[[1]][1:100, ]
+    varex <- datregdin$varex[1:100, ]
 
     mod <- estimamodelo(serie, "ss_reg", formula = ~ V1 + V2 * V3, regdata = varex, vardin = TRUE)
 
-    newregdata <- dados[[1]][1:20, ]
+    newregdata <- datregdin$varex[1:20, ]
 
     newseries  <- ts(seq(20), start = c(2, 4), freq = 10)
     mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
@@ -255,7 +241,7 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla heterocedastic
 test_that("Identificacao de deslocamento de array", {
 
     # Quando ambas as series tem sazonalidade especificada
-    
+
     s1 <- ts(seq(100), start = c(1, 4), freq = 10)
 
     s2 <- ts(seq(100), start = c(11, 7), freq = 10)
