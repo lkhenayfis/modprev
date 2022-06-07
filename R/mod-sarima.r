@@ -17,13 +17,14 @@ NULL
 
 #' @param serie serie para ajustar
 #' 
-#' @return \code{sarima} retorna modelo sarima estimado. Este objeto será utilizado para compor a
-#'     saída de \code{\link{estimamodelo}};
+#' @return Objeto da classe mod_eol e subclasse \code{sarima}, uma lista de dois elementos:
+#'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_sarima
 
 sarima <- function(serie) {
-    out <- auto.arima(serie, allowdrift = FALSE)
+    mod <- auto.arima(serie, allowdrift = FALSE)
+    out <- new_mod_eol(mod, serie, "sarima")
     return(out)
 }
 

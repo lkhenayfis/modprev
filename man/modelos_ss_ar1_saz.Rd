@@ -27,8 +27,8 @@ ss_ar1_saz(serie)
 \item{refit}{booleano indicando se o modelo deve ou não ser reajustado}
 }
 \value{
-\code{ss_ar1_saz} retorna modelo SS estimado. Este objeto será utilizado para compor a
-saída de \code{\link{estimamodelo}};
+Objeto da classe mod_eol e subclasse \code{ss_ar1_saz}, uma lista de dois elementos:
+\code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 
 \code{predict} retorna uma série temporal multivariada contendo valor esperado e desvio
 padrao da previsão \code{n.ahead} passos à frente;

@@ -39,8 +39,8 @@ NULL
 #'     Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro assume este
 #'     valor como a sazonalidade
 #' 
-#' @return \code{ss_reg_din} retorna modelo de regressão dinâmica. Este objeto será utilizado para
-#'     compor a saída de \code{link{estimamodelo}}
+#' @return Objeto da classe mod_eol e subclasse \code{ss_reg_din}, uma lista de dois elementos:
+#'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_ss_reg_din
 
@@ -100,7 +100,9 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE) {
     attr(fit$model, "vardin")  <- vardin
     attr(fit$model, "saz")     <- saz
 
-    return(fit$model)
+    out <- new_mod_eol(fit$model, serie, "ss_reg_din")
+
+    return(out)
 }
 
 # METODOS ------------------------------------------------------------------------------------------

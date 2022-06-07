@@ -17,8 +17,8 @@ NULL
 
 #' @param serie serie para ajustar
 #' 
-#' @return \code{ss_ar1_saz} retorna modelo SS estimado. Este objeto será utilizado para compor a
-#'     saída de \code{\link{estimamodelo}};
+#' @return Objeto da classe mod_eol e subclasse \code{ss_ar1_saz}, uma lista de dois elementos:
+#'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_ss_ar1_saz
 
@@ -52,7 +52,9 @@ ss_ar1_saz <- function(serie) {
         fit$model$Z[] <- NA
     }
 
-    return(fit$model)
+    out <- new_mod_eol(fit$model, serie, "ss_ar1_saz")
+
+    return(out)
 }
 
 # METODOS ------------------------------------------------------------------------------------------

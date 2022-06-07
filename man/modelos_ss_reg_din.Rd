@@ -41,8 +41,8 @@ seja informado a previsão sera feita tantos passos à frente quanto amostras em
 \item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
 }
 \value{
-\code{ss_reg_din} retorna modelo de regressão dinâmica. Este objeto será utilizado para
-compor a saída de \code{link{estimamodelo}}
+Objeto da classe mod_eol e subclasse \code{ss_reg_din}, uma lista de dois elementos:
+\code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 
 \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
 previsão \code{n.ahead} passos à frente;
