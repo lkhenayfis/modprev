@@ -87,3 +87,22 @@ test_that("Vetor de reajustes", {
 
     expect_error(rr <- expanderefit(jj, c(1, 4, 6)))
 })
+
+geraserie <- function(n, f, seed = 1234) {
+    set.seed(seed)
+    ar1 <- arima.sim(list(ar = .8), n)
+    saz <- sin(seq(0, f - 1) * 2 * pi / f)
+
+    ts(ar1 + 2.5 * saz, freq = f)
+}
+
+test_that("Testes de previsao em janela", {
+
+    # Modelo sem variavel explicativa -------------------------------
+    serie <- geraserie(100, 4)
+
+    jm <- janelamovel(serie, "ss_ar1_saz", 48, 12, 6)
+
+    expect_equal(length(jm), 6)
+    expect_true(all(sapply(jm, function(m) all(dim(m) == c(6, 2)))))
+})

@@ -70,20 +70,20 @@ JANELAMOVEL <- function(tipo, serie, janela, passo, n.ahead, refit.cada, verbose
 
 JANELAMOVEL.default <- function(tipo, serie, janela, passo, n.ahead, refit.cada, verbose, ...) {
 
-    serie <- ifelse(is.ts(serie), serie, ts(serie))
+    if(!is.ts(serie)) serie <- ts(serie)
     verb_func <- verbose_fun(verbose)
     janelas <- expandejanelas(serie, janela, passo)
     v_refit <- expanderefit(janelas, refit.cada)
 
     # Estima um modelo inicial que vai ser usado na primeira janela e atualizado dali em diante
-    serie <- window(serie, janela[[1]][1], janela[[1]][2])
-    mod   <- estimamodelo(serie = serie, tipo = tipo)
+    iserie <- window(serie, janelas[[1]][[1]], janelas[[1]][[2]])
+    mod    <- estimamodelo(serie = iserie, tipo = tipo)
 
     jm <- lapply(seq(janelas), function(i) {
 
-        verb_func(janela[[i]][1], janela[[i]][2], v_refit[i])
+        verb_func(janelas[[i]][[1]], janelas[[i]][[2]], v_refit[i])
 
-        iserie <- window(serie, janela[[i]][1], janela[[i]][2])
+        iserie <- window(serie, janelas[[i]][[1]], janelas[[i]][[2]])
         mod    <- update(mod, iserie, refit = v_refit[i])
 
         predict(mod, n.ahead = n.ahead)
