@@ -1,3 +1,14 @@
+# regdin
+
+## New features
+
+* `ss_reg_din` agora permite a estimacao de regressoes dinamicas com qualquer formula, informadas 
+  pelo argumento `formula` como formulas padrao do R
+* `ss_reg_din` agora permite a estimacao de modelos com heterocedasticidade, na forma de variancias
+  sazonais. Isto e feito atraves de variaveis circulares, nao dummies, de modo que a carga extra
+  para estimacao e de apenas um novo hiperparametero
+
+
 # master
 
 ## New features
