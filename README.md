@@ -5,7 +5,7 @@
 
 <!-- badges: start -->
 
-[![R-CMD-Check](https://github.com/lkhenayfis/modprev/workflows/R-CMD-Check/badge.svg)](https://github.com/lkhenayfis/modprev/actions)
+[![R-CMD-check](https://github.com/lkhenayfis/modprev/workflows/R-CMD-check/badge.svg)](https://github.com/lkhenayfis/modprev/actions)
 [![test-coverage](https://github.com/lkhenayfis/modprev/workflows/test-coverage/badge.svg)](https://github.com/lkhenayfis/modprev/actions)
 <!-- badges: end -->
 

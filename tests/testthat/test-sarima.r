@@ -36,5 +36,5 @@ test_that("Atualizacao de modelo SARIMA", {
 
     mod_refit <- update(mod, serie2, refit = TRUE)
     expect_equal(mod_refit$modelo$x, serie2)
-    expect_snapshot_value(round(coef(mod_refit$modelo), 10), style = "deparse")
+    expect_snapshot_value(round(coef(mod_refit$modelo), 5), style = "deparse")
 })

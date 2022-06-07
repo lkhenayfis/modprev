@@ -5,8 +5,8 @@ test_that("Estimacao de modelo S.S. RegDin - regressao simples", {
     mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg")
 
     expect_equal("ss_reg_din", class(mod)[1])
-    expect_snapshot_value(round(mod$modelo["Q"][1, 1, 1], 10), style = "deparse")
-    expect_snapshot_value(round(mod$modelo["H"][1, 1, 1], 10), style = "deparse")
+    expect_snapshot_value(round(mod$modelo["Q"][1, 1, 1], 5), style = "deparse")
+    expect_snapshot_value(round(mod$modelo["H"][1, 1, 1], 5), style = "deparse")
 
     serie <- c(serie)
     mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg")
@@ -30,14 +30,14 @@ test_that("Previsao de modelo S.S. RegDin - regressao simples", {
     expect_true(all(dim(prev) == c(20, 2)))
     expect_equal(c("prev", "sd"), colnames(prev))
 
-    expect_snapshot_value(round(c(prev), 10), style = "deparse")
+    expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
     prev <- predict(mod, newdata = newdata, n.ahead = 10)
 
     expect_true(all(dim(prev) == c(10, 2)))
     expect_equal(c("prev", "sd"), colnames(prev))
 
-    expect_snapshot_value(round(c(prev), 10), style = "deparse")
+    expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
     expect_error(predict(mod))
 })
@@ -48,7 +48,7 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao simples", {
     serie2 <- window(datregdin$obs, 101, 200)
     varex2 <- datregdin$varex[101:200, "V1", drop = FALSE]
 
-    mod <- estimamodelo(serie1, tipo = "ss_reg_din", regdata = varex1)
+    mod <- estimamodelo(serie1, tipo = "ss_reg", regdata = varex1)
 
     mod_upd <- update(mod, serie2, newregdata = varex2)
     expect_equal(c(mod$modelo["Q"]), c(mod_upd$modelo["Q"]))
@@ -63,8 +63,8 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao simples", {
 
     mod_refit <- update(mod, serie2, newregdata = varex2, refit = TRUE)
     expect_equal(c(mod_refit$modelo$y), c(serie2))
-    expect_snapshot_value(round(mod_refit$modelo["Q"][, , 1], 8), style = "deparse")
-    expect_snapshot_value(round(mod_refit$modelo["H"][, , 1], 8), style = "deparse")
+    expect_snapshot_value(round(mod_refit$modelo["Q"][, , 1], 5), style = "deparse")
+    expect_snapshot_value(round(mod_refit$modelo["H"][, , 1], 5), style = "deparse")
     expect_equal(mod_refit$modelo["Z"][, 2, ], c(varex2[[1]]))
 
     expect_equal(attr(mod_upd$model, "formula"), attr(mod$model, "formula"))
@@ -80,8 +80,8 @@ test_that("Estimacao de modelo S.S. RegDin - regressao multipla", {
     mod <- estimamodelo(serie, "ss_reg", regdata = varex, formula = ~ V1 + V2 * V3)
 
     expect_equal("ss_reg_din", class(mod)[1])
-    expect_snapshot_value(round(mod$modelo["Q"][, , 1], 10), style = "deparse")
-    expect_snapshot_value(round(mod$modelo["H"][, , 1], 10), style = "deparse")
+    expect_snapshot_value(round(mod$modelo["Q"][, , 1], 5), style = "deparse")
+    expect_snapshot_value(round(mod$modelo["H"][, , 1], 5), style = "deparse")
 
     serie <- c(serie)
     mod   <- estimamodelo(serie, formula = ~ V1 + V2 * V3, regdata = varex, tipo = "ss_reg")
@@ -106,14 +106,14 @@ test_that("Previsao de modelo S.S. RegDin - regressao multipla", {
     expect_true(all(dim(prev) == c(20, 2)))
     expect_equal(c("prev", "sd"), colnames(prev))
 
-    expect_snapshot_value(round(c(prev), 10), style = "deparse")
+    expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
     prev <- predict(mod, newdata = newdata, n.ahead = 10)
 
     expect_true(all(dim(prev) == c(10, 2)))
     expect_equal(c("prev", "sd"), colnames(prev))
 
-    expect_snapshot_value(round(c(prev), 10), style = "deparse")
+    expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
     expect_error(predict(mod))
 })
@@ -143,8 +143,8 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla", {
 
     expect_true(all(mod_upd$modelo["Z"][, 2:4, ] - t(data.matrix(newregdata)) == 0))
     expect_true(all(mod_upd$serie - newseries == 0))
-    expect_snapshot_value(round(mod$modelo["Q"][, , 1], 10), style = "deparse")
-    expect_snapshot_value(round(mod$modelo["H"][, , 1], 10), style = "deparse")
+    expect_snapshot_value(round(mod$modelo["Q"][, , 1], 5), style = "deparse")
+    expect_snapshot_value(round(mod$modelo["H"][, , 1], 5), style = "deparse")
 
     expect_equal(attr(mod_upd$model, "formula"), attr(mod$model, "formula"))
     expect_equal(attr(mod_upd$model, "vardin"), attr(mod$model, "vardin"))
@@ -166,8 +166,8 @@ test_that("Estimacao de modelo S.S. RegDin - regressao multipla heterocedastica"
     expect_equal(attr(mod1$model, "vardin"), 1)
     matH <- matrix(c(mod1$model["H"]), 10)
     expect_true(all(apply(matH, 1, function(v) all(v == v[1]))))
-    expect_snapshot_value(round(mod1$modelo["Q"][, , 1], 10), style = "deparse")
-    expect_snapshot_value(round(mod1$modelo["H"][1, 1, 1:10], 10), style = "deparse")
+    expect_snapshot_value(round(mod1$modelo["Q"][, , 1], 5), style = "deparse")
+    expect_snapshot_value(round(mod1$modelo["H"][1, 1, 1:10], 5), style = "deparse")
 
     # Serie temporal sem sazonalidade com vardin = 10
 
@@ -196,14 +196,14 @@ test_that("Previsao de modelo S.S. RegDin - regressao multipla - heterocedastica
     expect_true(all(dim(prev) == c(20, 2)))
     expect_equal(c("prev", "sd"), colnames(prev))
 
-    expect_snapshot_value(round(c(prev), 10), style = "deparse")
+    expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
     prev <- predict(mod, newdata = newdata, n.ahead = 10)
 
     expect_true(all(dim(prev) == c(10, 2)))
     expect_equal(c("prev", "sd"), colnames(prev))
 
-    expect_snapshot_value(round(c(prev), 10), style = "deparse")
+    expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
     expect_error(predict(mod))
 })
