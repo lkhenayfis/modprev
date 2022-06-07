@@ -2,9 +2,9 @@
 # FUNCOES DE VISUALIZACAO
 ####################################################################################################
 
-#' Plot De Objetos \code{mod_eol}
+#' Plot De Objetos \code{modprev}
 #' 
-#' Metodo para plotar ajustes \code{mod_eol}
+#' Metodo para plotar ajustes \code{modprev}
 #' 
 #' @param x objeto para plotar
 #' @param ... demais parametros repassados para \code{plot}
@@ -13,7 +13,7 @@
 #' 
 #' @export
 
-plot.mod_eol <- function(x, ...) {
+plot.modprev <- function(x, ...) {
 
     # Ajuste do modelo
     args <- c(list(object = x$modelo, filter = TRUE))

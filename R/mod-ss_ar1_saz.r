@@ -17,8 +17,8 @@ NULL
 
 #' @param serie serie para ajustar
 #' 
-#' @return Objeto da classe mod_eol e subclasse \code{ss_ar1_saz}, uma lista de dois elementos:
-#'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
+#' @return Objeto da classe \code{modprev} e subclasse \code{ss_ar1_saz}, uma lista de dois 
+#'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_ss_ar1_saz
 
@@ -52,7 +52,7 @@ ss_ar1_saz <- function(serie) {
         fit$model$Z[] <- NA
     }
 
-    out <- new_mod_eol(fit$model, serie, "ss_ar1_saz")
+    out <- new_modprev(fit$model, serie, "ss_ar1_saz")
 
     return(out)
 }
@@ -67,7 +67,7 @@ ss_ar1_saz <- function(serie) {
 #' advindos da distribuição preditiva e não de suavização. Considerando estes fatores, \code{...} 
 #' não pode conter \code{n.ahead} ou estes dois outros, ou então ocorrerá erro.
 #' 
-#' @param object objeto com classes \code{c("ss_ar1_saz", "mod_eol")} contendo modelo
+#' @param object objeto com classes \code{c("ss_ar1_saz", "modprev")} contendo modelo
 #' @param n.ahead número de passos à frente para previsão
 #' @param ... demais argumentos passados a \code{\link[KFAS]{predict.SSModel}}. Ver Detalhes
 #' 
@@ -101,7 +101,7 @@ predict.ss_ar1_saz <- function(object, n.ahead, ...) {
 #' @param ... existe apenas para consistência com a genérica
 #' 
 #' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
-#'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{mod_eol};
+#'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
 #' 
 #' @rdname modelos_ss_ar1_saz
 #' 

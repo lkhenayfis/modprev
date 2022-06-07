@@ -16,7 +16,7 @@ sarima(serie)
 \arguments{
 \item{serie}{serie para ajustar}
 
-\item{object}{objeto com classes \code{c("sarima", "mod_eol")} contendo modelo}
+\item{object}{objeto com classes \code{c("sarima", "modprev")} contendo modelo}
 
 \item{n.ahead}{número de passos à frente para previsão}
 
@@ -27,14 +27,14 @@ sarima(serie)
 \item{refit}{booleano indicando se o modelo deve ou não ser reajustado}
 }
 \value{
-Objeto da classe mod_eol e subclasse \code{sarima}, uma lista de dois elementos:
+Objeto da classe \code{modprev} e subclasse \code{sarima}, uma lista de dois elementos:
 \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 
 \code{predict} retorna uma série temporal multivariada contendo valor esperado e desvio
 padrão da previsão \code{n.ahead} passos à frente;
 
 \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado.
-Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{mod_eol};
+Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
 }
 \description{
 Estimação e métodos de modelos da classe \code{sarima}

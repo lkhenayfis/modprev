@@ -25,7 +25,7 @@ ss_reg_din(serie, regdata, formula, vardin = FALSE)
 Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro assume este
 valor como a sazonalidade}
 
-\item{object}{objeto com classes \code{c("ss_reg_din", "mod_eol")} contendo modelo}
+\item{object}{objeto com classes \code{c("ss_reg_din", "modprev")} contendo modelo}
 
 \item{newdata}{\code{data.frame}-like contendo variéveis explicativas fora da amostra}
 
@@ -41,14 +41,14 @@ seja informado a previsão sera feita tantos passos à frente quanto amostras em
 \item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
 }
 \value{
-Objeto da classe mod_eol e subclasse \code{ss_reg_din}, uma lista de dois elementos:
-\code{modelo} e \code{serie} contendo o modelo estimado e a série passada
+Objeto da classe \code{modprev} e subclasse \code{ss_reg_din}, uma lista de dois
+elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 
 \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
 previsão \code{n.ahead} passos à frente;
 
 \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado.
-Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{mod_eol};
+Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
 }
 \description{
 Estimação e métodos de modelos da classe \code{ss_reg_din}
