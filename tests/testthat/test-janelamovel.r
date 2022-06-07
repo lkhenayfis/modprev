@@ -125,4 +125,11 @@ test_that("Testes de previsao em janela", {
 
     expect_equal(length(jm), 10)
     expect_true(all(sapply(jm, function(m) all(dim(m) == c(5, 2)))))
+
+    # Argumento deprecado -------------------------------------------
+
+    serie <- geraserie(100, 4)
+    jm    <- janelamovel(serie, "ss_ar1_saz", 48, 12, 6)
+    expect_warning(jm2 <- janelamovel(serie, "ss_ar1_saz", largura = 48, passo = 12, n.ahead = 6))
+    expect_true(identical(jm, jm2))
 })

@@ -58,6 +58,13 @@
 #' @export
 
 janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cada = NA, verbose = 0, ...) {
+    args <- list(...)
+    if("largura" %in% names(args)) {
+        warning("'largura' nao e mais suportado -- use 'janela' no lugar")
+
+        janela <- args$largura
+    }
+
     tipo <- structure(tipo, class = tipo)
     JANELAMOVEL(tipo, serie, janela, passo, n.ahead, refit.cada, verbose, ...)
 }
