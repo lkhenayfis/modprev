@@ -49,22 +49,25 @@
 #' 
 #' @examples 
 #' 
+#' # janela rolante de cinco anos, prevendo um ano a frente e rolando de seis em seis meses
+#' jm_sarima <- janelamovel(AirPassengers, "sarima", 60, passo = 6, n.ahead = 12)
+#' 
+#' # mesma configuracao, porem janela extensivel (inicio fixo no primeiro mes)
+#' jm_sarima <- janelamovel(AirPassengers, "sarima", c(1, 60), passo = 6, n.ahead = 12)
+#' 
+#' # VARIAVEIS EXPLICATIVAS -----------------------------------------
+#' 
+#' # serie deve conter n.ahead menos observacoes que a variavel explicativa
+#' serie <- window(datregdin$obs, 1, 190)
+#' varex <- datregdin$varex
+#' jm_regdin <- janelamovel(serie, "ss_reg_din", 100, passo = 10, n.ahead = 5, regdata = varex)
+#' 
+#' # MODO VERBOSE ---------------------------------------------------
+#' 
 #' \dontrun{
-#' serie <- ts(window(datregdin[[1]], 1, 250))
-#' jm <- janelamovel(serie, "ss_ar1_saz", 200, refit.cada = 10)
-#' 
-#' serie <- ts(window(datregdin[[1]], 1, 720), freq = 48)
-#' jm <- janelamovel(serie, "ss_ar1_saz", 480, refit.cada = 48)
-#' 
-#' serie <- ts(window(datregdin[[1]], 1, 250))
-#' varex <- datregdin[1:255, 2, drop = FALSE]
-#' jm <- janelamovel(serie, "ss_reg_din", 200, 5L, refit.cada = 10, regdata = varex)
-#' 
-#' # como esta funcao pode demorar um tempo para rodar (especialmente com multiplos refits), pode
-#' # ser conveniente mandar o log para um arquivo
-#' sink("log_janelamovel.txt")
-#' jm <- janelamovel(serie, "ss_ar1_saz", 200, refit.cada = 10, verbose = 2)
-#' sink()
+#' jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 0)
+#' jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 1, refit = 12)
+#' jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 2, refit = 3)
 #' }
 #' 
 #' @return lista contendo previsoes de 1 a n.ahead passos à frente para cada janela
