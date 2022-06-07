@@ -58,7 +58,8 @@ será estimada uma função simples (somente termos aditivos) de todas as variá
 }
 \examples{
 
-# ajustando tipo SARIMA
+# SARIMA -----------------------------------------------
+
 mod_sarima <- estimamodelo(AirPassengers, tipo = "sarima")
 
 # caso a serie nao possua sazonalidade explicita, o modelo sera ajustado sem isso
@@ -70,10 +71,29 @@ mod_sarima_semsazo <- estimamodelo(ss, tipo = "sarima")
 coef(mod_sarima_semsazo)
 }
 
-# ajustando uma regressao dinamica (com dado dummy interno do pacote)
-serie <- window(datregdin[[1]], 1, 100)
-varex <- datregdin[1:100, 2, drop = FALSE]
-mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
+# SS AR(1) + Sazonalidade ------------------------------
+
+mod_ss <- estimamodelo(AirPassengers, tipo = "ss_ar1_saz")
+
+# caso a serie nao possua sazonalidade explicita, o modelo sera ajustado sem isso
+ss <- arima.sim(200, model = list(ar = .8))
+mod_ss_semsazo <- estimamodelo(ss, tipo = "ss_ar1_saz")
+
+# Regressao dinamica -----------------------------------
+
+serie <- window(datregdin$obs, 1, 100)
+varex <- datregdin$varex[1:100, , drop = FALSE]
+
+mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din", formula = ~ V1 + V2)
+
+# explicitando uma formula
+mod_regdin2 <- estimamodelo(serie, "ss_reg_din", formula = ~ V1 + V2 * V3, regdata = varex)
+
+\dontrun{
+layout(matrix(1:2))
+plot(mod_regdin, main = "obs ~ V1 + V2")
+plot(mod_regdin2, main = "obs ~ V1 + V2 * V3")
+}
 
 # Visualizacao -----------------------------------------
 

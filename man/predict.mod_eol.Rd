@@ -39,11 +39,11 @@ pred <- predict(mod, n.ahead = 24)
 
 # em modelos de regressao, deve ser passada a variavel explicativa via newdata
 
-serie <- window(datregdin[[1]], 1, 200)
-varex <- datregdin[1:200, 2, drop = FALSE]
-mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
+serie <- window(datregdin$obs, 1, 100)
+varex <- datregdin$varex[1:100, , drop = FALSE]
+mod_regdin <- estimamodelo(serie, "ss_reg_din", regdata = varex)
 
-newdata <- datregdin[201:230, 2, drop = FALSE]
+newdata <- datregdin$varex[101:130, , drop = FALSE]
 pred <- predict(mod_regdin, newdata = newdata)
 
 }

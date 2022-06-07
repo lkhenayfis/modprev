@@ -34,8 +34,8 @@ na forma de um \code{data.frame}-like contendo as variáveis explicativas necess
 }
 \examples{
 
-serie1 <- window(datregdin[[1]], 1, 300)
-serie2 <- window(datregdin[[1]], 501, 800)
+serie1 <- window(AirPassengers, c(1949, 1), c(1954, 12))
+serie2 <- window(AirPassengers, c(1955, 1), c(1960, 12))
 
 mod_orig  <- estimamodelo(serie1, tipo = "sarima")
 mod_upd   <- update(mod_orig, serie2, refit = FALSE)
@@ -43,29 +43,22 @@ mod_refit <- update(mod_orig, serie2, refit = TRUE)
 
 \dontrun{
 layout(matrix(1:3))
-plot(mod_orig)
-plot(mod_upd)
-plot(mod_refit)
+plot(mod_orig, main = "original")
+plot(mod_upd, main = "update s/ refit")
+plot(mod_refit, main = "update c/ refit")
 }
 
 # Com variaveis explicativas ---------------------------
 
-serie <- window(datregdin[[1]], 1, 100)
-varex <- datregdin[1:100, 2, drop = FALSE]
-mod_orig <- estimamodelo(serie, "ss_reg_din", regdata = varex)
+serie <- window(datregdin$obs, 1, 100)
+varex <- datregdin$varex[1:100, , drop = FALSE]
+mod_orig <- estimamodelo(serie, "ss_reg_din", regdata = varex, formula = ~ V1 + V2 * V3)
 
-newserie <- window(datregdin[[1]], 101, 200)
-newvarex <- datregdin[101:200, 2, drop = FALSE]
+newserie <- window(datregdin$obs, 101, 200)
+newvarex <- datregdin$varex[101:200, , drop = FALSE]
 
 mod_upd   <- update(mod_orig, newserie, newregdata = newvarex, refit = FALSE)
 mod_refit <- update(mod_orig, newserie, newregdata = newvarex, refit = TRUE)
-
-\dontrun{
-layout(matrix(1:3))
-plot(mod_orig)
-plot(mod_upd)
-plot(mod_refit)
-}
 
 }
 \seealso{

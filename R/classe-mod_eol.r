@@ -49,7 +49,8 @@
 #' 
 #' @examples 
 #' 
-#' # ajustando tipo SARIMA
+#' # SARIMA -----------------------------------------------
+#' 
 #' mod_sarima <- estimamodelo(AirPassengers, tipo = "sarima")
 #' 
 #' # caso a serie nao possua sazonalidade explicita, o modelo sera ajustado sem isso
@@ -61,10 +62,29 @@
 #' coef(mod_sarima_semsazo)
 #' }
 #' 
-#' # ajustando uma regressao dinamica (com dado dummy interno do pacote)
-#' serie <- window(datregdin[[1]], 1, 100)
-#' varex <- datregdin[1:100, 2, drop = FALSE]
-#' mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
+#' # SS AR(1) + Sazonalidade ------------------------------
+#' 
+#' mod_ss <- estimamodelo(AirPassengers, tipo = "ss_ar1_saz")
+#' 
+#' # caso a serie nao possua sazonalidade explicita, o modelo sera ajustado sem isso
+#' ss <- arima.sim(200, model = list(ar = .8))
+#' mod_ss_semsazo <- estimamodelo(ss, tipo = "ss_ar1_saz")
+#' 
+#' # Regressao dinamica -----------------------------------
+#' 
+#' serie <- window(datregdin$obs, 1, 100)
+#' varex <- datregdin$varex[1:100, , drop = FALSE]
+#' 
+#' mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din", formula = ~ V1 + V2)
+#' 
+#' # explicitando uma formula
+#' mod_regdin2 <- estimamodelo(serie, "ss_reg_din", formula = ~ V1 + V2 * V3, regdata = varex)
+#' 
+#' \dontrun{
+#' layout(matrix(1:2))
+#' plot(mod_regdin, main = "obs ~ V1 + V2")
+#' plot(mod_regdin2, main = "obs ~ V1 + V2 * V3")
+#' }
 #' 
 #' # Visualizacao -----------------------------------------
 #' 
@@ -150,11 +170,11 @@ new_mod_eol <- function(fit, serie, tipo) {
 #' 
 #' # em modelos de regressao, deve ser passada a variavel explicativa via newdata
 #' 
-#' serie <- window(datregdin[[1]], 1, 200)
-#' varex <- datregdin[1:200, 2, drop = FALSE]
-#' mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
+#' serie <- window(datregdin$obs, 1, 100)
+#' varex <- datregdin$varex[1:100, , drop = FALSE]
+#' mod_regdin <- estimamodelo(serie, "ss_reg_din", regdata = varex)
 #' 
-#' newdata <- datregdin[201:230, 2, drop = FALSE]
+#' newdata <- datregdin$varex[101:130, , drop = FALSE]
 #' pred <- predict(mod_regdin, newdata = newdata)
 #' 
 #' @return série temporal multivariada contendo a previsão e o desvio padrão associado para os
@@ -189,8 +209,8 @@ predict.mod_eol <- function(object, n.ahead, ...) {
 #' 
 #' @examples 
 #' 
-#' serie1 <- window(datregdin[[1]], 1, 300)
-#' serie2 <- window(datregdin[[1]], 501, 800)
+#' serie1 <- window(AirPassengers, c(1949, 1), c(1954, 12))
+#' serie2 <- window(AirPassengers, c(1955, 1), c(1960, 12))
 #' 
 #' mod_orig  <- estimamodelo(serie1, tipo = "sarima")
 #' mod_upd   <- update(mod_orig, serie2, refit = FALSE)
@@ -198,29 +218,22 @@ predict.mod_eol <- function(object, n.ahead, ...) {
 #' 
 #' \dontrun{
 #' layout(matrix(1:3))
-#' plot(mod_orig)
-#' plot(mod_upd)
-#' plot(mod_refit)
+#' plot(mod_orig, main = "original")
+#' plot(mod_upd, main = "update s/ refit")
+#' plot(mod_refit, main = "update c/ refit")
 #' }
 #' 
 #' # Com variaveis explicativas ---------------------------
 #' 
-#' serie <- window(datregdin[[1]], 1, 100)
-#' varex <- datregdin[1:100, 2, drop = FALSE]
-#' mod_orig <- estimamodelo(serie, "ss_reg_din", regdata = varex)
+#' serie <- window(datregdin$obs, 1, 100)
+#' varex <- datregdin$varex[1:100, , drop = FALSE]
+#' mod_orig <- estimamodelo(serie, "ss_reg_din", regdata = varex, formula = ~ V1 + V2 * V3)
 #' 
-#' newserie <- window(datregdin[[1]], 101, 200)
-#' newvarex <- datregdin[101:200, 2, drop = FALSE]
+#' newserie <- window(datregdin$obs, 101, 200)
+#' newvarex <- datregdin$varex[101:200, , drop = FALSE]
 #' 
 #' mod_upd   <- update(mod_orig, newserie, newregdata = newvarex, refit = FALSE)
 #' mod_refit <- update(mod_orig, newserie, newregdata = newvarex, refit = TRUE)
-#' 
-#' \dontrun{
-#' layout(matrix(1:3))
-#' plot(mod_orig)
-#' plot(mod_upd)
-#' plot(mod_refit)
-#' }
 #' 
 #' @return modelo com novos dados, possivelmente reajustado
 #' 
