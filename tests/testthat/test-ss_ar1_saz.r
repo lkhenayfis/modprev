@@ -23,8 +23,8 @@ test_that("Previsao de modelo S.S. AR1+Saz", {
 })
 
 test_that("Atualizacao de modelo S.S. AR1+Saz", {
-    serie1 <- window(datregdin[[1]], 1, 300)
-    serie2 <- window(datregdin[[1]], 501, 900)
+    serie1 <- window(AirPassengers, c(1949, 1), c(1954, 12))
+    serie2 <- window(AirPassengers, c(1955, 1), c(1960, 12))
 
     mod <- estimamodelo(serie1, tipo = "ss_ar1_saz")
 

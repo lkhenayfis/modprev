@@ -9,7 +9,7 @@ test_that("Localizacao de arquivo de conf", {
     # CONF NO MESMO NIVEL DO DIRETORIO LOCAL
 
     setwd(wd)
-    ll <- localizaconf()
+    expect_warning(ll <- localizaconf())
 
     local <- ll[[1]]
     conf  <- ll[[2]]
@@ -30,7 +30,7 @@ test_that("Localizacao de arquivo de conf", {
 
     setwd("..")
 
-    ll <- localizaconf()
+    expect_warning(ll <- localizaconf())
 
     local <- ll[[1]]
     conf  <- ll[[2]]

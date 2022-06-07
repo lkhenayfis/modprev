@@ -9,47 +9,47 @@
 \arguments{
 \item{object}{modelo ajustado através de \code{\link{estimamodelo}}}
 
-\item{n.ahead}{numero de passos a frente para prever}
+\item{n.ahead}{número de passos à frente para prever}
 
 \item{...}{existe apenas para consistência com a genérica}
 }
 \value{
-série temporal multivariada contendo a previsão e o desvio padrão associado
+série temporal multivariada contendo a previsão e o desvio padrão associado para os
+passos de tempo \code{1:n.ahead}
 }
 \description{
-Wrapper para previsão e plot de modelos ajustados por \code{estimamodelo}
+Wrapper para previsão de modelos ajustados por \code{\link{estimamodelo}}
 }
 \details{
+A previsão destes modelos funciona da forma mais padrão, com \code{object} contendo um modelo
+estimado por \code{\link{estimamodelo}} e \code{n.ahead} um inteiro indicando número de passos à
+frente para prever. Em modelos de séries temporais simples, isto é tudo.
+
+\bold{Modelos com variáveis explicativas:}
+
 No caso de modelos com variáveis explicativas deve ser fornecido um parâmetro \code{newdata} na
-forma de uma matriz ou data.frame contendo apenas as colunas com variáveis a serem utilizadas. Se
-houver apenas uma variável explicativa, pode ser passada como um vetor ou série temporal. Nestes
-modelos, se o argumento \code{n.ahead} também tiver sido fornecido, \code{newdata} será reduzida
-às \code{n.ahead} primeiras observações.
+forma de code{data.frame}-like contendo as variáveis necessárias para o modelo. Usualmente a
+previsão será feita tantos passos à frente quanto há observações em \code{newdata}, porém se
+\code{n.ahead} for fornecido será usado com precedência sobre o número de observações novas.
 }
 \examples{
 
 mod <- estimamodelo(AirPassengers, tipo = "sarima")
-
-\dontrun{
-predict(mod, n.ahead = 24)
-predict(mod)
-}
+pred <- predict(mod, n.ahead = 24)
 
 # em modelos de regressao, deve ser passada a variavel explicativa via newdata
 
-serie <- window(datregdin[[1]], 1, 200)
-varex <- datregdin[1:200, 2, drop = FALSE]
-mod_regdin <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
+serie <- window(datregdin$obs, 1, 100)
+varex <- datregdin$varex[1:100, , drop = FALSE]
+mod_regdin <- estimamodelo(serie, "ss_reg_din", regdata = varex)
 
-\dontrun{
-newdata <- datregdin[201:230, 2, drop = FALSE]
-predict(mod_regdin, newdata = newdata)
-}
+newdata <- datregdin$varex[101:130, , drop = FALSE]
+pred <- predict(mod_regdin, newdata = newdata)
 
 }
 \seealso{
-Other metodos_mod_eol: 
+Other Metodos mod_eol: 
 \code{\link{estimamodelo}()},
 \code{\link{update.mod_eol}()}
 }
-\concept{metodos_mod_eol}
+\concept{Metodos mod_eol}

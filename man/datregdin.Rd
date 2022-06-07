@@ -5,17 +5,16 @@
 \alias{datregdin}
 \title{Dado Exemplo De Velocidade Do Vento}
 \format{
-\code{data.frame} de duas colunas:
+lista de dois elementos:
 \describe{
-\item{obs}{velocidade de vento observada}
-\item{prev}{velocidade de vento prevista}
+\item{obs}{série temporal de 200 observações do observado dummy}
+\item{prev}{\code{data.frame} de três colunas contendo as variáveis explicativas}
 }
 }
 \usage{
 datregdin
 }
 \description{
-Dado para exemplo de ajuste dos modelos, contendo informacoes de velocidade do vento prevista e
-observada
+Dado dummy para exemplificação dos modelos de regressão dinâmica.
 }
 \keyword{datasets}

@@ -14,7 +14,8 @@
 
 # Atualizacao de modelo S.S. AR1+Saz
 
-    structure(1.03757393105933, .Dim = c(1L, 1L, 1L))
+    structure(c(3.24732914442299, 0, 0, 55.5297447734162), .Dim = c(2L, 
+    2L, 1L))
 
 ---
 
@@ -22,11 +23,27 @@
 
 ---
 
-    structure(c(3.08476265907036, 1), .Dim = c(1L, 2L, 1L), .Dimnames = list(
-        NULL, c("custom1", "custom2"), NULL))
+    structure(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 183.9864917186, 
+    1), .Dim = c(1L, 13L, 1L), .Dimnames = list(NULL, c("sea_dummy1", 
+    "sea_dummy2", "sea_dummy3", "sea_dummy4", "sea_dummy5", "sea_dummy6", 
+    "sea_dummy7", "sea_dummy8", "sea_dummy9", "sea_dummy10", "sea_dummy11", 
+    "custom1", "custom2"), NULL))
 
 ---
 
-    structure(c(1, 0, 0, 0.797315902065573), .Dim = c(2L, 2L, 1L), .Dimnames = list(
-        c("custom1", "custom2"), c("custom1", "custom2"), NULL))
+    structure(c(-1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 1, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, -1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 
+    0, 1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 
+    0, 0, -1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 
+    0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 
+    0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.989405551005964), .Dim = c(13L, 
+    13L, 1L), .Dimnames = list(c("sea_dummy1", "sea_dummy2", "sea_dummy3", 
+    "sea_dummy4", "sea_dummy5", "sea_dummy6", "sea_dummy7", "sea_dummy8", 
+    "sea_dummy9", "sea_dummy10", "sea_dummy11", "custom1", "custom2"
+    ), c("sea_dummy1", "sea_dummy2", "sea_dummy3", "sea_dummy4", 
+    "sea_dummy5", "sea_dummy6", "sea_dummy7", "sea_dummy8", "sea_dummy9", 
+    "sea_dummy10", "sea_dummy11", "custom1", "custom2"), NULL))
 
