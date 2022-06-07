@@ -57,11 +57,19 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao simples", {
     expect_equal(mod_upd$modelo["Z"][, 2, ], c(varex2[[1]]))
     expect_true(all(mod_upd$serie - serie2 == 0))
 
+    expect_equal(attr(mod_upd$model, "formula"), attr(mod$model, "formula"))
+    expect_equal(attr(mod_upd$model, "vardin"), attr(mod$model, "vardin"))
+    expect_equal(attr(mod_upd$model, "saz"), attr(mod$model, "saz"))
+
     mod_refit <- update(mod, serie2, newregdata = varex2, refit = TRUE)
     expect_equal(c(mod_refit$modelo$y), c(serie2))
     expect_equal(round(mod_refit$modelo["Q"][, , 1], 8), 0.03101488)
     expect_equal(round(mod_refit$modelo["H"][, , 1], 8), 0.02001851)
     expect_equal(mod_refit$modelo["Z"][, 2, ], c(varex2[[1]]))
+    
+    expect_equal(attr(mod_upd$model, "formula"), attr(mod$model, "formula"))
+    expect_equal(attr(mod_upd$model, "vardin"), attr(mod$model, "vardin"))
+    expect_equal(attr(mod_upd$model, "saz"), attr(mod$model, "saz"))
 })
 
 # helper para gerar dados de regressao multipla
@@ -138,12 +146,20 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla", {
     expect_true(all(mod_upd$modelo["Z"][, 2:4, ] - t(data.matrix(newregdata)) == 0))
     expect_true(all(mod_upd$serie - newseries == 0))
 
+    expect_equal(attr(mod_upd$model, "formula"), attr(mod$model, "formula"))
+    expect_equal(attr(mod_upd$model, "vardin"), attr(mod$model, "vardin"))
+    expect_equal(attr(mod_upd$model, "saz"), attr(mod$model, "saz"))
+
     mod_refit <- update(mod, newseries = newseries, newregdata = newregdata, refit = TRUE)
 
     expect_true(all(mod_upd$modelo["Z"][, 2:4, ] - t(data.matrix(newregdata)) == 0))
     expect_true(all(mod_upd$serie - newseries == 0))
     expect_snapshot_value(round(mod$modelo["Q"][, , 1], 10), style = "deparse")
     expect_snapshot_value(round(mod$modelo["H"][, , 1], 10), style = "deparse")
+
+    expect_equal(attr(mod_upd$model, "formula"), attr(mod$model, "formula"))
+    expect_equal(attr(mod_upd$model, "vardin"), attr(mod$model, "vardin"))
+    expect_equal(attr(mod_upd$model, "saz"), attr(mod$model, "saz"))
 })
 
 test_that("Estimacao de modelo S.S. RegDin - regressao multipla heterocedastica", {
@@ -224,12 +240,12 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla heterocedastic
     mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
     desloc     <- parsedesloc(serie, newseries, 10)
     expect_equal(mod_upd$modelo["H"][1, 1, 1:10], shift(mod$modelo["H"][1, 1, 1:10], desloc))
-    
+
     newseries  <- ts(seq(20), start = c(2, 10), freq = 10)
     mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
     desloc     <- parsedesloc(serie, newseries, 10)
     expect_equal(mod_upd$modelo["H"][1, 1, 1:10], shift(mod$modelo["H"][1, 1, 1:10], desloc))
-    
+
     newseries  <- ts(seq(20), start = c(2, 2), freq = 10)
     mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
     desloc     <- parsedesloc(serie, newseries, 10)
