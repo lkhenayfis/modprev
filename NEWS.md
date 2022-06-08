@@ -1,3 +1,10 @@
+# master
+
+## New features
+
+* `estimamodelo` agora recebe em `tipo` nome completo do modelo a ser estimado, como simbolo ou
+  string. A chamada interna foi reformulada para simplificar a incorporacao de novos modelos
+
 # modprev 1.4.1
 
 ## New features
