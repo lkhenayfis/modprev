@@ -107,17 +107,16 @@ estimamodelo.numeric <- function(serie, tipo, ...) estimamodelo.ts(ts(serie), ti
 
 #' @export
 
-estimamodelo.ts <- function(serie, tipo = c("sarima", "ss_ar1_saz", "ss_reg_din"), ...) {
+estimamodelo.ts <- function(serie, tipo, ...) {
 
-    tipo <- match.arg(tipo)
+    tipo <- paste0("modprev:::", as.character(tipo))
+    tipo <- str2lang(tipo)
 
-    # originalmente isso foi implementado com um eval de match.call trocando o nome da funcao, mas
-    # tem uns problemas pra resolver de scoping. Eventualmente essa melhoria precisa ser feita
-    out <- switch(tipo,
-        "sarima" = sarima(serie, ...),
-        "ss_ar1_saz" = ss_ar1_saz(serie, ...),
-        "ss_reg_din" = ss_reg_din(serie, ...)
-    )
+    mc      <- match.call()
+    mc[[1]] <- tipo
+    mc[["tipo"]] <- NULL
+
+    out <- eval(mc, envir = parent.frame(), enclos = parent.frame())
 
     return(out)
 }
