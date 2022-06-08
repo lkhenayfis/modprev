@@ -1,0 +1,23 @@
+---
+title: "Adicionando novos modelos"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Adicionando novos modelos}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(modprev)
+```
+
+# Introdução
+
+O objetivo deste pacote
