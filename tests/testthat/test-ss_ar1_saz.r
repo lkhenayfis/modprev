@@ -1,4 +1,10 @@
 
+digits <- switch(Sys.info()[["sysname"]],
+    "Windows" = 5,
+    "Linux" = 5,
+    "Darwin" = 2
+)
+
 test_that("Estimacao de modelo S.S. AR1+Saz", {
     mod <- estimamodelo(AirPassengers, tipo = "ss_ar1_saz")
 
@@ -19,7 +25,7 @@ test_that("Previsao de modelo S.S. AR1+Saz", {
     expect_true(all(dim(prev) == c(24, 2)))
     expect_equal(c("prev", "sd"), colnames(prev))
 
-    expect_snapshot_value(round(c(prev), 5), style = "deparse")
+    expect_snapshot_value(round(c(prev), digits), style = "deparse")
 })
 
 test_that("Atualizacao de modelo S.S. AR1+Saz", {
