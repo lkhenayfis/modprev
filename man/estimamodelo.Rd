@@ -15,7 +15,7 @@ estimamodelo(serie, tipo, ...)
 Detalhes}
 }
 \value{
-Objeto da classe mod_eol e subclasse igual a \code{tipo}, uma lista de dois elementos:
+Objeto da classe modprev e subclasse igual a \code{tipo}, uma lista de dois elementos:
 \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 }
 \description{
@@ -103,8 +103,8 @@ plot(mod_regdin)
 
 }
 \seealso{
-Other Metodos mod_eol: 
-\code{\link{predict.mod_eol}()},
-\code{\link{update.mod_eol}()}
+Other Metodos modprev: 
+\code{\link{predict.modprev}()},
+\code{\link{update.modprev}()}
 }
-\concept{Metodos mod_eol}
+\concept{Metodos modprev}

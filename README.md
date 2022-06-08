@@ -5,6 +5,9 @@
 
 <!-- badges: start -->
 
+[![R-CMD-check](https://github.com/lkhenayfis/modprev/workflows/R-CMD-check/badge.svg)](https://github.com/lkhenayfis/modprev/actions)
+[![test-coverage](https://github.com/lkhenayfis/modprev/workflows/test-coverage/badge.svg)](https://github.com/lkhenayfis/modprev/actions)
+[![codecov](https://codecov.io/gh/lkhenayfis/modprev/branch/master/graph/badge.svg?token=LKMK4R8W9N)](https://codecov.io/gh/lkhenayfis/modprev)
 <!-- badges: end -->
 
 Arcabouco unificado para estimacao, previsao, simulacao e etc de

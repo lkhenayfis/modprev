@@ -17,19 +17,20 @@ NULL
 
 #' @param serie serie para ajustar
 #' 
-#' @return \code{sarima} retorna modelo sarima estimado. Este objeto será utilizado para compor a
-#'     saída de \code{\link{estimamodelo}};
+#' @return Objeto da classe \code{modprev} e subclasse \code{sarima}, uma lista de dois elementos:
+#'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_sarima
 
 sarima <- function(serie) {
-    out <- auto.arima(serie, allowdrift = FALSE)
+    mod <- auto.arima(serie, allowdrift = FALSE)
+    out <- new_modprev(mod, serie, "sarima")
     return(out)
 }
 
 # METODOS ------------------------------------------------------------------------------------------
 
-#' @param object objeto com classes \code{c("sarima", "mod_eol")} contendo modelo
+#' @param object objeto com classes \code{c("sarima", "modprev")} contendo modelo
 #' @param n.ahead número de passos à frente para previsão
 #' @param ... demais argumentos passados a \code{\link[stats]{predict.Arima}}, além de 
 #'     \code{n.ahead}
@@ -56,7 +57,7 @@ predict.sarima <- function(object, n.ahead, ...) {
 #' @param ... existe apenas para consistência com a genérica
 #' 
 #' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
-#'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{mod_eol};
+#'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
 #' 
 #' @rdname modelos_sarima
 #' 
@@ -67,6 +68,7 @@ update.sarima <- function(object, newseries, refit = FALSE, ...) {
         object <- estimamodelo(newseries, "sarima")
     } else {
         object$modelo <- Arima(newseries, model = object$modelo)
+        object$serie  <- if(is.ts(newseries)) newseries else ts(newseries)
     }
 
     return(object)

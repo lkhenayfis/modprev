@@ -92,10 +92,10 @@
 #' plot(mod_regdin)
 #' }
 #' 
-#' @return Objeto da classe mod_eol e subclasse igual a \code{tipo}, uma lista de dois elementos:
+#' @return Objeto da classe modprev e subclasse igual a \code{tipo}, uma lista de dois elementos:
 #'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
-#' @family Metodos mod_eol
+#' @family Metodos modprev
 #' 
 #' @export
 
@@ -107,24 +107,21 @@ estimamodelo.numeric <- function(serie, tipo, ...) estimamodelo.ts(ts(serie), ti
 
 #' @export
 
-estimamodelo.ts <- function(serie, tipo = c("sarima", "ss_ar1_saz", "ss_reg_din"), ...) {
+estimamodelo.ts <- function(serie, tipo, ...) {
 
-    tipo <- match.arg(tipo)
+    tipo <- paste0("modprev:::", as.character(tipo))
+    tipo <- str2lang(tipo)
 
-    # originalmente isso foi implementado com um eval de match.call trocando o nome da funcao, mas
-    # tem uns problemas pra resolver de scoping. Eventualmente essa melhoria precisa ser feita
-    fit_mod <- switch(tipo,
-        "sarima" = sarima(serie, ...),
-        "ss_ar1_saz" = ss_ar1_saz(serie, ...),
-        "ss_reg_din" = ss_reg_din(serie, ...)
-    )
+    mc      <- match.call()
+    mc[[1]] <- tipo
+    mc[["tipo"]] <- NULL
 
-    out <- new_mod_eol(fit_mod, serie, tipo)
+    out <- eval(mc, envir = parent.frame(), enclos = parent.frame())
 
     return(out)
 }
 
-#' Contrutor Interno De \code{mod_eol}
+#' Contrutor Interno De \code{modprev}
 #' 
 #' Função interna, não deve ser chamada diretamente pelo usuário
 #' 
@@ -132,19 +129,19 @@ estimamodelo.ts <- function(serie, tipo = c("sarima", "ss_ar1_saz", "ss_reg_din"
 #' @param serie serie para qual o modelo foi estimado
 #' @param tipo string indicando espcificação do modelo
 #' 
-#' @return Objeto da classe mod_eol e subclasse igual a \code{tipo}, uma lista de dois elementos:
-#'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada 
+#' @return Objeto da classe \code{modprev} e subclasse igual a \code{tipo}, uma lista de dois 
+#'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada 
 
-new_mod_eol <- function(fit, serie, tipo) {
+new_modprev <- function(fit, serie, tipo) {
     new <- list(modelo = fit, serie = serie)
-    class(new) <- c(tipo, "mod_eol")
+    class(new) <- c(tipo, "modprev")
 
     return(new)
 }
 
 # METODOS -----------------------------------------------------------------------------------------
 
-#' Previsão De Modelos \code{mod_eol}
+#' Previsão De Modelos \code{modprev}
 #' 
 #' Wrapper para previsão de modelos ajustados por \code{\link{estimamodelo}}
 #' 
@@ -180,17 +177,17 @@ new_mod_eol <- function(fit, serie, tipo) {
 #' @return série temporal multivariada contendo a previsão e o desvio padrão associado para os
 #'     passos de tempo \code{1:n.ahead}
 #' 
-#' @family Metodos mod_eol
+#' @family Metodos modprev
 #' 
 #' @export
 
-predict.mod_eol <- function(object, n.ahead, ...) {
+predict.modprev <- function(object, n.ahead, ...) {
     stop(paste0("Modelo do tipo ", class(object)[1], " nao possui metodo 'predict'"))
 }
 
-#' Atualizacao De Modelos \code{mod_eol}
+#' Atualizacao De Modelos \code{modprev}
 #' 
-#' Wrapper para atualizar e possivelmete reajustar modelos \code{mod_eol}
+#' Wrapper para atualizar e possivelmete reajustar modelos \code{modprev}
 #' 
 #' O padrão desta função é simplesmente substituir \code{newseries} no modelo ajustado 
 #' \code{object}, isto é, mantendo todos os hiperparâmetros estimados originalmente. Através do 
@@ -237,10 +234,10 @@ predict.mod_eol <- function(object, n.ahead, ...) {
 #' 
 #' @return modelo com novos dados, possivelmente reajustado
 #' 
-#' @family Metodos mod_eol
+#' @family Metodos modprev
 #' 
 #' @export
 
-update.mod_eol <- function(object, newseries, refit = FALSE, ...) {
+update.modprev <- function(object, newseries, refit = FALSE, ...) {
     stop(paste0("Modelo do tipo ", class(object)[1], " nao possui metodo 'update'"))
 }

@@ -39,8 +39,8 @@ NULL
 #'     Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro assume este
 #'     valor como a sazonalidade
 #' 
-#' @return \code{ss_reg_din} retorna modelo de regressão dinâmica. Este objeto será utilizado para
-#'     compor a saída de \code{link{estimamodelo}}
+#' @return Objeto da classe \code{modprev} e subclasse \code{ss_reg_din}, uma lista de dois 
+#'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_ss_reg_din
 
@@ -100,7 +100,9 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE) {
     attr(fit$model, "vardin")  <- vardin
     attr(fit$model, "saz")     <- saz
 
-    return(fit$model)
+    out <- new_modprev(fit$model, serie, "ss_reg_din")
+
+    return(out)
 }
 
 # METODOS ------------------------------------------------------------------------------------------
@@ -113,7 +115,7 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE) {
 #' advindos da distribuição preditiva e não de suavização. Considerando estes fatores, \code{...} 
 #' não pode conter \code{n.ahead} ou estes dois outros, ou então ocorrerá erro.
 #' 
-#' @param object objeto com classes \code{c("ss_reg_din", "mod_eol")} contendo modelo
+#' @param object objeto com classes \code{c("ss_reg_din", "modprev")} contendo modelo
 #' @param newdata \code{data.frame}-like contendo variéveis explicativas fora da amostra
 #' @param n.ahead número de passos à frente para previsão. Este argumento não é necessario, caso não
 #'     seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}
@@ -161,7 +163,7 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
 #' @param ... demais argumentos passados a \code{\link[KFAS]{predict.SSModel}}
 #' 
 #' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
-#'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{mod_eol};
+#'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
 #' 
 #' @rdname modelos_ss_reg_din
 #' 
