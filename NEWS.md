@@ -11,6 +11,7 @@
   emite um aviso quando `formula` e omitido
 * `parsedesloc` nao estava correta na ausencia de heterocedasticidade com series sazonais, e emitia
   um aviso incorretamente
+* `JANELAMOVEL.ss_reg_din` nao possuia argumento `vardin`
 
 # modprev 1.4.1
 
