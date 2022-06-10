@@ -8,27 +8,30 @@ digits <- switch(Sys.info()[["sysname"]],
 test_that("Estimacao de modelo S.S. RegDin - regressao simples", {
     serie <- window(datregdin$obs, 1, 200)
     varex <- datregdin$varex[, "V1", drop = FALSE]
-    mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
+    mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din", formula = ~ V1)
 
     expect_equal("ss_reg_din", class(mod)[1])
     expect_snapshot_value(round(mod$modelo["Q"][1, 1, 1], digits), style = "deparse")
     expect_snapshot_value(round(mod$modelo["H"][1, 1, 1], digits), style = "deparse")
 
     serie <- c(serie)
-    mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
+    mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din", formula = ~ V1)
 
+    # sem passar regdata
     expect_error(estimamodelo(serie, tipo = "ss_reg_din"))
 
-    serie <- datregdin$obs
-    varex <- data.frame(venprev = datregdin$varex)
+    # sem passar formula
+    expect_warning(estimamodelo(serie, tipo = "ss_reg_din", regdata = varex))
+
+    # NAs nos regressores
     varex[c(1, 10, 20), ] <- NA_real_
-    expect_warning(estimamodelo(serie, regdata = varex, tipo = "ss_reg_din"))
+    expect_warning(estimamodelo(serie, regdata = varex, tipo = "ss_reg_din", formula = ~ V1))
 })
 
 test_that("Previsao de modelo S.S. RegDin - regressao simples", {
     serie <- window(datregdin$obs, 1, 100)
     varex <- datregdin$varex[1:100, "V1", drop = FALSE]
-    mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din")
+    mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din", formula = ~ V1)
 
     newdata <- datregdin$varex[101:120, "V1", drop = FALSE]
     prev    <- predict(mod, newdata = newdata)
@@ -54,7 +57,7 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao simples", {
     serie2 <- window(datregdin$obs, 101, 200)
     varex2 <- datregdin$varex[101:200, "V1", drop = FALSE]
 
-    mod <- estimamodelo(serie1, tipo = "ss_reg_din", regdata = varex1)
+    mod <- estimamodelo(serie1, tipo = "ss_reg_din", regdata = varex1, formula = ~ V1)
 
     mod_upd <- update(mod, serie2, newregdata = varex2)
     expect_equal(c(mod$modelo["Q"]), c(mod_upd$modelo["Q"]))

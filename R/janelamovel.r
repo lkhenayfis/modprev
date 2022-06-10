@@ -139,7 +139,7 @@ JANELAMOVEL.ss_reg_din <- function(tipo, serie, janela, passo, n.ahead, refit.ca
     ij <- janelas[[1]]
     iserie   <- window(serie, ij[[1]], ij[[2]])
     iregdata <- regdata[window(aux, ij[[1]], ij[[2]]), , drop = FALSE]
-    mod      <- estimamodelo(serie = iserie, tipo = tipo, regdata = iregdata)
+    mod <- estimamodelo(serie = iserie, tipo = tipo, regdata = iregdata, formula = formula)
 
     jm <- lapply(seq(janelas), function(i) {
 

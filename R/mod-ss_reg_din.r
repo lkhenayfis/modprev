@@ -49,6 +49,7 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE) {
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
 
     if(missing(formula) || is.null(formula)) {
+        warning("'formula' nao foi passado -- usando todas as variaveis de forma aditiva")
         formula <- colnames(regdata)
         if(length(formula) > 1) formula <- paste0(colnames(regdata), collapse = " + ")
         formula <- paste0("~ ", formula)

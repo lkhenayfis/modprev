@@ -5,6 +5,11 @@
 * `estimamodelo` agora recebe em `tipo` nome completo do modelo a ser estimado, como simbolo ou
   string. A chamada interna foi reformulada para simplificar a incorporacao de novos modelos
 
+## Bug fixes
+
+* `JANELAMOVEL.ss_reg_din` nao estava usando a `formula` passada. Adicionalmente `ss_reg_din` agora 
+  emite um aviso quando `formula` e omitido
+
 # modprev 1.4.1
 
 ## New features
