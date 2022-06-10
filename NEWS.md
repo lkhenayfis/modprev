@@ -2,6 +2,8 @@
 
 ## New features
 
+### Minor
+
 * `estimamodelo` agora recebe em `tipo` nome completo do modelo a ser estimado, como simbolo ou
   string. A chamada interna foi reformulada para simplificar a incorporacao de novos modelos
 
