@@ -239,6 +239,8 @@ parsedesloc <- function(serie, newseries, saz) {
     freq_old <- frequency(serie)
     freq_new <- frequency(newseries)
 
+    if(saz == 1) return(0)
+
     if(freq_old != saz) {
         wrn <- paste0("O modelo foi ajustado com heterocedasticidade, mas 'serie' nao era um objeto",
             "ts -- Sera transformado com inicio = c(1, 1) e frequecia igual a da heterocedasticidade")

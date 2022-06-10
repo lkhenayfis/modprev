@@ -9,6 +9,8 @@
 
 * `JANELAMOVEL.ss_reg_din` nao estava usando a `formula` passada. Adicionalmente `ss_reg_din` agora 
   emite um aviso quando `formula` e omitido
+* `parsedesloc` nao estava correta na ausencia de heterocedasticidade com series sazonais, e emitia
+  um aviso incorretamente
 
 # modprev 1.4.1
 

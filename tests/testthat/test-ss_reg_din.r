@@ -233,18 +233,28 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla heterocedastic
 
     newseries  <- ts(seq(20), start = c(2, 4), freq = 10)
     mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
-    desloc     <- parsedesloc(serie, newseries, 10)
+    desloc     <- parsedesloc(serie, newseries, attr(mod_upd$modelo, "saz"))
     expect_equal(mod_upd$modelo["H"][1, 1, 1:10], shift(mod$modelo["H"][1, 1, 1:10], desloc))
 
     newseries  <- ts(seq(20), start = c(2, 10), freq = 10)
     mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
-    desloc     <- parsedesloc(serie, newseries, 10)
+    desloc     <- parsedesloc(serie, newseries, attr(mod_upd$modelo, "saz"))
     expect_equal(mod_upd$modelo["H"][1, 1, 1:10], shift(mod$modelo["H"][1, 1, 1:10], desloc))
 
     newseries  <- ts(seq(20), start = c(2, 2), freq = 10)
     mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
-    desloc     <- parsedesloc(serie, newseries, 10)
+    desloc     <- parsedesloc(serie, newseries, attr(mod_upd$modelo, "saz"))
     expect_equal(mod_upd$modelo["H"][1, 1, 1:10], shift(mod$modelo["H"][1, 1, 1:10], desloc))
+
+    # Atualizacao quando a serie e sazonal mas vardin = FALSE
+
+    mod <- estimamodelo(serie, "ss_reg_din", formula = ~ V1 + V2 * V3, regdata = varex, vardin = FALSE)
+
+    newseries  <- ts(seq(20), start = c(2, 4), freq = 10)
+    newregdata <- datregdin$varex[1:20, ]
+    mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
+    desloc     <- parsedesloc(serie, newseries, attr(mod$model, "saz"))
+    expect_equal(desloc, 0)
 })
 
 test_that("Identificacao de deslocamento de array", {
