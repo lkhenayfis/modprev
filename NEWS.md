@@ -1,3 +1,12 @@
+# janelamovel
+
+## New features
+
+### Minor
+
+* `estimamodelo` agora faz uma critica acerca dos argumentos extras passados via `...`. Estes sao
+  comparados com os argumentos do `tipo` especificado e apenas aqueles com match positivo permanecem
+
 # master
 
 ## Misc
