@@ -92,8 +92,8 @@ jm_regdin <- janelamovel(serie, "ss_reg_din", 100, passo = 10, n.ahead = 5, regd
 
 \dontrun{
 jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 0)
-jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 1, refit = 12)
-jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 2, refit = 3)
+jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 1, refit.cada = 12)
+jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 2, refit.cada = 3)
 }
 
 }

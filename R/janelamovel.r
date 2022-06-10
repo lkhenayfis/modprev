@@ -66,8 +66,8 @@
 #' 
 #' \dontrun{
 #' jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 0)
-#' jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 1, refit = 12)
-#' jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 2, refit = 3)
+#' jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 1, refit.cada = 12)
+#' jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 2, refit.cada = 3)
 #' }
 #' 
 #' @return lista contendo previsoes de 1 a n.ahead passos à frente para cada janela
@@ -75,54 +75,28 @@
 #' @export
 
 janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cada = NA, verbose = 0, ...) {
+
     args <- list(...)
     if("largura" %in% names(args)) {
         warning("'largura' nao e mais suportado -- use 'janela' no lugar")
-
         janela <- args$largura
     }
-
-    tipo <- structure(tipo, class = tipo)
-    JANELAMOVEL(tipo, serie, janela, passo, n.ahead, refit.cada, verbose, ...)
-}
-
-# BACKEND ------------------------------------------------------------------------------------------
-
-JANELAMOVEL <- function(tipo, serie, janela, passo, n.ahead, refit.cada, verbose, ...) {
-    UseMethod("JANELAMOVEL")
-}
-
-JANELAMOVEL.default <- function(tipo, serie, janela, passo, n.ahead, refit.cada, verbose, ...) {
-
-    if(!is.ts(serie)) serie <- ts(serie)
-    verb_func <- verbose_fun(verbose)
-    janelas <- expandejanelas(serie, janela, passo)
-    v_refit <- expanderefit(janelas, refit.cada)
-
-    # Estima um modelo inicial que vai ser usado na primeira janela e atualizado dali em diante
-    iserie <- window(serie, janelas[[1]][[1]], janelas[[1]][[2]])
-    mod    <- estimamodelo(serie = iserie, tipo = tipo)
-
-    jm <- lapply(seq(janelas), function(i) {
-
-        verb_func(janelas[[i]][[1]], janelas[[i]][[2]], v_refit[i])
-
-        iserie <- window(serie, janelas[[i]][[1]], janelas[[i]][[2]])
-        mod    <- update(mod, iserie, refit = v_refit[i])
-
-        predict(mod, n.ahead = n.ahead)
-    })
-
-    # Retorna
-    return(jm)
-}
-
-JANELAMOVEL.ss_reg_din <- function(tipo, serie, janela, passo, n.ahead, refit.cada, verbose,
-    formula, regdata, vardin = FALSE, ...) {
+    if("refit_cada" %in% names(args)) {
+        warning("'refit_cada' nao e mais suportado -- use 'refit.cada' no lugar")
+        refit.cada <- refit_cada
+    }
 
     if(!is.ts(serie)) serie <- ts(serie)
 
-    if(length(serie) + n.ahead > nrow(regdata)) {
+    has_regdata <- "regdata" %in% ...names()
+    if(!has_regdata) {
+        regdata <- NULL
+    } else {
+        regdata <- args$regdata
+        args$regdata <- NULL
+    }
+
+    if(has_regdata && (length(serie) + n.ahead > nrow(regdata))) {
         warning("'regdata' deve conter 'length(serie) + n.ahead' observacoes -- reduzindo 'serie'")
 
         reduz <- length(serie) + n.ahead - nrow(regdata)
@@ -133,14 +107,15 @@ JANELAMOVEL.ss_reg_din <- function(tipo, serie, janela, passo, n.ahead, refit.ca
     janelas <- expandejanelas(serie, janela, passo)
     v_refit <- expanderefit(janelas, refit.cada)
 
-    aux <- ts(seq_len(nrow(regdata)), start = start(serie), frequency = frequency(serie))
+    # variavel auxiliar para fazer o subset de newdata pareado com serie
+    aux <- ts(seq_len(length(serie) + n.ahead), start = start(serie), frequency = frequency(serie))
 
     # Estima um modelo inicial que vai ser usado na primeira janela e atualizado dali em diante
     ij <- janelas[[1]]
     iserie   <- window(serie, ij[[1]], ij[[2]])
     iregdata <- regdata[window(aux, ij[[1]], ij[[2]]), , drop = FALSE]
-    mod <- estimamodelo(serie = iserie, tipo = tipo, regdata = iregdata, formula = formula,
-        vardin = vardin)
+    mod <- c(list(quote(estimamodelo), serie = iserie, tipo = tipo, regdata = iregdata), args)
+    mod <- eval(as.call(mod), parent.frame(), parent.frame())
 
     jm <- lapply(seq(janelas), function(i) {
 
@@ -153,7 +128,7 @@ JANELAMOVEL.ss_reg_din <- function(tipo, serie, janela, passo, n.ahead, refit.ca
 
         ijn <- list(deltats(ij[[2]], 1, frequency(aux)), deltats(ij[[2]], n.ahead, frequency(aux)))
         inewdata <- regdata[window(aux, ijn[[1]], ijn[[2]]), , drop = FALSE]
-        predict(mod, newdata = inewdata)
+        predict(mod, n.ahead, newdata = inewdata)
     })
 
     # Retorna

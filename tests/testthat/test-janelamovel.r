@@ -121,7 +121,8 @@ test_that("Testes de previsao em janela", {
     ss <- window(dados[[2]], 1, 195)
     regd <- dados[[1]]
 
-    jm <- janelamovel(ss, "ss_reg_din", 150, passo = 5, n.ahead = 5, regdata = regd)
+    jm <- janelamovel(ss, "ss_reg_din", 150, passo = 5, n.ahead = 5, regdata = regd,
+        formula = ~ V1)
 
     expect_equal(length(jm), 10)
     expect_true(all(sapply(jm, function(m) all(dim(m) == c(5, 2)))))
