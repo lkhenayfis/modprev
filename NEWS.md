@@ -2,7 +2,8 @@
 
 ## Misc
 
-* Remove `extraiserie` e `localizaconf` do pacote
+* Remove `extraiserie` e `localizaconf` do pacote e dependencias `data.table` e `jsonlite` que eram
+  associadas a estas funcoes
 
 # modprev 1.4.4
 

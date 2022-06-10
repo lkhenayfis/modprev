@@ -18,9 +18,7 @@ Depends:
     R (>= 3.6),
     stats (>= 3.6)
 Imports: 
-    data.table (>= 1.12.8),
     forecast (>= 8.12),
-    jsonlite (>= 1.6.1),
     KFAS (>= 1.4.4)
 Suggests: 
     testthat (>= 3.0.0)
