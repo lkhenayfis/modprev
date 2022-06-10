@@ -1,5 +1,11 @@
 # master
 
+## Misc
+
+* Remove `extraiserie` e `localizaconf` do pacote
+
+# modprev 1.4.4
+
 ## New features
 
 ### Minor

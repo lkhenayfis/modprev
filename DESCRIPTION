@@ -1,6 +1,6 @@
 Package: modprev
 Title: Interface Unificada Para Estimacao E Uso De Modelos
-Version: 1.4.4
+Version: 1.4.4.9000
 Authors@R: 
     person("Lucas", "Khenayfis", , "lucaskhenayfis@gmail.com", role = c("aut", "cre"))
 Description: Arcabouco unificado para estimacao, previsao, simulacao e etc
