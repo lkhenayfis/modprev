@@ -112,7 +112,7 @@ estimamodelo.numeric <- function(serie, tipo, ...) estimamodelo.ts(ts(serie), ti
 estimamodelo.ts <- function(serie, tipo, ...) {
 
     args_tipo <- names(formals(tipo))
-    tipo <- str2lang(tipo)
+    tipo <- str2lang(paste0("modprev:::", tipo))
 
     mc <- match.call()
     mc <- mc[c(TRUE, names(mc)[-1] %in% args_tipo)]

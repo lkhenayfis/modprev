@@ -84,7 +84,7 @@ janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cad
     }
     if("refit_cada" %in% names(args)) {
         warning("'refit_cada' nao e mais suportado -- use 'refit.cada' no lugar")
-        refit.cada <- refit_cada
+        refit.cada <- args$refit_cada
     }
 
     if(!is.ts(serie)) serie <- ts(serie)
