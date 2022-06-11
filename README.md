@@ -26,8 +26,8 @@ deve ser instalado diretamente a partir do repositorio utilizando:
 
 ``` r
 # Caso a biblioteca remotes nao esteja instalada, execute install.packages("remotes") primeiro
-remotes::install_github("lkhenayfis/modprev") # instalacao da versao de desenvolvimento
-remotes::install_github("lkhenayfis/modprev@*release") # instalacao da ultima versao fechada
+remotes::install_github("lkhenayfis/modprev", build_vignettes = TRUE) # instalacao da versao de desenvolvimento
+remotes::install_github("lkhenayfis/modprev@*release", build_vignettes = TRUE) # instalacao da ultima versao fechada
 ```
 
 ## Exemplo de uso
