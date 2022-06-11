@@ -1,0 +1,269 @@
+---
+title: "Adicionando novos modelos"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Adicionando novos modelos}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r conf_knit, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+O objetivo deste pacote é facilitar o uso de diferentes arcabouços de modelagem para previsões 
+diversas. Para que isso seja possível, a introdução de novas abordagens deve ser a mais *seamless*
+possível, sem demandar modificações ao código existente exceto pela adição do novo tipo de modelo. 
+Atualmente os diferentes modelos são implementados como subclasses de uma classe genérica do pacote,
+estimados através da mesma função wrapper e utilizados por métodos S3 apropriados. A manutenção 
+desta estrutura garante o funcionamento da estimação e backtest em janela móvel de quaisquer novos
+modelos introduzidos.
+
+O objetivo desta vignette é detalhar o processo de introdução de novos modelos ao pacote.
+
+-----
+
+## Estimação 
+
+Todos os modelos disponíveis são estimados através da mesma wrapper `estimamodelos`. Esta função 
+só possui dois argumentos nomeados:
+
+* `serie`: a série temporal sendo ajustada
+* `tipo`: o tipo de modelo que será ajustado à série
+
+Ela também possui o argumento `...` para que seja possível passar mais informações aos métodos de
+estimação de cada arcabouço. Esta função não realiza a estimação de modelos diretamente, mas sim
+faz a ponte entre os argumentos e o método de estimação apropriado, definido em `tipo`. A seguir
+está o corpo desta função
+
+```{r base_fit, eval=FALSE}
+estimamodelo.ts <- function(serie, tipo, ...) {
+
+    tipo <- paste0("modprev:::", as.character(tipo))
+    tipo <- str2lang(tipo)
+
+    mc      <- match.call()
+    mc[[1]] <- tipo
+    mc[["tipo"]] <- NULL
+
+    out <- eval(mc, envir = parent.frame(), enclos = parent.frame())
+
+    return(out)
+}
+```
+
+Ou seja, o código espera que exista uma função chamada `tipo` no *namespace* de `modprev`, e a chama
+passando os argumentos passados a `estimamodelo`, com exceção de `tipo`.
+
+Desta forma, cada arcabouço de modelagem deve possuir uma função própria de estimação que receba o
+argumento `serie`. Por exemplo, modelos SARIMA são estimados pela função `sarima`:
+
+```{r sarima_fit, echo=FALSE, eval=FALSE}
+sarima <- function(serie) {
+    mod <- auto.arima(serie, allowdrift = FALSE)
+    out <- new_modprev(mod, serie, "sarima")
+    return(out)
+}
+```
+
+Outros argumentos são permitidos, como por exemplo nos modelos de regressão dinâmica:
+
+```{r, eval=FALSE}
+ss_reg_din <- function(serie, regdata, formula, vardin = FALSE) {
+
+    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
+
+    if(missing(formula) || is.null(formula)) {
+        formula <- colnames(regdata)
+        if(length(formula) > 1) formula <- paste0(colnames(regdata), collapse = " + ")
+        formula <- paste0("~ ", formula)
+        formula <- as.formula(formula)
+    }
+
+    nvars  <- ncol(model.matrix(formula, data = regdata)) - 1 # model.matrix inclui intercept
+
+    if(vardin & (frequency(serie) == 1)) warning("'vardin' e TRUE mas 'serie' nao possui sazonalidade")
+    vardin <- vardin * 1
+
+    if(vardin != 0) {
+
+        saz <- frequency(serie) * (vardin == 1) + vardin * (vardin > 1)
+        upfunc <- function(par, mod, ...) {
+            parH <- par[1:2]
+            uH   <- cos(0:(saz - 1) * 2 * pi / saz)
+            vH   <- sin(0:(saz - 1) * 2 * pi / saz)
+            mod["H"][] <- rep(exp(parH[1] * uH + parH[2] * vH), length.out = dim(mod["H"])[3])
+
+            parQ <- par[-c(1:2)]
+            for(i in seq_along(parQ)) mod["Q"][i, i, 1] <- exp(parQ[i])
+
+            return(mod)
+        }
+
+    } else {
+
+        saz <- 1
+        upfunc <- function(par, mod, ...) {
+            mod["H"][1, 1, 1] <- exp(par[1])
+
+            parQ <- par[-1]
+            for(i in seq_along(parQ)) mod["Q"][i, i, 1] <- exp(parQ[i])
+
+            return(mod)
+        }
+    }
+
+    mod <- SSModel(serie ~ SSMregression(formula, regdata, Q = diag(NA_real_, nvars)),
+            H = array(NA_real_, c(1, 1, saz)))
+    fit <- fitSSM(mod, rep(0, nvars + 1 + (vardin != 0)), upfunc, method = "BFGS")
+
+    if(fit$optim.out$convergence < 0) {
+        fit$model$Z[] <- NA
+    }
+
+    attr(fit$model, "formula") <- formula
+    attr(fit$model, "vardin")  <- vardin
+    attr(fit$model, "saz")     <- saz
+
+    out <- new_modprev(fit$model, serie, "ss_reg_din")
+
+    return(out)
+}
+```
+
+De fato, todos os métodos que utilizem variáveis explicativas devem recebê-las pelo argumento 
+`regdata`. Isto é importante para identificação automática pelo pacote do método de janela rolante
+apropriado.
+
+Além da restrição de existência do argumento `serie`, qualquer método de estimação deve 
+necessáriamente utilizar o contrutor `new_modprev` **SEM ADICIONAR OU ALTERNAR NADA NELE**. 
+Observando `ss_reg_din` novamente, vemos que além da estimação da regressão dinâmica, é necessário
+passar mais algumas informações acerca do modelo. Estas informações podem ser incluídas como 
+atributos *do modelo estimado*, sem problemas.
+
+O objeto retornado pelo construtor terá classe `modprev` e subclasse `tipo`.
+
+## Métodos
+
+A previsão, extração de valores ajustados e demais métodos estatísticos são implementados como 
+métodos S3 das classes `tipo` correspondentes a cada arcabouço de modelagem. Estes métodos devem
+receber diretamente o objeto retornado por `estimamodelo`.
+
+### `predict`
+
+Assim como a estimação, os métodos de previsão devem seguir algumas restrições acerca de seus 
+argumentos e valor retornado. Por exemplo, a previsão de `sarima`:
+
+```{r, eval=FALSE}
+predict.sarima <- function(object, n.ahead, ...) {
+    modelo <- object$modelo
+
+    prev <- predict(modelo, n.ahead = n.ahead, ...)
+    prev <- do.call(cbind, prev)
+    colnames(prev) <- c("prev", "sd")
+
+    return(prev)
+}
+```
+
+Além de `object`, os `predict`s precisam ter o argumento `n.ahead` indicando número de passos à 
+frente para previsão. A saída dos métodos de previsão deve sempre ser uma série temporal bivariada
+com as colunas `prev` e `sd`, contendo o valor previsto e o desvio padrão associado à esta previsão.
+
+Novamente, é permissível que estes métodos possuam outros argumentos:
+
+```{r, eval=FALSE}
+predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
+    modelo <- object$modelo
+
+    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro newdata")
+
+    if(!missing(n.ahead)) {
+        regobs <- min(n.ahead, nrow(newdata))
+        newdata <- newdata[seq(regobs), , drop = FALSE]
+    }
+
+    # Como extserie nao tem sazonalidade, update vai lancar um aviso que nao tem utilidade aqui
+    extserie <- rep(NA_real_, nrow(newdata))
+    extmod   <- suppressWarnings(update(object, extserie, newdata)$modelo)
+
+    prev <- predict(modelo, newdata = extmod, se.fit = TRUE, filtered = TRUE, ...)
+    colnames(prev) <- c("prev", "sd")
+
+    return(prev)
+}
+```
+
+### `update`
+
+Os métodos de `update` em `modprev` são diferentes em essência daquele padrão do R. Em regressões,
+por exemplo, `update` serve para trocar e reavaliar a fórmula da regressão, mantendo os mesmos
+dados. Aqui, este método possui dois usos principais:
+
+1. atualizar a série e, possivelmente, variáveis explicativas mantendo os parâmetros já estimados
+2. atualizar a série e variáveis explicativas reestimando o modelo
+
+Devem seguir algumas restrições de argumentos:
+
+```{r, eval=FALSE}
+update.sarima <- function(object, newseries, refit = FALSE, ...) {
+    if(refit) {
+        object <- estimamodelo(newseries, "sarima")
+    } else {
+        object$modelo <- Arima(newseries, model = object$modelo)
+        object$serie  <- if(is.ts(newseries)) newseries else ts(newseries)
+    }
+
+    return(object)
+}
+```
+
+Novamente, devem receber `object` contendo o objeto retornado por `estimamodelo`, `newseries` 
+contendo a nova série e `refit`, um booleano indicando se o modelo deve ser reajustado. O objeto
+retornado deve ser `object` modificado com o novo modelo e série. Deve ser tomado cuidado com os 
+argumentos extras possivelmente presentes, como no caso de `ss_reg_din`:
+
+```{r, eval=FALSE}
+update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...) {
+
+    if(refit) {
+        formula <- attr(object$modelo, "formula")
+        vardin  <- attr(object$modelo, "vardin")
+        object  <- estimamodelo(newseries, "ss_reg_din", regdata = newregdata, formula = formula,
+            vardin = vardin)
+    } else {
+
+        modelo <- object$modelo
+
+        if(missing(newregdata)) {
+            stop("Forneca nova variavel explicativa atraves do parametro newregdata")
+        }
+
+        saz <- attr(modelo, "saz")
+
+        desloc <- parsedesloc(object$serie, newseries, saz)
+
+        Hmat <- modelo["H"][, , seq_len(saz), drop = FALSE]
+        Hmat <- Hmat[, , shift(seq_len(saz), desloc), drop = FALSE]
+
+        Qmat <- modelo["Q"]
+        form <- attr(modelo, "formula")
+        modelo <- SSModel(newseries ~ SSMregression(form, newregdata, Q = Qmat), H = Hmat)
+
+        attr(modelo, "formula") <- attr(object$modelo, "formula")
+        attr(modelo, "vardin")  <- attr(object$modelo, "vardin")
+        attr(modelo, "saz")     <- attr(object$modelo, "saz")
+
+        object$modelo <- modelo
+        object$serie  <- newseries
+    }
+
+    return(object)
+}
+```
+
+Aqui, após atualização do modelo, os atributos adicionados na estimação precisam ser realocados ao
+objeto de saída.
