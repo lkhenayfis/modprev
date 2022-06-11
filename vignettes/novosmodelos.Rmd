@@ -18,7 +18,9 @@ O objetivo deste pacote é facilitar o uso de diferentes arcabouços de modelage
 diversas. Para que isso seja possível, a introdução de novas abordagens deve ser a mais *seamless*
 possível, sem demandar modificações ao código existente exceto pela adição do novo tipo de modelo. 
 Atualmente os diferentes modelos são implementados como subclasses de uma classe genérica do pacote,
-estimados através da mesma função wrapper e utilizados por métodos S3 apropriados.
+estimados através da mesma função wrapper e utilizados por métodos S3 apropriados. A manutenção 
+desta estrutura garante o funcionamento da estimação e backtest em janela móvel de quaisquer novos
+modelos introduzidos.
 
 O objetivo desta vignette é detalhar o processo de introdução de novos modelos ao pacote.
 
