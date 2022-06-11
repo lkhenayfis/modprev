@@ -110,6 +110,19 @@ test_that("Testes de previsao em janela", {
 
     serie <- geraserie(100, 4)
 
+    jm <- janelamovel(serie, "sarima", 48, 12, 6)
+
+    expect_equal(length(jm), 6)
+    expect_true(all(sapply(jm, function(m) all(dim(m) == c(6, 2)))))
+
+    # checa se as janelas comecam onde deveriam
+    serie1 <- window(serie, c(1, 1), c(12, 4))
+    for(i in seq(jm)[-length(jm)]) {
+        expect_equal(start(jm[[i]]), deltats(end(serie1), 12 * (i - 1) + 1, 4))
+    }
+    expect_equal(start(tail(jm, 1)[[1]]), deltats(end(serie), 1, 4))
+
+    # teste simples com ss_ar1_saz, nao precisa repetir os inicios de janela
     jm <- janelamovel(serie, "ss_ar1_saz", 48, 12, 6)
 
     expect_equal(length(jm), 6)
@@ -121,10 +134,26 @@ test_that("Testes de previsao em janela", {
     ss <- window(dados[[2]], 1, 195)
     regd <- dados[[1]]
 
-    jm <- janelamovel(ss, "ss_reg_din", 150, passo = 5, n.ahead = 5, regdata = regd)
+    jm <- janelamovel(ss, "ss_reg_din", 150, passo = 5, n.ahead = 5, regdata = regd,
+        formula = ~ V1)
 
     expect_equal(length(jm), 10)
     expect_true(all(sapply(jm, function(m) all(dim(m) == c(5, 2)))))
+
+    # Checa se as previsoes estao usando variaveis explicativas corretamente
+    mod_ref <- estimamodelo(window(dados[[2]], 1, 150), "ss_reg_din", regdata = regd[1:150, ],
+        formula = ~ V1)
+
+    prev_ref1 <- predict(mod_ref, newdata = regd[151:155, ])
+    expect_equal(prev_ref1, jm[[1]])
+
+    mod_ref2 <- update(mod_ref, newseries = window(dados[[2]], 6, 155), newregdata = regd[6:155, ])
+    prev_ref2 <- predict(mod_ref2, newdata = regd[156:160, ])
+    expect_equal(prev_ref2, jm[[2]])
+
+    mod_ref3 <- update(mod_ref, newseries = window(dados[[2]], 11, 160), newregdata = regd[11:160, ])
+    prev_ref3 <- predict(mod_ref3, newdata = regd[161:165, ])
+    expect_equal(prev_ref3, jm[[3]])
 
     # Argumento deprecado -------------------------------------------
 
