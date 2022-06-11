@@ -45,7 +45,8 @@
 #'     reajustado
 #' @param verbose Escalar inteiro indicando quanta informacao a ser emitida durante rodada. 
 #'     0 = nenhuma, 1: toda vez que reajusta modelo, 2: todo horizonte de previsão e reajuste
-#' @param ... não possui uso até a versão corrente
+#' @param ... demais argumentos pertinentes a estimação de cada \code{tipo}. Veja 
+#'     \code{\link{estimamodelo}} para mais detalhes
 #' 
 #' @examples 
 #' 

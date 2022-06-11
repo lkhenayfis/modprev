@@ -32,7 +32,8 @@ reajustado}
 \item{verbose}{Escalar inteiro indicando quanta informacao a ser emitida durante rodada.
 0 = nenhuma, 1: toda vez que reajusta modelo, 2: todo horizonte de previsão e reajuste}
 
-\item{...}{não possui uso até a versão corrente}
+\item{...}{demais argumentos pertinentes a estimação de cada \code{tipo}. Veja
+\code{\link{estimamodelo}} para mais detalhes}
 }
 \value{
 lista contendo previsoes de 1 a n.ahead passos à frente para cada janela
