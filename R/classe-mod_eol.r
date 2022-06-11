@@ -97,6 +97,8 @@
 #' 
 #' @family Metodos modprev
 #' 
+#' @seealso \code{\link{janelamovel}} para backtest dos modelos em horizonte rolante
+#' 
 #' @export
 
 estimamodelo <- function(serie, tipo, ...) UseMethod("estimamodelo")
