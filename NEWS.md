@@ -1,4 +1,4 @@
-# janelamovel
+# modprev 1.4.5
 
 ## New features
 
@@ -7,8 +7,6 @@
 * `estimamodelo` agora faz uma critica acerca dos argumentos extras passados via `...`. Estes sao
   comparados com os argumentos do `tipo` especificado e apenas aqueles com match positivo permanecem
 * unifica `janelamovel` numa unica funcao
-
-# master
 
 ## Misc
 
