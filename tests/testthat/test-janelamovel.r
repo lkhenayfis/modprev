@@ -155,13 +155,6 @@ test_that("Testes de previsao em janela", {
     prev_ref3 <- predict(mod_ref3, newdata = regd[161:165, ])
     expect_equal(prev_ref3, jm[[3]])
 
-    # Argumento deprecado -------------------------------------------
-
-    serie <- geraserie(100, 4)
-    jm    <- janelamovel(serie, "ss_ar1_saz", 48, 12, 6)
-    expect_warning(jm2 <- janelamovel(serie, "ss_ar1_saz", largura = 48, passo = 12, n.ahead = 6))
-    expect_true(identical(jm, jm2))
-
     # Full Output ---------------------------------------------------
 
     # Caso com variavel explicativa
