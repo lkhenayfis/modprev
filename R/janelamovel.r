@@ -113,11 +113,7 @@ janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cad
     mod <- c(list(quote(estimamodelo), serie = iserie, tipo = tipo, regdata = iregdata), args)
     mod <- eval(as.call(mod), parent.frame(), parent.frame())
 
-    if(full.output) {
-        retfun <- function(pred, mod, regdata) return(list(pred, mod, regdata))
-    } else {
-        retfun <- function(pred, ...) return(pred)
-    }
+    retfun <- whichreturn(full.output)
 
     jm <- lapply(seq(janelas), function(i) {
 
@@ -140,6 +136,19 @@ janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cad
 }
 
 # HELPERS ------------------------------------------------------------------------------------------
+
+#' Tipo De \code{return} Em \code{janelamovel}
+#' 
+#' Seleciona se a funcao de \code{return} no lapply devolve tudo ou so a previsao
+#' 
+#' @param full.output booleano indicando o tipo de retorno
+#' 
+#' @return funcao de retorno para usar no lapply de \code{janelamovel}
+
+whichreturn <- function(full.output) ifelse(full.output, fullreturn, simplereturn)
+
+fullreturn   <- function(pred, mod, regdata) return(list(pred, mod, regdata))
+simplereturn <- function(pred, ...) return(pred)
 
 #' Selecao Da Funcao De Log
 #' 
