@@ -45,6 +45,8 @@
 #'     reajustado
 #' @param verbose Escalar inteiro indicando quanta informacao a ser emitida durante rodada. 
 #'     0 = nenhuma, 1: toda vez que reajusta modelo, 2: todo horizonte de previsão e reajuste
+#' @param full.output booleano indicando se deve ser retornada uma lista com modelo usado, previsao 
+#'     e variaveis exogenas (caso existam) ou apenas a previsao
 #' @param ... demais argumentos pertinentes a estimação de cada \code{tipo}. Veja 
 #'     \code{\link{estimamodelo}} para mais detalhes
 #' 
@@ -75,7 +77,8 @@
 #' 
 #' @export
 
-janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cada = NA, verbose = 0, ...) {
+janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cada = NA, verbose = 0,
+    full.output = FALSE, ...) {
 
     args <- list(...)
     if("largura" %in% names(args)) {
@@ -118,6 +121,12 @@ janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cad
     mod <- c(list(quote(estimamodelo), serie = iserie, tipo = tipo, regdata = iregdata), args)
     mod <- eval(as.call(mod), parent.frame(), parent.frame())
 
+    if(full.output) {
+        retfun <- function(pred, mod, regdata) return(list(pred, mod, regdata))
+    } else {
+        retfun <- function(pred, ...) return(pred)
+    }
+
     jm <- lapply(seq(janelas), function(i) {
 
         verb_func(janelas[[i]][[1]], janelas[[i]][[2]], v_refit[i])
@@ -129,7 +138,9 @@ janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cad
 
         ijn <- list(deltats(ij[[2]], 1, frequency(aux)), deltats(ij[[2]], n.ahead, frequency(aux)))
         inewdata <- regdata[window(aux, ijn[[1]], ijn[[2]]), , drop = FALSE]
-        predict(mod, n.ahead, newdata = inewdata)
+        pred <- predict(mod, n.ahead, newdata = inewdata)
+
+        retfun(pred, mod, inewdata)
     })
 
     # Retorna
