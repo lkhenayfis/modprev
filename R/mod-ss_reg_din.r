@@ -97,11 +97,8 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE) {
         fit$model$Z[] <- NA
     }
 
-    attr(fit$model, "formula") <- formula
-    attr(fit$model, "vardin")  <- vardin
-    attr(fit$model, "saz")     <- saz
-
-    out <- new_modprev(fit$model, serie, "ss_reg_din")
+    mod_atrs <- list(formula = formula, vardin = vardin, saz = saz)
+    out <- new_modprev(fit$model, serie, "ss_reg_din", mod_atrs)
 
     return(out)
 }
@@ -172,9 +169,11 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
 
 update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...) {
 
+    mod_atrs <- attr(object, "mod_atrs")
+
     if(refit) {
-        formula <- attr(object$modelo, "formula")
-        vardin  <- attr(object$modelo, "vardin")
+        formula <- mod_atrs$formula
+        vardin  <- mod_atrs$vardin
         object  <- estimamodelo(newseries, "ss_reg_din", regdata = newregdata, formula = formula,
             vardin = vardin)
     } else {
@@ -185,7 +184,7 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
             stop("Forneca nova variavel explicativa atraves do parametro newregdata")
         }
 
-        saz <- attr(modelo, "saz")
+        saz <- mod_atrs$saz
 
         desloc <- parsedesloc(object$serie, newseries, saz)
 
@@ -193,15 +192,10 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
         Hmat <- Hmat[, , shift(seq_len(saz), desloc), drop = FALSE]
 
         Qmat <- modelo["Q"]
-        form <- attr(modelo, "formula")
+        form <- mod_atrs$formula
         modelo <- SSModel(newseries ~ SSMregression(form, newregdata, Q = Qmat), H = Hmat)
 
-        attr(modelo, "formula") <- attr(object$modelo, "formula")
-        attr(modelo, "vardin")  <- attr(object$modelo, "vardin")
-        attr(modelo, "saz")     <- attr(object$modelo, "saz")
-
-        object$modelo <- modelo
-        object$serie  <- newseries
+        object <- new_modprev(modelo, newseries, "ss_reg_din", mod_atrs)
     }
 
     return(object)
