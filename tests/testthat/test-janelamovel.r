@@ -155,10 +155,22 @@ test_that("Testes de previsao em janela", {
     prev_ref3 <- predict(mod_ref3, newdata = regd[161:165, ])
     expect_equal(prev_ref3, jm[[3]])
 
-    # Argumento deprecado -------------------------------------------
+    # Full Output ---------------------------------------------------
 
-    serie <- geraserie(100, 4)
-    jm    <- janelamovel(serie, "ss_ar1_saz", 48, 12, 6)
-    expect_warning(jm2 <- janelamovel(serie, "ss_ar1_saz", largura = 48, passo = 12, n.ahead = 6))
-    expect_true(identical(jm, jm2))
+    # Caso com variavel explicativa
+    jm <- janelamovel(ss, "ss_reg_din", 150, passo = 5, n.ahead = 5, regdata = regd, formula = ~ V1,
+        full.output = TRUE)
+    outs <- sapply(jm, function(l) {
+        length(l) &
+            ("ts" %in% class(l[[1]])) & ("modprev" %in% class(l[[2]])) & ("data.frame" %in% class(l[[3]]))
+    })
+    expect_true(all(outs))
+
+    # Caso sem variavel explicativa
+    jm <- janelamovel(serie, "ss_ar1_saz", 48, 12, 6, full.output = TRUE)
+    outs <- sapply(jm, function(l) {
+        length(l) &
+            ("ts" %in% class(l[[1]])) & ("modprev" %in% class(l[[2]])) & (is.null(l[[3]]))
+    })
+    expect_true(all(outs))
 })

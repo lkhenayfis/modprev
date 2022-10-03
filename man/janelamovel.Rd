@@ -12,6 +12,7 @@ janelamovel(
   n.ahead = 1L,
   refit.cada = NA,
   verbose = 0,
+  full.output = FALSE,
   ...
 )
 }
@@ -31,6 +32,9 @@ reajustado}
 
 \item{verbose}{Escalar inteiro indicando quanta informacao a ser emitida durante rodada.
 0 = nenhuma, 1: toda vez que reajusta modelo, 2: todo horizonte de previsão e reajuste}
+
+\item{full.output}{booleano indicando se deve ser retornada uma lista com modelo usado, previsao
+e variaveis exogenas (caso existam) ou apenas a previsao}
 
 \item{...}{demais argumentos pertinentes a estimação de cada \code{tipo}. Veja
 \code{\link{estimamodelo}} para mais detalhes}
