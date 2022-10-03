@@ -1,3 +1,10 @@
+# janelamovel
+
+## New features
+
+* `janelamovel` agora tem argumento `full.output`, um booleano indicando o nivel de complexidade da
+  saida. Se true, retorna alem da previsao o modelo e variaveis explicativas utilizados
+
 # modprev 1.4.5
 
 ## New features
