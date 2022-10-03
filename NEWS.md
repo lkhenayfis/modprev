@@ -4,6 +4,7 @@
 
 ### Minor
 
+* `update`s agora retornam pelo construtor interno, conferindo mais robustez (#10)
 * Objetos `modprev` agora podem carregar atributos genéricos pertinentes ao modelo estimado (#11)
 
 # modprev 1.4.5

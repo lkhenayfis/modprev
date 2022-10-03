@@ -67,8 +67,10 @@ update.sarima <- function(object, newseries, refit = FALSE, ...) {
     if(refit) {
         object <- estimamodelo(newseries, "sarima")
     } else {
-        object$modelo <- Arima(newseries, model = object$modelo)
-        object$serie  <- if(is.ts(newseries)) newseries else ts(newseries)
+        modelo <- Arima(newseries, model = object$modelo)
+        newseries <- if(is.ts(newseries)) newseries else ts(newseries)
+
+        object <- new_modprev(modelo, newseries, "sarima")
     }
 
     return(object)

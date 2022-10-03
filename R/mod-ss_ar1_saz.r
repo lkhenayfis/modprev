@@ -122,8 +122,9 @@ update.ss_ar1_saz <- function(object, newseries, refit = FALSE, ...) {
         attr(modelo$y, "dim") <- c(length(newseries), 1)
         attr(modelo, "n") <- as.integer(length(newseries))
 
-        object$modelo <- modelo
-        object$serie  <- if(is.ts(newseries)) newseries else ts(newseries)
+        newseries  <- if(is.ts(newseries)) newseries else ts(newseries)
+
+        object <- new_modprev(modelo, newseries, "ss_ar1_saz")
     }
 
     return(object)
