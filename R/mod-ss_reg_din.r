@@ -38,13 +38,14 @@ NULL
 #' @param vardin booleano ou inteiro indicando se deve ser estimado modelo com heterocedasticidade.
 #'     Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro assume este
 #'     valor como a sazonalidade
+#' @param estatica booleano indicando se a regressao deve ser de coeficientes estaticos
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{ss_reg_din}, uma lista de dois 
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_ss_reg_din
 
-ss_reg_din <- function(serie, regdata, formula, vardin = FALSE) {
+ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
 
