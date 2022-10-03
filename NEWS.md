@@ -2,6 +2,9 @@
 
 ## New features
 
+* `ss_reg_din` agora recebe argumento `estatica`, o que permite a estimacao de regressoes com 
+  coeficientes fixos (nao variando no tempo)
+
 ### Minor
 
 * `update`s agora retornam pelo construtor interno, conferindo mais robustez (#10)

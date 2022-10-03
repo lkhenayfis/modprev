@@ -17,6 +17,10 @@ test_that("Estimacao de modelo S.S. RegDin - regressao simples", {
     # sem passar formula
     expect_warning(estimamodelo(serie, tipo = "ss_reg_din", regdata = varex))
 
+    # Regressao estatica
+    mod_st <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din", formula = ~ V1, estatica = T)
+    expect_true(all(mod_st$model["Q"] == 0))
+
     # NAs nos regressores
     varex[c(1, 10, 20), ] <- NA_real_
     expect_warning(estimamodelo(serie, regdata = varex, tipo = "ss_reg_din", formula = ~ V1))

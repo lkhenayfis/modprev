@@ -62,43 +62,21 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE
     if(vardin & (frequency(serie) == 1)) warning("'vardin' e TRUE mas 'serie' nao possui sazonalidade")
     vardin <- vardin * 1
 
-    if(vardin != 0) {
+    saz <- ifelse(vardin == 0, 1, frequency(serie) * (vardin == 1) + vardin * (vardin > 1))
 
-        saz <- frequency(serie) * (vardin == 1) + vardin * (vardin > 1)
-        upfunc <- function(par, mod, ...) {
-            parH <- par[1:2]
-            uH   <- cos(0:(saz - 1) * 2 * pi / saz)
-            vH   <- sin(0:(saz - 1) * 2 * pi / saz)
-            mod["H"][] <- rep(exp(parH[1] * uH + parH[2] * vH), length.out = dim(mod["H"])[3])
+    Qfill <- ifelse(estatica, 0, NA_real_)
+    mod   <- SSModel(serie ~ SSMregression(formula, regdata, Q = diag(Qfill, nvars)),
+        H = array(NA_real_, c(1, 1, saz)))
 
-            parQ <- par[-c(1:2)]
-            for(i in seq_along(parQ)) mod["Q"][i, i, 1] <- exp(parQ[i])
+    updQ <- ifelse(estatica, updQ_stat, updQ_din)
+    updH <- ifelse(vardin == 0, updH_homoc, updH_heter_trig)
+    upfunc <- function(par, mod) updH(par, updQ(par, mod), saz = saz)
 
-            return(mod)
-        }
-
-    } else {
-
-        saz <- 1
-        upfunc <- function(par, mod, ...) {
-            mod["H"][1, 1, 1] <- exp(par[1])
-
-            parQ <- par[-1]
-            for(i in seq_along(parQ)) mod["Q"][i, i, 1] <- exp(parQ[i])
-
-            return(mod)
-        }
-    }
-
-    mod <- SSModel(serie ~ SSMregression(formula, regdata, Q = diag(NA_real_, nvars)),
-            H = array(NA_real_, c(1, 1, saz)))
     fit <- fitSSM(mod, rep(0, nvars + 1 + (vardin != 0)), upfunc, method = "BFGS")
 
-    if(fit$optim.out$convergence < 0) {
-        fit$model$Z[] <- NA
-    }
+    if(fit$optim.out$convergence < 0) fit$model$Z[] <- NA
 
-    mod_atrs <- list(formula = formula, vardin = vardin, saz = saz)
+    mod_atrs <- list(formula = formula, vardin = vardin, saz = saz, estatica = estatica)
     out <- new_modprev(fit$model, serie, "ss_reg_din", mod_atrs)
 
     return(out)
@@ -203,6 +181,61 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
 }
 
 # HELPERS ------------------------------------------------------------------------------------------
+
+#' Auxiliares Para Estimacao
+#' 
+#' Funcoes de atualizacao das matrizes H e Q num modelo espaco de estados
+#' 
+#' Cada funcao \code{updX_*} atualiza a matriz \code{X} do sistema por uma abordagem diferente. 
+#' Independentemente do numero de hiperparametros necessarios, cada funcao deve receber o vetor 
+#' completo e extrai dele os que sao pertinentes para si. Por padrao, para facilitar este processo,
+#' os hiperparametros associado a matriz H sempre estao primeiro e os a Q por ultimo.
+#' 
+#' Por exemplo, \code{updH_heter_trig} assume que as variancias sazonais sao geradas por uma funcao
+#' trigonometrica de um harmonico definida em termos de dois hiperparametros, os dois primeiros 
+#' elementos do vetor \code{par}. Os demais, quantos quer que sejam, sao relativos a Q.
+#' 
+#' @param par vetor completo de hiperparametros. Ver Detalhes
+#' @param mod o modelo a ser atualizado
+#' @param saz sazonalidade da serie modelada
+#' @param ... sem uso, apenas para consistencia de argumentos entre funcoes
+#' 
+#' @return \code{mod} com a matriz modificada
+#' 
+#' @name update_funs
+NULL
+
+#' @rdname update_funs
+
+updH_homoc <- function(par, mod, ...) {
+    mod["H"][1, 1, 1] <- exp(par[1])
+    return(mod)
+}
+#' @rdname update_funs
+
+updH_heter_trig <- function(par, mod, saz, ...) {
+    uH   <- cos(0:(saz - 1) * 2 * pi / saz)
+    vH   <- sin(0:(saz - 1) * 2 * pi / saz)
+
+    parH <- head(par, 2)
+    mod["H"][] <- rep(exp(parH[1] * uH + parH[2] * vH), length.out = dim(mod["H"])[3])
+
+    return(mod)
+}
+#' @rdname update_funs
+
+updQ_stat <- function(par, mod, ...) {
+    return(mod)
+}
+#' @rdname update_funs
+
+updQ_din <- function(par, mod, ...) {
+    nQ <- dim(mod["Q"])[1]
+
+    parQ <- tail(par, nQ)
+    for(i in seq_along(parQ)) mod["Q"][i, i, 1] <- exp(parQ[i])
+    return(mod)
+}
 
 #' Deslocamento Do Array De Variancias
 #' 
