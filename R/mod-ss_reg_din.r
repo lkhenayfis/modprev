@@ -72,7 +72,8 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE
     updH <- ifelse(vardin == 0, updH_homoc, updH_heter_trig)
     upfunc <- function(par, mod) updH(par, updQ(par, mod), saz = saz)
 
-    fit <- fitSSM(mod, rep(0, nvars + 1 + (vardin != 0)), upfunc, method = "BFGS")
+    start <- rep(0, nvars * is.na(Qfill) + 1 + (vardin != 0))
+    fit <- fitSSM(mod, start, upfunc, method = "BFGS")
 
     if(fit$optim.out$convergence < 0) fit$model$Z[] <- NA
 
