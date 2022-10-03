@@ -31,6 +31,14 @@
 #' Por fim, deve ser notado que se \code{serie} for um vetor, sera convertido internamente para 
 #' \code{ts} com \code{start = c(1, 1), frequency = 1}.
 #' 
+#' \bold{Modelos periódicos:}
+#' 
+#' Se o argumento \code{periodico} for \code{TRUE}, serao estimados S modelos individuais, onde S 
+#' representa o número de estações em \code{serie}. Desta forma, assim como para a estimação de 
+#' modelos com sazonalidade, a estimação de modelos periódicos \bold{NECESSITA} que \code{serie} 
+#' seja um objeto de serie temporal com sazonalidade. Do contrário será estimado um modelo único 
+#' para a série completa.
+#' 
 #' \bold{Modelos com variáveis explicativas:}
 #' 
 #' No caso de modelos que contenham variáveis explicativas, dois argumentos extras se tornam 
@@ -42,6 +50,7 @@
 #' 
 #' @param serie série para ajustar
 #' @param tipo tipo de modelo a ser ajustado. Ver Detalhes
+#' @param periodico booleano indicando se o modelo é global ou periódico. Ver Detalhes
 #' @param ... demais parâmetros passados para as funções de fit específicas de cada modelo. Ver
 #'     Detalhes
 #' 
