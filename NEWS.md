@@ -1,21 +1,16 @@
-# master
+# modprev 1.5
 
 ## New features
 
 * `ss_reg_din` agora recebe argumento `estatica`, o que permite a estimacao de regressoes com 
   coeficientes fixos (nao variando no tempo)
+* `janelamovel` agora tem argumento `full.output`, um booleano indicando o nivel de complexidade da
+  saida. Se true, retorna alem da previsao o modelo e variaveis explicativas utilizados
 
 ### Minor
 
 * `update`s agora retornam pelo construtor interno, conferindo mais robustez (#10)
-* Objetos `modprev` agora podem carregar atributos genéricos pertinentes ao modelo estimado (#11)
-
-# janelamovel
-
-## New features
-
-* `janelamovel` agora tem argumento `full.output`, um booleano indicando o nivel de complexidade da
-  saida. Se true, retorna alem da previsao o modelo e variaveis explicativas utilizados
+* Objetos `modprev` agora podem carregar atributos genericos pertinentes ao modelo estimado (#11)
 
 # modprev 1.4.5
 
