@@ -101,15 +101,7 @@
 #' 
 #' @export
 
-estimamodelo <- function(serie, tipo, ...) UseMethod("estimamodelo")
-
-#' @export
-
-estimamodelo.numeric <- function(serie, tipo, ...) estimamodelo.ts(ts(serie), tipo, ...)
-
-#' @export
-
-estimamodelo.ts <- function(serie, tipo, ...) {
+estimamodelo_U <- function(serie, tipo, ...) {
 
     args_tipo <- names(formals(tipo))
     tipo <- str2lang(paste0("modprev:::", tipo))
