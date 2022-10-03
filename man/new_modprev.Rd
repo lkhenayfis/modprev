@@ -4,7 +4,7 @@
 \alias{new_modprev}
 \title{Contrutor Interno De \code{modprev}}
 \usage{
-new_modprev(fit, serie, tipo)
+new_modprev(fit, serie, tipo, atrs)
 }
 \arguments{
 \item{fit}{modelo estimado}
@@ -12,11 +12,20 @@ new_modprev(fit, serie, tipo)
 \item{serie}{serie para qual o modelo foi estimado}
 
 \item{tipo}{string indicando espcificação do modelo}
+
+\item{atrs}{lista nomeada contendo atributos extras pertinentes ao modelo. Ver Detalhes}
 }
 \value{
 Objeto da classe \code{modprev} e subclasse igual a \code{tipo}, uma lista de dois
-elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
+elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada.
+Adicionalmente, se \code{atrs} for passada, um atributo "mod_atrs" contendo o argumento
 }
 \description{
 Função interna, não deve ser chamada diretamente pelo usuário
+}
+\details{
+\code{atrs} Existe para permitir que outras informacoes, nao necessariamente contidas no objeto
+do modelo (como por exemplo a formula de regressao nos modelos de regressao dinamica), sejam
+passadas adiante para os metodos de cada modelagem. A lista aqui passada sera adicionada ao
+objeto \code{modprev} de saida como um atributo chamado "mod_atrs".
 }

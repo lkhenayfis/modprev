@@ -1,3 +1,11 @@
+# master
+
+## New features
+
+### Minor
+
+* Objetos `modprev` agora podem carregar atributos genéricos pertinentes ao modelo estimado (#11)
+
 # modprev 1.4.5
 
 ## New features

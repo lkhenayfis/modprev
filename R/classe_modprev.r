@@ -127,16 +127,25 @@ estimamodelo.ts <- function(serie, tipo, ...) {
 #' 
 #' Função interna, não deve ser chamada diretamente pelo usuário
 #' 
+#' \code{atrs} Existe para permitir que outras informacoes, nao necessariamente contidas no objeto 
+#' do modelo (como por exemplo a formula de regressao nos modelos de regressao dinamica), sejam 
+#' passadas adiante para os metodos de cada modelagem. A lista aqui passada sera adicionada ao 
+#' objeto \code{modprev} de saida como um atributo chamado "mod_atrs".
+#' 
 #' @param fit modelo estimado
 #' @param serie serie para qual o modelo foi estimado
 #' @param tipo string indicando espcificação do modelo
+#' @param atrs lista nomeada contendo atributos extras pertinentes ao modelo. Ver Detalhes
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse igual a \code{tipo}, uma lista de dois 
-#'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada 
+#'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada. 
+#'     Adicionalmente, se \code{atrs} for passada, um atributo "mod_atrs" contendo o argumento
 
-new_modprev <- function(fit, serie, tipo) {
+new_modprev <- function(fit, serie, tipo, atrs) {
     new <- list(modelo = fit, serie = serie)
     class(new) <- c(tipo, "modprev")
+
+    if(!missing("atrs")) attr(new, "mod_atrs") <- atrs
 
     return(new)
 }
