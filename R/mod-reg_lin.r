@@ -33,6 +33,8 @@ reg_lin <- function(serie, regdata, formula, ...) {
         if(length(formula) > 1) formula <- paste0(colnames(regdata), collapse = " + ")
         formula <- paste0("Y ~ ", formula)
         formula <- as.formula(formula)
+    } else {
+        formula <- update(formula, Y ~ .)
     }
 
     if(!is.ts(serie)) serie <- ts(serie)
