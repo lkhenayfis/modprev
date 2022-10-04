@@ -6,12 +6,23 @@
 #' 
 #' Estimação e métodos de modelos da classe \code{reg_lin}
 #' 
+#' Modelos de regressao linear estaticas comuns, estimados atraves da funcao \code{\link[stats]{lm}}
+#' 
 #' @name modelos_reg_lin
 NULL
 
 # ESTIMACAO ----------------------------------------------------------------------------------------
 
 #' \bold{Estimação}:
+#' 
+#' Para estimação deste tipo de modelo, além de ser fornecido o arumento \code{serie} também deve 
+#' ser necessariamente informado \code{regdata}, um \code{data.frame}-like contendo as variáveis 
+#' explicativas necessárias. 
+#' 
+#' Opcionalmente pode ser informado o argumento \code{formula} contendo a especificação da regressão
+#' linear, no formato padrão do R (veja \code{\link{formula}}) porém sem o LHS. Caso \code{formula} 
+#' seja omitido, todas as variáveis em \code{regdata} serão utilizadas aditivamemte, i.e. se existem
+#' as colunas \code{c("V1", "V2", "V3")}, formula sera \code{~ V1 + V2 + V3}.
 #' 
 #' @param serie série para ajustar
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
@@ -52,6 +63,11 @@ reg_lin <- function(serie, regdata, formula, ...) {
 
 #' \bold{Predict}:
 #' 
+#' A previsão destes modelos é feita com um argumento opcional já passado por padrão que não pode
+#' ser modificado. Este é \code{se.fit = TRUE}, determinando que seja retornado o desvio padrão 
+#' associado a previsão realizada. Considerando estes fatores, \code{...} não pode conter 
+#' \code{n.ahead} ou estes dois outros, ou então ocorrerá erro.
+#' 
 #' @param object objeto com classes \code{c("reg_lin", "modprev")} contendo modelo
 #' @param newdata \code{data.frame}-like contendo variéveis explicativas fora da amostra
 #' @param n.ahead número de passos à frente para previsão. Este argumento não é necessario, caso não
@@ -88,8 +104,6 @@ predict.reg_lin <- function(object, newdata, n.ahead, ...) {
 
 #' @details 
 #' 
-#' \bold{Update}:
-#' 
 #' @param newseries nova série com a qual atualizar o modelo
 #' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
 #' @param refit booleano indicando se o modelo deve ou nao ser reajustado
@@ -98,7 +112,7 @@ predict.reg_lin <- function(object, newdata, n.ahead, ...) {
 #' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
 #'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
 #' 
-#' @rdname modelos_ss_reg_din
+#' @rdname modelos_reg_lin
 #' 
 #' @export
 

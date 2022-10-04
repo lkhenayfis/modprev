@@ -4,11 +4,14 @@
 \alias{modelos_reg_lin}
 \alias{reg_lin}
 \alias{predict.reg_lin}
+\alias{update.reg_lin}
 \title{Modelos \code{reg_lin}}
 \usage{
 reg_lin(serie, regdata, formula, ...)
 
 \method{predict}{reg_lin}(object, newdata, n.ahead, ...)
+
+\method{update}{reg_lin}(object, newseries, newregdata, refit = FALSE, ...)
 }
 \arguments{
 \item{serie}{série para ajustar}
@@ -26,6 +29,12 @@ reg_lin(serie, regdata, formula, ...)
 
 \item{n.ahead}{número de passos à frente para previsão. Este argumento não é necessario, caso não
 seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}}
+
+\item{newseries}{nova série com a qual atualizar o modelo}
+
+\item{newregdata}{\code{data.frame}-like contendo variáveis explicativas na nova amostra}
+
+\item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
 }
 \value{
 Objeto da classe \code{modprev} e subclasse \code{reg_lin}, uma lista de dois
@@ -33,7 +42,29 @@ elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série pa
 
 \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
 previsão \code{n.ahead} passos à frente;
+
+\code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado.
+Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
 }
 \description{
 Estimação e métodos de modelos da classe \code{reg_lin}
+
+Para estimação deste tipo de modelo, além de ser fornecido o arumento \code{serie} também deve
+ser necessariamente informado \code{regdata}, um \code{data.frame}-like contendo as variáveis
+explicativas necessárias.
+
+A previsão destes modelos é feita com um argumento opcional já passado por padrão que não pode
+ser modificado. Este é \code{se.fit = TRUE}, determinando que seja retornado o desvio padrão
+associado a previsão realizada. Considerando estes fatores, \code{...} não pode conter
+\code{n.ahead} ou estes dois outros, ou então ocorrerá erro.
+}
+\details{
+Modelos de regressao linear estaticas comuns, estimados atraves da funcao \code{\link[stats]{lm}}
+
+Opcionalmente pode ser informado o argumento \code{formula} contendo a especificação da regressão
+linear, no formato padrão do R (veja \code{\link{formula}}) porém sem o LHS. Caso \code{formula}
+seja omitido, todas as variáveis em \code{regdata} serão utilizadas aditivamemte, i.e. se existem
+as colunas \code{c("V1", "V2", "V3")}, formula sera \code{~ V1 + V2 + V3}.
+
+
 }

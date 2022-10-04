@@ -13,6 +13,7 @@
 #' através de \code{serie} é selecionado através do argumento \code{tipo}, podendo ser um de
 #' 
 #' \describe{
+#'     \item{\code{reg_lin}}{Regressao linear comum}
 #'     \item{\code{sarima}}{SARIMA(p, d, q)(P, D, Q)}
 #'     \item{\code{ss_ar1_saz}}{Espaço de estados composto por processo AR(1) + Sazonalidade}
 #'     \item{\code{ss_reg_din}}{Regressão dinâmica}
@@ -69,6 +70,17 @@
 #' # caso a serie nao possua sazonalidade explicita, o modelo sera ajustado sem isso
 #' ss <- arima.sim(200, model = list(ar = .8))
 #' mod_ss_semsazo <- estimamodelo(ss, tipo = "ss_ar1_saz")
+#' 
+#' # Regressao linear -------------------------------------
+#' 
+#' serie <- window(datregdin$obs, 1, 100)
+#' varex <- datregdin$varex[1:100, , drop = FALSE]
+#' 
+#' # sem passar uma formula, todas as variaveis sao utilizadas de forma aditiva
+#' # e um aviso sera levantado
+#' mod_regstat <- estimamodelo(serie, "reg_lin", regdata = varex)
+#' 
+#' mod_regstat <- estimamodelo(serie, "reg_lin", regdata = varex, formula = ~ V1 + V2 * V3)
 #' 
 #' # Regressao dinamica -----------------------------------
 #' 
