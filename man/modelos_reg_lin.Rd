@@ -18,7 +18,7 @@ reg_lin(serie, regdata, formula, ...)
 \item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
 \code{regdata} serão utilizadas}
 
-\item{...}{demais argumentos passados a \link[stat]{\code{predict.lm}}}
+\item{...}{nao possui uso, existe apenas para consistencia com a generica}
 
 \item{object}{objeto com classes \code{c("reg_lin", "modprev")} contendo modelo}
 

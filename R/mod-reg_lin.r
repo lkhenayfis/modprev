@@ -41,7 +41,7 @@ reg_lin <- function(serie, regdata, formula, ...) {
     regdata <- cbind(Y = as.numeric(serie), regdata)
     fit <- lm(formula, regdata)
 
-    mod_atrs <- list(tsp = aux_tsp)
+    mod_atrs <- list(formula = formula, tsp = aux_tsp)
 
     new_modprev(fit, serie, "reg_lin", mod_atrs)
 }
@@ -54,7 +54,7 @@ reg_lin <- function(serie, regdata, formula, ...) {
 #' @param newdata \code{data.frame}-like contendo variéveis explicativas fora da amostra
 #' @param n.ahead número de passos à frente para previsão. Este argumento não é necessario, caso não
 #'     seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}
-#' @param ... demais argumentos passados a \link[stat]{\code{predict.lm}}
+#' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
 #'     previsão \code{n.ahead} passos à frente;
@@ -82,4 +82,47 @@ predict.reg_lin <- function(object, newdata, n.ahead, ...) {
     prev <- ts(prev, start = prox_t, frequency = aux_tsp[3])
 
     return(prev)
+}
+
+#' @details 
+#' 
+#' \bold{Update}:
+#' 
+#' @param newseries nova série com a qual atualizar o modelo
+#' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
+#' @param refit booleano indicando se o modelo deve ou nao ser reajustado
+#' @param ... nao possui uso, existe apenas para consistencia com a generica
+#' 
+#' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
+#'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
+#' 
+#' @rdname modelos_ss_reg_din
+#' 
+#' @export
+
+update.reg_lin <- function(object, newseries, newregdata, refit = FALSE, ...) {
+
+    mod_atrs <- attr(object, "mod_atrs")
+
+    if(refit) {
+        formula <- mod_atrs$formula
+        object  <- estimamodelo(newseries, "reg_lin", regdata = newregdata, formula = formula)
+    } else {
+
+        modelo <- object$modelo
+
+        if(missing(newregdata)) {
+            stop("Forneca nova variavel explicativa atraves do parametro newregdata")
+        }
+
+        modelo$model <- cbind.data.frame(Y = as.numeric(newseries), newregdata)
+        modelo$fitted.values <- predict(modelo)
+        modelo$residuals <- as.numeric(newseries) - fitted(modelo)
+
+        mod_atrs$tsp <- tsp(newseries)
+
+        object <- new_modprev(modelo, newseries, "reg_lin", mod_atrs)
+    }
+
+    return(object)
 }
