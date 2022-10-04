@@ -130,7 +130,7 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
 #' 
 #' \bold{Update}:
 #' 
-#' A atualização de modelos \code{ss_ar1_saz} sempre vai checar se o modelo passado foi estimado
+#' A atualização de modelos \code{ss_reg_din} sempre vai checar se o modelo passado foi estimado
 #' corretamente. Como modelos em espaçoo de estados dependem bastante de inicialização, às vezes não
 #' dá para estimar direito. Nesses casos ele tenta reestimar o modelo independentemente de 
 #' \code{refit}
@@ -138,7 +138,7 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
 #' @param newseries nova série com a qual atualizar o modelo
 #' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
 #' @param refit booleano indicando se o modelo deve ou nao ser reajustado
-#' @param ... demais argumentos passados a \code{\link[KFAS]{predict.SSModel}}
+#' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
 #'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
