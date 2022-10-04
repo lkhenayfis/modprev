@@ -1,3 +1,11 @@
+# master
+
+## New features
+
+* Adiciona modelo de regressao linear. A modelagem estatica de `ss_reg_din` nao funciona num 
+  ambiente de janela rolante pois a filtragem inicia em tempos diferentes, o que leva a coeficientes
+  diferentes mesmo sem reestimacao
+
 # modprev 1.5
 
 ## New features
