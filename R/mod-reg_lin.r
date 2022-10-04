@@ -46,3 +46,40 @@ reg_lin <- function(serie, regdata, formula, ...) {
     new_modprev(fit, serie, "reg_lin", mod_atrs)
 }
 
+# METODOS ------------------------------------------------------------------------------------------
+
+#' \bold{Predict}:
+#' 
+#' @param object objeto com classes \code{c("reg_lin", "modprev")} contendo modelo
+#' @param newdata \code{data.frame}-like contendo variéveis explicativas fora da amostra
+#' @param n.ahead número de passos à frente para previsão. Este argumento não é necessario, caso não
+#'     seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}
+#' @param ... demais argumentos passados a \link[stat]{\code{predict.lm}}
+#' 
+#' @return \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
+#'     previsão \code{n.ahead} passos à frente;
+#' 
+#' @rdname modelos_reg_lin
+#' 
+#' @export
+
+predict.reg_lin <- function(object, newdata, n.ahead, ...) {
+    modelo <- object$modelo
+    aux_tsp <- attr(object, "mod_atrs")$tsp
+
+    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro newdata")
+
+    if(!missing(n.ahead)) {
+        regobs <- min(n.ahead, nrow(newdata))
+        newdata <- newdata[seq(regobs), , drop = FALSE]
+    }
+
+    prev <- predict(modelo, newdata = newdata, se.fit = TRUE)
+    prev <- do.call(cbind, prev[1:2])
+    colnames(prev) <- c("prev", "sd")
+
+    prox_t <- aux_tsp[2] + 1 / aux_tsp[3]
+    prev <- ts(prev, start = prox_t, frequency = aux_tsp[3])
+
+    return(prev)
+}
