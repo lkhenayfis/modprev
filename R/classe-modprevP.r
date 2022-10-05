@@ -28,10 +28,9 @@
 
 estimamodelo_P <- function(serie, tipo, ...) {
 
-    freq <- tsp(serie)
-    if(freq == 1) stop("'serie' nao possui sazonalidade -- nao pode ser modelada periodicamente")
-
     aux_tsp <- tsp(serie)
+    if(aux_tsp[3] == 1) stop("'serie' nao possui sazonalidade -- nao pode ser modelada periodicamente")
+
     seasons <- as.numeric(cycle(serie))
     l_series <- split(serie, seasons)
     l_series <- lapply(seq(l_series), function(i) {
@@ -41,7 +40,7 @@ estimamodelo_P <- function(serie, tipo, ...) {
     args <- list(...)
 
     if("regdata" %in% ...names()) {
-        l_regdata <- split(regdata, seasons)
+        l_regdata <- split(args$regdata, seasons)
         args$regdata <- NULL
     } else {
         # caso nao tenha sido passado regdata, usa uma lista vazia. Nos modelos em que regdata e
@@ -50,12 +49,14 @@ estimamodelo_P <- function(serie, tipo, ...) {
         l_regdata <- vector("list", length(l_series))
     }
 
-    out <- mapply(l_series, l_regdata, FUN = function(serie, regdata) {
-        args <- c(list(serie, tipo, regdata), args)
+    fits <- mapply(l_series, l_regdata, FUN = function(serie, regdata) {
+        args <- c(list(serie = serie, tipo = tipo, regdata = regdata), args)
         do.call(estimamodelo_U, args)
     }, SIMPLIFY = FALSE)
 
-    new_modprevP(out)
+    mod_atrs <- list(tsp = aux_tsp)
+
+    new_modprevP(fits, serie, mod_atrs)
 }
 
 #' Construtor Interno De \code{modprevP}
@@ -76,7 +77,7 @@ estimamodelo_P <- function(serie, tipo, ...) {
 #'     passada. Adicionalmente, se \code{atrs} for passada, um atributo "mod_atrs" contendo o
 #'     argumento homônimo.
 
-new_modprevP <- function(fits, serie, mod_atrs) {
+new_modprevP <- function(fits, serie, atrs) {
     new <- list(modelos = fits, serie = serie)
     class(new) <- c("modprevP", "modprev")
 
