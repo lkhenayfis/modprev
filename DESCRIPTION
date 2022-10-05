@@ -1,6 +1,6 @@
 Package: modprev
 Title: Interface Unificada Para Estimacao E Uso De Modelos
-Version: 1.4.5
+Version: 1.5.0.9999
 Authors@R: 
     person("Lucas", "Khenayfis", , "lucaskhenayfis@gmail.com", role = c("aut", "cre"))
 Description: Arcabouco unificado para estimacao, previsao, simulacao e etc
@@ -31,4 +31,4 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2

@@ -72,7 +72,8 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE
     updH <- ifelse(vardin == 0, updH_homoc, updH_heter_trig)
     upfunc <- function(par, mod) updH(par, updQ(par, mod), saz = saz)
 
-    fit <- fitSSM(mod, rep(0, nvars + 1 + (vardin != 0)), upfunc, method = "BFGS")
+    start <- rep(0, nvars * is.na(Qfill) + 1 + (vardin != 0))
+    fit <- fitSSM(mod, start, upfunc, method = "BFGS")
 
     if(fit$optim.out$convergence < 0) fit$model$Z[] <- NA
 
@@ -129,7 +130,7 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
 #' 
 #' \bold{Update}:
 #' 
-#' A atualização de modelos \code{ss_ar1_saz} sempre vai checar se o modelo passado foi estimado
+#' A atualização de modelos \code{ss_reg_din} sempre vai checar se o modelo passado foi estimado
 #' corretamente. Como modelos em espaçoo de estados dependem bastante de inicialização, às vezes não
 #' dá para estimar direito. Nesses casos ele tenta reestimar o modelo independentemente de 
 #' \code{refit}
@@ -137,7 +138,7 @@ predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
 #' @param newseries nova série com a qual atualizar o modelo
 #' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
 #' @param refit booleano indicando se o modelo deve ou nao ser reajustado
-#' @param ... demais argumentos passados a \code{\link[KFAS]{predict.SSModel}}
+#' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
 #'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
