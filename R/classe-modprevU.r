@@ -104,19 +104,15 @@
 #' plot(mod_regdin)
 #' }
 #' 
-#' @return Objeto da classe modprev e subclasse igual a \code{tipo}, uma lista de dois elementos:
+#' @return Objeto da classe modprevU e subclasse igual a \code{tipo}, uma lista de dois elementos:
 #'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
-#' @family Metodos modprev
-#' 
-#' @seealso \code{\link{janelamovel}} para backtest dos modelos em horizonte rolante
-#' 
-#' @export
+#' @family Metodos modprevU
 
 estimamodelo_U <- function(serie, tipo, ...) {
 
     args_tipo <- names(formals(tipo))
-    tipo <- str2lang(paste0("modprev:::", tipo))
+    tipo <- str2lang(paste0("modprevU:::", tipo))
 
     mc <- match.call()
     mc <- mc[c(TRUE, names(mc)[-1] %in% args_tipo)]
@@ -127,27 +123,27 @@ estimamodelo_U <- function(serie, tipo, ...) {
     return(out)
 }
 
-#' Contrutor Interno De \code{modprev}
+#' Contrutor Interno De \code{modprevU}
 #' 
 #' Função interna, não deve ser chamada diretamente pelo usuário
 #' 
 #' \code{atrs} Existe para permitir que outras informacoes, nao necessariamente contidas no objeto 
 #' do modelo (como por exemplo a formula de regressao nos modelos de regressao dinamica), sejam 
 #' passadas adiante para os metodos de cada modelagem. A lista aqui passada sera adicionada ao 
-#' objeto \code{modprev} de saida como um atributo chamado "mod_atrs".
+#' objeto \code{modprevU} de saida como um atributo chamado "mod_atrs".
 #' 
 #' @param fit modelo estimado
 #' @param serie serie para qual o modelo foi estimado
 #' @param tipo string indicando espcificação do modelo
 #' @param atrs lista nomeada contendo atributos extras pertinentes ao modelo. Ver Detalhes
 #' 
-#' @return Objeto da classe \code{modprev} e subclasse igual a \code{tipo}, uma lista de dois 
+#' @return Objeto da classe \code{modprevU} e subclasse igual a \code{tipo}, uma lista de dois 
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada. 
 #'     Adicionalmente, se \code{atrs} for passada, um atributo "mod_atrs" contendo o argumento
 
-new_modprev <- function(fit, serie, tipo, atrs) {
+new_modprevU <- function(fit, serie, tipo, atrs) {
     new <- list(modelo = fit, serie = serie)
-    class(new) <- c(tipo, "modprev")
+    class(new) <- c(tipo, "modprevU")
 
     if(!missing("atrs")) attr(new, "mod_atrs") <- atrs
 
@@ -156,7 +152,7 @@ new_modprev <- function(fit, serie, tipo, atrs) {
 
 # METODOS -----------------------------------------------------------------------------------------
 
-#' Previsão De Modelos \code{modprev}
+#' Previsão De Modelos \code{modprevU}
 #' 
 #' Wrapper para previsão de modelos ajustados por \code{\link{estimamodelo}}
 #' 
@@ -192,17 +188,17 @@ new_modprev <- function(fit, serie, tipo, atrs) {
 #' @return série temporal multivariada contendo a previsão e o desvio padrão associado para os
 #'     passos de tempo \code{1:n.ahead}
 #' 
-#' @family Metodos modprev
+#' @family Metodos modprevU
 #' 
 #' @export
 
-predict.modprev <- function(object, n.ahead, ...) {
+predict.modprevU <- function(object, n.ahead, ...) {
     stop(paste0("Modelo do tipo ", class(object)[1], " nao possui metodo 'predict'"))
 }
 
-#' Atualizacao De Modelos \code{modprev}
+#' Atualizacao De Modelos \code{modprevU}
 #' 
-#' Wrapper para atualizar e possivelmete reajustar modelos \code{modprev}
+#' Wrapper para atualizar e possivelmete reajustar modelos \code{modprevU}
 #' 
 #' O padrão desta função é simplesmente substituir \code{newseries} no modelo ajustado 
 #' \code{object}, isto é, mantendo todos os hiperparâmetros estimados originalmente. Através do 
@@ -249,10 +245,10 @@ predict.modprev <- function(object, n.ahead, ...) {
 #' 
 #' @return modelo com novos dados, possivelmente reajustado
 #' 
-#' @family Metodos modprev
+#' @family Metodos modprevU
 #' 
 #' @export
 
-update.modprev <- function(object, newseries, refit = FALSE, ...) {
+update.modprevU <- function(object, newseries, refit = FALSE, ...) {
     stop(paste0("Modelo do tipo ", class(object)[1], " nao possui metodo 'update'"))
 }

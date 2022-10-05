@@ -78,7 +78,7 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE
     if(fit$optim.out$convergence < 0) fit$model$Z[] <- NA
 
     mod_atrs <- list(formula = formula, vardin = vardin, saz = saz, estatica = estatica)
-    out <- new_modprev(fit$model, serie, "ss_reg_din", mod_atrs)
+    out <- new_modprevU(fit$model, serie, "ss_reg_din", mod_atrs)
 
     return(out)
 }
@@ -175,7 +175,7 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
         form <- mod_atrs$formula
         modelo <- SSModel(newseries ~ SSMregression(form, newregdata, Q = Qmat), H = Hmat)
 
-        object <- new_modprev(modelo, newseries, "ss_reg_din", mod_atrs)
+        object <- new_modprevU(modelo, newseries, "ss_reg_din", mod_atrs)
     }
 
     return(object)

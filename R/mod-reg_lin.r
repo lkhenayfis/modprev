@@ -56,7 +56,7 @@ reg_lin <- function(serie, regdata, formula, ...) {
 
     mod_atrs <- list(formula = formula, tsp = aux_tsp)
 
-    new_modprev(fit, serie, "reg_lin", mod_atrs)
+    new_modprevU(fit, serie, "reg_lin", mod_atrs)
 }
 
 # METODOS ------------------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ update.reg_lin <- function(object, newseries, newregdata, refit = FALSE, ...) {
 
         mod_atrs$tsp <- tsp(newseries)
 
-        object <- new_modprev(modelo, newseries, "reg_lin", mod_atrs)
+        object <- new_modprevU(modelo, newseries, "reg_lin", mod_atrs)
     }
 
     return(object)
