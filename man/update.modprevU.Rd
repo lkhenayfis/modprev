@@ -7,7 +7,7 @@
 \method{update}{modprevU}(object, newseries, refit = FALSE, ...)
 }
 \arguments{
-\item{object}{modelo ajustado atraves de \code{estimamodelo}}
+\item{object}{modelo ajustado atraves de \code{estimamodeloU}}
 
 \item{newseries}{nova serie para associar ao modelo}
 
@@ -20,46 +20,6 @@ modelo com novos dados, possivelmente reajustado
 }
 \description{
 Wrapper para atualizar e possivelmete reajustar modelos \code{modprevU}
-}
-\details{
-O padrão desta função é simplesmente substituir \code{newseries} no modelo ajustado
-\code{object}, isto é, mantendo todos os hiperparâmetros estimados originalmente. Através do
-argumento \code{refit} é possível realizar o reajuste do modelo para a nova série.
-
-\bold{Modelos com variáveis explicativas:}
-
-No caso de modelos com variáveis explicativas, deve ser fornecido um argumento \code{newregdata}
-na forma de um \code{data.frame}-like contendo as variáveis explicativas necessárias associadas
-às novas observações em \code{newseries}.
-}
-\examples{
-
-serie1 <- window(AirPassengers, c(1949, 1), c(1954, 12))
-serie2 <- window(AirPassengers, c(1955, 1), c(1960, 12))
-
-mod_orig  <- estimamodelo(serie1, tipo = "sarima")
-mod_upd   <- update(mod_orig, serie2, refit = FALSE)
-mod_refit <- update(mod_orig, serie2, refit = TRUE)
-
-\dontrun{
-layout(matrix(1:3))
-plot(mod_orig, main = "original")
-plot(mod_upd, main = "update s/ refit")
-plot(mod_refit, main = "update c/ refit")
-}
-
-# Com variaveis explicativas ---------------------------
-
-serie <- window(datregdin$obs, 1, 100)
-varex <- datregdin$varex[1:100, , drop = FALSE]
-mod_orig <- estimamodelo(serie, "ss_reg_din", regdata = varex, formula = ~ V1 + V2 * V3)
-
-newserie <- window(datregdin$obs, 101, 200)
-newvarex <- datregdin$varex[101:200, , drop = FALSE]
-
-mod_upd   <- update(mod_orig, newserie, newregdata = newvarex, refit = FALSE)
-mod_refit <- update(mod_orig, newserie, newregdata = newvarex, refit = TRUE)
-
 }
 \seealso{
 Other Metodos modprevU: 

@@ -7,7 +7,7 @@
 \method{predict}{modprevU}(object, n.ahead, ...)
 }
 \arguments{
-\item{object}{modelo ajustado através de \code{\link{estimamodelo}}}
+\item{object}{modelo ajustado através de \code{\link{estimamodeloU}}}
 
 \item{n.ahead}{número de passos à frente para prever}
 
@@ -18,34 +18,7 @@ série temporal multivariada contendo a previsão e o desvio padrão associado p
 passos de tempo \code{1:n.ahead}
 }
 \description{
-Wrapper para previsão de modelos ajustados por \code{\link{estimamodelo}}
-}
-\details{
-A previsão destes modelos funciona da forma mais padrão, com \code{object} contendo um modelo
-estimado por \code{\link{estimamodelo}} e \code{n.ahead} um inteiro indicando número de passos à
-frente para prever. Em modelos de séries temporais simples, isto é tudo.
-
-\bold{Modelos com variáveis explicativas:}
-
-No caso de modelos com variáveis explicativas deve ser fornecido um parâmetro \code{newdata} na
-forma de code{data.frame}-like contendo as variáveis necessárias para o modelo. Usualmente a
-previsão será feita tantos passos à frente quanto há observações em \code{newdata}, porém se
-\code{n.ahead} for fornecido será usado com precedência sobre o número de observações novas.
-}
-\examples{
-
-mod <- estimamodelo(AirPassengers, tipo = "sarima")
-pred <- predict(mod, n.ahead = 24)
-
-# em modelos de regressao, deve ser passada a variavel explicativa via newdata
-
-serie <- window(datregdin$obs, 1, 100)
-varex <- datregdin$varex[1:100, , drop = FALSE]
-mod_regdin <- estimamodelo(serie, "ss_reg_din", regdata = varex)
-
-newdata <- datregdin$varex[101:130, , drop = FALSE]
-pred <- predict(mod_regdin, newdata = newdata)
-
+Wrapper para previsão de modelos unicos
 }
 \seealso{
 Other Metodos modprevU: 
