@@ -1,9 +1,16 @@
 
-gera_dados_p_sX <- function(p = 10, n = 20, seed = 1234) {
+gera_dados_p_sX <- function(p = 4, n = 80, seed = 1234) {
     set.seed(seed)
     coefs <- seq(.5, .9, length.out = p)
-    ss <- lapply(seq_len(p), function(i) as.numeric(arima.sim(list(ar = coefs[i]), n)))
-    ss2 <- lapply(seq_len(n), function(t) sapply(seq_len(p), function(i) ss[[i]][[t]]))
+    ns <- as.numeric(table(rep(seq_len(p), length.out = n)))
+    ss <- lapply(seq_len(p), function(i) as.numeric(arima.sim(list(ar = coefs[i]), ns[i])))
+    ss2 <- lapply(seq_len(max(ns)), function(t) {
+        sapply(seq_len(p), function(i) {
+            tryCatch(ss[[i]][[t]], error = function(e) return(NA))
+        })
+    })
+    ss2 <- unlist(ss2)
+    ss2 <- ts(ss2[!is.na(ss2)], frequency = p)
     return(list(ss, ss2))
 }
 
@@ -13,7 +20,7 @@ test_that("Estimacao de Modelos Periodicos -- S/ Variavel Explicativa", {
 
     ll <- gera_dados_p_sX()
     serie_0 <- ll[[1]]
-    serie_p <- ts(unlist(ll[[2]]), frequency = 10)
+    serie_p <- ll[[2]]
 
     # SARIMA -------------------------------------------------------------------
 
@@ -48,11 +55,11 @@ test_that("Estimacao de Modelos Periodicos -- S/ Variavel Explicativa", {
 
 })
 
-test_that("Estimacao de Modelos Periodicos -- S/ Variavel Explicativa", {
+test_that("Estimacao de Modelos Periodicos -- C/ Variavel Explicativa", {
 
-    serie_0 <- split(datregdin$obs, rep(seq_len(10), length.out = 200))
-    varex_0 <- split(datregdin$varex, rep(seq_len(10), length.out = 200))
-    serie_p <- ts(datregdin$obs, frequency = 10)
+    serie_0 <- split(datregdin$obs, rep(seq_len(4), length.out = 200))
+    varex_0 <- split(datregdin$varex, rep(seq_len(4), length.out = 200))
+    serie_p <- ts(datregdin$obs, frequency = 4)
     varex_p <- datregdin$varex
 
     form <- ~ V1 + V2 + V3
