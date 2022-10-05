@@ -11,6 +11,7 @@
 #' através de \code{serie} é selecionado através do argumento \code{tipo}, podendo ser um de
 #' 
 #' \describe{
+#'     \item{\code{reg_lin}}{Regressao linear comum}
 #'     \item{\code{sarima}}{SARIMA(p, d, q)(P, D, Q)}
 #'     \item{\code{ss_ar1_saz}}{Espaço de estados composto por processo AR(1) + Sazonalidade}
 #'     \item{\code{ss_reg_din}}{Regressão dinâmica}
@@ -77,6 +78,17 @@
 #' ss <- arima.sim(200, model = list(ar = .8))
 #' mod_ss_semsazo <- estimamodelo(ss, tipo = "ss_ar1_saz")
 #' 
+#' # Regressao linear -------------------------------------
+#' 
+#' serie <- window(datregdin$obs, 1, 100)
+#' varex <- datregdin$varex[1:100, , drop = FALSE]
+#' 
+#' # sem passar uma formula, todas as variaveis sao utilizadas de forma aditiva
+#' # e um aviso sera levantado
+#' mod_regstat <- estimamodelo(serie, "reg_lin", regdata = varex)
+#' 
+#' mod_regstat <- estimamodelo(serie, "reg_lin", regdata = varex, formula = ~ V1 + V2 * V3)
+#' 
 #' # Regressao dinamica -----------------------------------
 #' 
 #' serie <- window(datregdin$obs, 1, 100)
@@ -102,9 +114,9 @@
 #' @return Objeto da classe modprev e subclasse igual a \code{tipo}, uma lista de dois elementos:
 #'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
-#' @family Metodos modprev
-#' 
 #' @seealso \code{\link{janelamovel}} para backtest dos modelos em horizonte rolante
+#' 
+#' @family Metodos modprev
 #' 
 #' @export
 
@@ -118,11 +130,111 @@ estimamodelo.numeric <- function(serie, tipo, periodico = FALSE, ...) estimamode
 
 estimamodelo.ts <- function(serie, tipo, periodico = FALSE, ...) {
 
-    if(periodico) {
-        out <- estimamodelo_P(serie, tipo, ...)
-    } else {
-        out <- estimamodelo_U(serie, tipo, ...)
-    }
+    fitfunc <- ifelse(periodico, estimamodelo_P, estimamodelo_U)
+    out <- fitfunc(serie, tipo, ...)
 
     return(out)
+}
+
+# METODOS -----------------------------------------------------------------------------------------
+
+#' Previsão De Modelos \code{modprev}
+#' 
+#' Wrapper para previsão de modelos ajustados por \code{\link{estimamodelo}}
+#' 
+#' A previsão destes modelos funciona da forma mais padrão, com \code{object} contendo um modelo
+#' estimado por \code{\link{estimamodelo}} e \code{n.ahead} um inteiro indicando número de passos à
+#' frente para prever. Em modelos de séries temporais simples, isto é tudo.
+#' 
+#' \bold{Modelos com variáveis explicativas:}
+#' 
+#' No caso de modelos com variáveis explicativas deve ser fornecido um parâmetro \code{newdata} na
+#' forma de code{data.frame}-like contendo as variáveis necessárias para o modelo. Usualmente a 
+#' previsão será feita tantos passos à frente quanto há observações em \code{newdata}, porém se
+#' \code{n.ahead} for fornecido será usado com precedência sobre o número de observações novas.
+#' 
+#' @param object modelo ajustado através de \code{\link{estimamodelo}}
+#' @param n.ahead número de passos à frente para prever
+#' @param ... existe apenas para consistência com a genérica
+#' 
+#' @examples
+#' 
+#' mod <- estimamodelo(AirPassengers, tipo = "sarima")
+#' pred <- predict(mod, n.ahead = 24)
+#' 
+#' # em modelos de regressao, deve ser passada a variavel explicativa via newdata
+#' 
+#' serie <- window(datregdin$obs, 1, 100)
+#' varex <- datregdin$varex[1:100, , drop = FALSE]
+#' mod_regdin <- estimamodelo(serie, "ss_reg_din", regdata = varex)
+#' 
+#' newdata <- datregdin$varex[101:130, , drop = FALSE]
+#' pred <- predict(mod_regdin, newdata = newdata)
+#' 
+#' @return série temporal multivariada contendo a previsão e o desvio padrão associado para os
+#'     passos de tempo \code{1:n.ahead}
+#' 
+#' @family Metodos modprev
+#' 
+#' @export
+
+predict.modprev <- function(object, n.ahead, ...) {
+    stop(paste0("Modelo do tipo ", class(object)[1], " nao possui metodo 'predict'"))
+}
+
+#' Atualizacao De Modelos \code{modprev}
+#' 
+#' Wrapper para atualizar e possivelmete reajustar modelos \code{modprev}
+#' 
+#' O padrão desta função é simplesmente substituir \code{newseries} no modelo ajustado 
+#' \code{object}, isto é, mantendo todos os hiperparâmetros estimados originalmente. Através do 
+#' argumento \code{refit} é possível realizar o reajuste do modelo para a nova série.
+#' 
+#' \bold{Modelos com variáveis explicativas:}
+#' 
+#' No caso de modelos com variáveis explicativas, deve ser fornecido um argumento \code{newregdata} 
+#' na forma de um \code{data.frame}-like contendo as variáveis explicativas necessárias associadas
+#' às novas observações em \code{newseries}.
+#' 
+#' @param object modelo ajustado atraves de \code{estimamodelo}
+#' @param newseries nova serie para associar ao modelo
+#' @param refit booleano indicando se o modelo deve ser reajustado
+#' @param ... existe apenas para consistência com a genérica
+#' 
+#' @examples 
+#' 
+#' serie1 <- window(AirPassengers, c(1949, 1), c(1954, 12))
+#' serie2 <- window(AirPassengers, c(1955, 1), c(1960, 12))
+#' 
+#' mod_orig  <- estimamodelo(serie1, tipo = "sarima")
+#' mod_upd   <- update(mod_orig, serie2, refit = FALSE)
+#' mod_refit <- update(mod_orig, serie2, refit = TRUE)
+#' 
+#' \dontrun{
+#' layout(matrix(1:3))
+#' plot(mod_orig, main = "original")
+#' plot(mod_upd, main = "update s/ refit")
+#' plot(mod_refit, main = "update c/ refit")
+#' }
+#' 
+#' # Com variaveis explicativas ---------------------------
+#' 
+#' serie <- window(datregdin$obs, 1, 100)
+#' varex <- datregdin$varex[1:100, , drop = FALSE]
+#' mod_orig <- estimamodelo(serie, "ss_reg_din", regdata = varex, formula = ~ V1 + V2 * V3)
+#' 
+#' newserie <- window(datregdin$obs, 101, 200)
+#' newvarex <- datregdin$varex[101:200, , drop = FALSE]
+#' 
+#' mod_upd   <- update(mod_orig, newserie, newregdata = newvarex, refit = FALSE)
+#' mod_refit <- update(mod_orig, newserie, newregdata = newvarex, refit = TRUE)
+#' 
+#' @return modelo com novos dados, possivelmente reajustado
+#' 
+#' @family Metodos modprev
+#' 
+#' @export
+
+update.modprev <- function(object, newseries, refit = FALSE, ...) {
+    stop(paste0("Modelo do tipo ", class(object)[1], " nao possui metodo 'update'"))
 }

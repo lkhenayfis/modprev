@@ -126,4 +126,9 @@ plot(mod_regdin)
 }
 \seealso{
 \code{\link{janelamovel}} para backtest dos modelos em horizonte rolante
+
+Other Metodos modprev: 
+\code{\link{predict.modprev}()},
+\code{\link{update.modprev}()}
 }
+\concept{Metodos modprev}
