@@ -74,7 +74,8 @@ new_modprevU <- function(fit, serie, tipo, atrs) {
 #' 
 #' @param object modelo ajustado através de \code{\link{estimamodeloU}}
 #' @param n.ahead número de passos à frente para prever
-#' @param ... existe apenas para consistência com a genérica
+#' @param ... Opcionalmente, pode ser passado o argumento \code{newdata} \code{data.frame}-like 
+#'     contendo variaveis explicativas fora da amostra para modelos que necessitem
 #' 
 #' @return série temporal multivariada contendo a previsão e o desvio padrão associado para os
 #'     passos de tempo \code{1:n.ahead}

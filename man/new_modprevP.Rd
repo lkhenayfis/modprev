@@ -4,7 +4,7 @@
 \alias{new_modprevP}
 \title{Construtor Interno De \code{modprevP}}
 \usage{
-new_modprevP(fits, serie, mod_atrs)
+new_modprevP(fits, serie, atrs)
 }
 \arguments{
 \item{fits}{lista de modelos parciais estimados, cada um um objeto \code{modprevU}}

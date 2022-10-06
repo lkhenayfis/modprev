@@ -153,9 +153,26 @@ estimamodelo.ts <- function(serie, tipo, periodico = FALSE, ...) {
 #' previsão será feita tantos passos à frente quanto há observações em \code{newdata}, porém se
 #' \code{n.ahead} for fornecido será usado com precedência sobre o número de observações novas.
 #' 
+#' \bold{Modelos periódicos:}
+#' 
+#' Nos casos de modelos periódicos que necessitam variaveis explicativas, alguns cuidados devem ser
+#' tomados. O usuario informara um argumento \code{newdata} contendo um \code{data.frame}-like unico
+#' contendo todas as variaveis explicativas fora da amostra. Se assume que as linhas neste dado 
+#' correspondem as variaveis explicativas nos tempos apos o ultimo da serie, cronologicamente.
+#' 
+#' Isto significa que, se a serie orignal era mensal terminando em junho/2020, o programa assume que 
+#' \code{newdata} tem, na primeira linha, as variaveis explicativas para julho/2020, na segunda, 
+#' para ago/2020 e assim por diante. Esta suposicao se sustenta no fato de que o pacote 
+#' \code{modprev} foi feito para modelagem de  series temporais em principio.
+#' 
+#' Alternativamente, o usuario pode passar \code{newdata} como uma lista de \code{data.frame}-likes;
+#' neste caso se assume que cada elemento da lista corresponde a uma estacao do dado, em ordem. 
+#' Observe que, se a serie comeca em maio, entao MAIO CORRESPONDE A PRIMEIRA ESTACAO.
+#' 
 #' @param object modelo ajustado através de \code{\link{estimamodelo}}
 #' @param n.ahead número de passos à frente para prever
-#' @param ... existe apenas para consistência com a genérica
+#' @param ... Opcionalmente, pode ser passado o argumento \code{newdata} \code{data.frame}-like 
+#'     contendo variaveis explicativas fora da amostra para modelos que necessitem
 #' 
 #' @examples
 #' 

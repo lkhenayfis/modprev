@@ -11,7 +11,8 @@
 
 \item{n.ahead}{número de passos à frente para prever}
 
-\item{...}{existe apenas para consistência com a genérica}
+\item{...}{Opcionalmente, pode ser passado o argumento \code{newdata} \code{data.frame}-like
+contendo variaveis explicativas fora da amostra para modelos que necessitem}
 }
 \value{
 série temporal multivariada contendo a previsão e o desvio padrão associado para os
