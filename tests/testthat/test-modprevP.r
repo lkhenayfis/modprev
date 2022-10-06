@@ -97,3 +97,127 @@ test_that("Estimacao de Modelos Periodicos -- C/ Variavel Explicativa", {
         compmods, modp$modelos)
     expect_true(all(compara_serie))
 })
+
+# PREVISAO -----------------------------------------------------------------------------------------
+
+test_that("Previsao de Modelos Periodicos -- S/ Variavel Explicativa", {
+
+    ll <- gera_dados_p_sX()
+    serie_0 <- ll[[1]]
+    serie_p <- ll[[2]]
+
+    ll2 <- gera_dados_p_sX(n = 82)
+    serie_02 <- ll2[[1]]
+    serie_p2 <- ll2[[2]]
+
+    # SARIMA -------------------------------------------------------------------
+
+    # Previsao "simples" -- partindo da primeira estacao
+
+    modp     <- estimamodelo(serie_p, "sarima", periodico = TRUE)
+    compmods <- lapply(serie_0, forecast::auto.arima, allowdrift = FALSE)
+
+    prevs <- predict.modprevP(modp, n.ahead = 8)
+    comp_prevs <- c(t(sapply(compmods, function(m) as.numeric(forecast(m, h = 2)$mean))))
+
+    expect_equal(tsp(prevs), c(21, 22.75, 4))
+    expect_equal(as.numeric(prevs[, 1]), comp_prevs)
+
+    prevs <- predict.modprevP(modp, n.ahead = 10)
+    comp_prevs <- c(t(sapply(compmods, function(m) as.numeric(forecast(m, h = 3)$mean))))[1:10]
+
+    expect_equal(tsp(prevs), c(21, 23.25, 4))
+    expect_equal(as.numeric(prevs[, 1]), comp_prevs)
+
+    # Comecando de uma estacao qualquer
+
+    modp     <- estimamodelo(serie_p2, "sarima", periodico = TRUE)
+    compmods <- lapply(serie_02, forecast::auto.arima, allowdrift = FALSE)
+
+    prevs <- predict.modprevP(modp, n.ahead = 8)
+    comp_prevs <- sapply(compmods, function(m) as.numeric(forecast(m, h = 3)$mean))
+    comp_prevs <- c(t(comp_prevs))
+
+    expect_equal(tsp(prevs), c(21.5, 23.25, 4))
+    expect_equal(as.numeric(prevs[, 1]), comp_prevs[c(3:10)])
+
+    prevs <- predict.modprevP(modp, n.ahead = 10)
+    comp_prevs <- sapply(compmods, function(m) as.numeric(forecast(m, h = 3)$mean))
+    comp_prevs <- c(t(comp_prevs))
+
+    expect_equal(tsp(prevs), c(21.5, 23.75, 4))
+    expect_equal(as.numeric(prevs[, 1]), comp_prevs[c(3:12)])
+})
+
+test_that("Previsao de Modelos Periodicos -- C/ Variavel Explicativa", {
+
+    # series teste com inicio em S = 1
+    serie_0 <- split(head(datregdin$obs, 160), rep(seq_len(4), length.out = 160))
+    varex_0_i <- split(head(datregdin$varex, 160), rep(seq_len(4), length.out = 160))
+    varex_0_o <- split(tail(datregdin$varex, 40), rep(seq_len(4), length.out = 40))
+
+    serie_p <- ts(head(datregdin$obs, 160), frequency = 4)
+    varex_p_i <- head(datregdin$varex, 160)
+    varex_p_o <- tail(datregdin$varex, 40)
+
+    # series teste com inicio em S = 3
+    serie_02 <- split(head(datregdin$obs, 163), rep(seq_len(4), length.out = 163))
+    varex_0_i2 <- split(head(datregdin$varex, 163), rep(seq_len(4), length.out = 163))
+    varex_0_o2 <- split(tail(datregdin$varex, 37), rep(c(4, 1, 2, 3), length.out = 37))
+
+    serie_p2 <- ts(head(datregdin$obs, 163), frequency = 4)
+    varex_p_i2 <- head(datregdin$varex, 163)
+    varex_p_o2 <- tail(datregdin$varex, 37)
+
+    form <- ~ V1 + V2 + V3
+
+    # REGRESSAO ESTATICA -------------------------------------------------------
+
+    # Previsao "simples" -- partindo da primeira estacao
+
+    modp     <- estimamodelo(serie_p, "reg_lin", periodico = TRUE, formula = form, regdata = varex_p_i)
+    compmods <- mapply(function(s, d) estimamodelo(s, "reg_lin", regdata = d, formula = form),
+        serie_0, varex_0_i, SIMPLIFY = FALSE)
+
+    prevs <- predict.modprevP(modp, n.ahead = 8, newdata = varex_p_o)
+    comp_prevs <- mapply(compmods, varex_0_o, FUN = function(mod, nd) {
+        predict(mod, newdata = nd, n.ahead = 2)
+    }, SIMPLIFY = FALSE)
+    comp_prevs <- do.call(rbind, comp_prevs)[c(1, 3, 5, 7, 2, 4, 6, 8), ]
+
+    expect_equal(tsp(prevs), c(41, 42.75, 4))
+    expect_equal(as.numeric(prevs), as.numeric(comp_prevs))
+
+    prevs <- predict.modprevP(modp, n.ahead = 10, newdata = varex_p_o)
+    comp_prevs <- mapply(compmods, varex_0_o, FUN = function(mod, nd) {
+        predict(mod, newdata = nd, n.ahead = 3)
+    }, SIMPLIFY = FALSE)
+    comp_prevs <- do.call(rbind, comp_prevs)[c(1, 4, 7, 10, 2, 5, 8, 11, 3, 6), ]
+
+    expect_equal(tsp(prevs), c(41, 43.25, 4))
+    expect_equal(as.numeric(prevs), as.numeric(comp_prevs))
+
+    # Comecando de uma estacao qualquer
+
+    modp     <- estimamodelo(serie_p2, "reg_lin", periodico = TRUE, formula = form, regdata = varex_p_i2)
+    compmods <- mapply(function(s, d) estimamodelo(s, "reg_lin", regdata = d, formula = form),
+        serie_02, varex_0_i2, SIMPLIFY = FALSE)
+
+    prevs <- predict.modprevP(modp, n.ahead = 8, newdata = varex_p_o2)
+    comp_prevs <- mapply(compmods, varex_0_o2, FUN = function(mod, nd) {
+        predict(mod, newdata = nd, n.ahead = 2)
+    }, SIMPLIFY = FALSE)
+    comp_prevs <- do.call(rbind, comp_prevs)[c(7, 1, 3, 5, 8, 2, 4, 6), ]
+
+    expect_equal(tsp(prevs), c(41.75, 43.5, 4))
+    expect_equal(as.numeric(prevs), as.numeric(comp_prevs))
+
+    prevs <- predict.modprevP(modp, n.ahead = 10, newdata = varex_p_o2)
+    comp_prevs <- mapply(compmods, varex_0_o2, FUN = function(mod, nd) {
+        predict(mod, newdata = nd, n.ahead = 3)
+    }, SIMPLIFY = FALSE)
+    comp_prevs <- do.call(rbind, comp_prevs)[c(10, 1, 4, 7, 11, 2, 5, 8, 12, 3), ]
+
+    expect_equal(tsp(prevs), c(41.75, 44, 4))
+    expect_equal(as.numeric(prevs), as.numeric(comp_prevs))
+})
