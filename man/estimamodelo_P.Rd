@@ -22,9 +22,9 @@ Wrapper para estimacao de modelos periodicos
 }
 \details{
 Esta funcao nao deve ser chamada diretamente pelo usuario, mas sim internamente por
-\code{\link{estimamodelos}} quando o argumento \code{periodico == TRUE}. Descricoes mais
+\code{\link{estimamodelo}} quando o argumento \code{periodico == TRUE}. Descricoes mais
 detalhadas da estimacao de modelos, periodicos ou nao, devem ser buscadas em
-\code{\link{estimamodelos}} diretamente.
+\code{\link{estimamodelo}} diretamente.
 
 Modelos periodicos sao estimados e utilizados em cima do arcabouço ja desenvolvido para os
 modelos unicos. Esta classe nada mais e do que um wrapper em torno de uma lista de modelos, um

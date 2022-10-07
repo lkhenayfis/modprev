@@ -11,7 +11,7 @@ new_modprevP(fits, serie, atrs)
 
 \item{serie}{serie para qual o modelo periodico foi estimado}
 
-\item{mod_atrs}{lista nomeada contendo atributos extras pertinentes ao modelo. Ver Detalhes}
+\item{atrs}{lista nomeada contendo atributos extras pertinentes ao modelo. Ver Detalhes}
 }
 \value{
 Objeto da classe \code{modprev} e subclasse igual a \code{modprevP}, uma lista de dois

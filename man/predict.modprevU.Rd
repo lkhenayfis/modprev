@@ -7,7 +7,7 @@
 \method{predict}{modprevU}(object, n.ahead, ...)
 }
 \arguments{
-\item{object}{modelo ajustado através de \code{\link{estimamodeloU}}}
+\item{object}{modelo ajustado através de \code{\link{estimamodelo_U}}}
 
 \item{n.ahead}{número de passos à frente para prever}
 

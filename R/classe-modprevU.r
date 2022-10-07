@@ -9,16 +9,14 @@
 #' Wrapper para estimacao de modelos unicos
 #' 
 #' Esta funcao nao deve ser chamada diretamente pelo usuario, mas sim internamente por 
-#' \code{\link{estimamodelos}} quando o argumento \code{periodico == FALSE}. Descricoes mais 
+#' \code{\link{estimamodelo}} quando o argumento \code{periodico == FALSE}. Descricoes mais 
 #' detalhadas da estimacao de modelos, periodicos ou nao, devem ser buscadas em 
-#' \code{\link{estimamodelos}} diretamente.
+#' \code{\link{estimamodelo}} diretamente.
 #' 
 #' @param serie serie para ajustar
 #' @param tipo tipo de modelo a ser ajustado. Ver Detalhes
 #' @param ... demais parâmetros passados para as funções de fit específicas de cada modelo. Ver
 #'     Detalhes
-#' 
-#' @examples 
 #' 
 #' @return Objeto da classe modprevU e subclasse igual a \code{tipo}, uma lista de dois elementos:
 #'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
@@ -72,7 +70,7 @@ new_modprevU <- function(fit, serie, tipo, atrs) {
 #' 
 #' Wrapper para previsão de modelos unicos
 #' 
-#' @param object modelo ajustado através de \code{\link{estimamodeloU}}
+#' @param object modelo ajustado através de \code{\link{estimamodelo_U}}
 #' @param n.ahead número de passos à frente para prever
 #' @param ... Opcionalmente, pode ser passado o argumento \code{newdata} \code{data.frame}-like 
 #'     contendo variaveis explicativas fora da amostra para modelos que necessitem
@@ -92,7 +90,7 @@ predict.modprevU <- function(object, n.ahead, ...) {
 #' 
 #' Wrapper para atualizar e possivelmete reajustar modelos \code{modprevU}
 #'  
-#' @param object modelo ajustado atraves de \code{estimamodeloU}
+#' @param object modelo ajustado atraves de \code{estimamodelo_U}
 #' @param newseries nova serie para associar ao modelo
 #' @param refit booleano indicando se o modelo deve ser reajustado
 #' @param ... Opcionalmente, pode ser passado o \code{newregdata}, um \code{data.frame}-like 

@@ -23,12 +23,9 @@ Wrapper para estimacao de modelos unicos
 }
 \details{
 Esta funcao nao deve ser chamada diretamente pelo usuario, mas sim internamente por
-\code{\link{estimamodelos}} quando o argumento \code{periodico == FALSE}. Descricoes mais
+\code{\link{estimamodelo}} quando o argumento \code{periodico == FALSE}. Descricoes mais
 detalhadas da estimacao de modelos, periodicos ou nao, devem ser buscadas em
-\code{\link{estimamodelos}} diretamente.
-}
-\examples{
-
+\code{\link{estimamodelo}} diretamente.
 }
 \seealso{
 Other Metodos modprevU: 

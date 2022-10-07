@@ -7,7 +7,7 @@
 \method{update}{modprevU}(object, newseries, refit = FALSE, ...)
 }
 \arguments{
-\item{object}{modelo ajustado atraves de \code{estimamodeloU}}
+\item{object}{modelo ajustado atraves de \code{estimamodelo_U}}
 
 \item{newseries}{nova serie para associar ao modelo}
 

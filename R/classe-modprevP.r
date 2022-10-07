@@ -9,9 +9,9 @@
 #' Wrapper para estimacao de modelos periodicos
 #' 
 #' Esta funcao nao deve ser chamada diretamente pelo usuario, mas sim internamente por 
-#' \code{\link{estimamodelos}} quando o argumento \code{periodico == TRUE}. Descricoes mais 
+#' \code{\link{estimamodelo}} quando o argumento \code{periodico == TRUE}. Descricoes mais 
 #' detalhadas da estimacao de modelos, periodicos ou nao, devem ser buscadas em 
-#' \code{\link{estimamodelos}} diretamente.
+#' \code{\link{estimamodelo}} diretamente.
 #' 
 #' Modelos periodicos sao estimados e utilizados em cima do arcabouço ja desenvolvido para os 
 #' modelos unicos. Esta classe nada mais e do que um wrapper em torno de uma lista de modelos, um
@@ -36,7 +36,7 @@ estimamodelo_P <- function(serie, tipo, ...) {
 
     l_series <- split(serie, seasons)
     l_series <- mapply(seq(l_series), l_series, FUN = function(n, v) {
-        ts(v, start = aux_tsp[1] + (n - 1) * (1 / aux_tsp[3]), delta = 1)
+        ts(v, start = aux_tsp[1] + (n - 1) * (1 / aux_tsp[3]), deltat = 1)
     }, SIMPLIFY = FALSE)
     names(l_series) <- levels(seasons)
 
@@ -74,7 +74,7 @@ estimamodelo_P <- function(serie, tipo, ...) {
 #' 
 #' @param fits lista de modelos parciais estimados, cada um um objeto \code{modprevU}
 #' @param serie serie para qual o modelo periodico foi estimado
-#' @param mod_atrs lista nomeada contendo atributos extras pertinentes ao modelo. Ver Detalhes
+#' @param atrs lista nomeada contendo atributos extras pertinentes ao modelo. Ver Detalhes
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse igual a \code{modprevP}, uma lista de dois 
 #'     elementos: \code{modelos} e \code{serie} contendo os modelos parciais estimados e a série
@@ -174,7 +174,7 @@ predict.modprevP <- function(object, n.ahead, ...) {
 #' 
 #' Wrapper para atualizar e possivelmente reajustar modelos periodicos
 #' 
-#' @param object modelo ajustado atraves de \code{estimamodeloU}
+#' @param object modelo ajustado atraves de \code{estimamodelo_U}
 #' @param newseries nova serie para associar ao modelo
 #' @param refit booleano indicando se o modelo deve ser reajustado
 #' @param ... Opcionalmente, pode ser passado o \code{newregdata}, um \code{data.frame}-like 
@@ -197,7 +197,7 @@ update.modprevP <- function(object, newseries, refit = FALSE, ...) {
 
     l_newseries <- split(newseries, seasons)
     l_newseries <- mapply(seq(l_newseries), l_newseries, FUN = function(n, v) {
-        ts(v, start = aux_tsp[1] + (n - 1) * (1 / aux_tsp[3]), delta = 1)
+        ts(v, start = aux_tsp[1] + (n - 1) * (1 / aux_tsp[3]), deltat = 1)
     }, SIMPLIFY = FALSE)
     names(l_newseries) <- levels(seasons)
 
