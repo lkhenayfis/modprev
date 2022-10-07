@@ -26,6 +26,7 @@ test_that("Estimacao de Modelos Periodicos -- S/ Variavel Explicativa", {
 
     modp     <- estimamodelo(serie_p, "sarima", periodico = TRUE)
     expect_equal(class(modp), c("modprevP", "modprev"))
+    expect_equal(names(modp$modelos), as.character(seq_len(4)))
 
     compmods <- lapply(serie_0, forecast::auto.arima, allowdrift = FALSE)
 
@@ -53,6 +54,19 @@ test_that("Estimacao de Modelos Periodicos -- S/ Variavel Explicativa", {
         compmods, modp$modelos)
     expect_true(all(compara_serie))
 
+    # SERIE COMECANDO EM S = 3 -------------------------------------------------
+
+    serie_p2 <- window(serie_p, 1.5)
+    modp <- estimamodelo(serie_p2, "sarima", TRUE)
+    expect_equal(names(modp$modelos), as.character(seq_len(4)))
+
+    serie_02 <- serie_0
+    serie_02[[1]] <- serie_02[[1]][-1]
+    serie_02[[2]] <- serie_02[[2]][-1]
+    compmods <- lapply(serie_02, forecast::auto.arima, allowdrift = FALSE)
+
+    compara_coef <- mapply(function(cm, m) all(coef(cm) == coef(m$modelo)), compmods, modp$modelos)
+    expect_true(all(compara_coef))
 })
 
 test_that("Estimacao de Modelos Periodicos -- C/ Variavel Explicativa", {
