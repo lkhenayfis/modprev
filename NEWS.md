@@ -1,10 +1,18 @@
+# modelosP
+
+## New features
+
+* Itroduz modelos periodicos. Esta classe e uma generalizacao dos modelos unicos em que cada estacao
+  de uma serie sazonal tem seu proprio modelo, mantendo a mesma interface de estimacao, atualizacao
+  e previsao. Ainda, qualquer modelagem unica introduzida no pacote sera automaticamente compativel
+  com a representacao periodica por contrucao.
+
 # master
 
 ## New features
 
 * Adiciona modelo de regressao linear. A modelagem estatica de `ss_reg_din` nao funciona num 
-  ambiente de janela rolante pois a filtragem inicia em tempos diferentes, o que leva a coeficientes
-  diferentes mesmo sem reestimacao
+  ambiente de janela rolante pois a filtragem inicia em tempos diferentes, o que leva a coeficientes diferentes mesmo sem reestimacao
 
 # modprev 1.5
 
