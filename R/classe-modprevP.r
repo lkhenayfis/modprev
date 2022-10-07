@@ -32,10 +32,13 @@ estimamodelo_P <- function(serie, tipo, ...) {
     if(aux_tsp[3] == 1) stop("'serie' nao possui sazonalidade -- nao pode ser modelada periodicamente")
 
     seasons <- as.numeric(cycle(serie))
+    seasons <- factor(seasons, unique(seasons))
+
     l_series <- split(serie, seasons)
-    l_series <- lapply(seq(l_series), function(i) {
-        ts(l_series[[i]], start = aux_tsp[1] + (i - 1) * (1 / aux_tsp[3]), delta = 1)
-    })
+    l_series <- mapply(seq(l_series), l_series, FUN = function(n, v) {
+        ts(v, start = aux_tsp[1] + (n - 1) * (1 / aux_tsp[3]), delta = 1)
+    }, SIMPLIFY = FALSE)
+    names(l_series) <- levels(seasons)
 
     args <- list(...)
 
@@ -53,6 +56,7 @@ estimamodelo_P <- function(serie, tipo, ...) {
         args <- c(list(serie = serie, tipo = tipo, regdata = regdata), args)
         do.call(estimamodelo_U, args)
     }, SIMPLIFY = FALSE)
+    fits <- fits[order(as.numeric(names(fits)))]
 
     mod_atrs <- list(tsp = aux_tsp)
 
@@ -164,4 +168,62 @@ predict.modprevP <- function(object, n.ahead, ...) {
     prevs <- ts(prevs[order(prev_times), ], start = tp1, frequency = aux_tsp[3])
 
     return(prevs)
+}
+
+#' Update De Modelos Periodicos
+#' 
+#' Wrapper para atualizar e possivelmente reajustar modelos periodicos
+#' 
+#' @param object modelo ajustado atraves de \code{estimamodeloU}
+#' @param newseries nova serie para associar ao modelo
+#' @param refit booleano indicando se o modelo deve ser reajustado
+#' @param ... Opcionalmente, pode ser passado o \code{newregdata}, um \code{data.frame}-like 
+#'     contendo variaveis explicativas pareadas com \code{newseries} para modelos que as necessitem
+#' 
+#' @return modelo com novos dados, possivelmente reajustado
+#' 
+#' @export
+
+update.modprevP <- function(object, newseries, refit = FALSE, ...) {
+
+    nmods <- length(object$modelos)
+
+    args <- list(...)
+
+    aux_tsp <- tsp(newseries)
+
+    seasons <- as.numeric(cycle(newseries))
+    seasons <- factor(seasons, unique(seasons))
+
+    l_newseries <- split(newseries, seasons)
+    l_newseries <- mapply(seq(l_newseries), l_newseries, FUN = function(n, v) {
+        ts(v, start = aux_tsp[1] + (n - 1) * (1 / aux_tsp[3]), delta = 1)
+    }, SIMPLIFY = FALSE)
+    names(l_newseries) <- levels(seasons)
+
+    has_newregdata <- "newregdata" %in% ...names()
+    newregdata_list <- has_newregdata && class(args$newregdata) == "list"
+
+    if(has_newregdata & !newregdata_list) {
+
+        newregdata <- split(args$newregdata, seasons)
+        args$newregdata <- NULL
+
+    } else if(has_newregdata & newregdata_list) {
+        names(newregdata) <- seq_along(newregdata)
+    } else if(!has_newregdata) {
+        newregdata <- structure(vector("list", nmods), names = seq_len(nmods))
+    }
+
+    submodels <- as.numeric(names(l_newseries))
+    ord <- order(submodels)
+
+    mods <- mapply(object$modelos, l_newseries[ord], newregdata[ord], FUN = function(mod, ns, nrd) {
+        args <- c(list(object = mod, newseries = ns, newregdata = nrd, refit = refit), args)
+        do.call(update, args)
+    }, SIMPLIFY = FALSE)
+
+    mod_atrs <- list(tsp = aux_tsp)
+
+    new_modprevP(mods, newseries, mod_atrs)
 }

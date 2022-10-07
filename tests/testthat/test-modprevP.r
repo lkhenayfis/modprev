@@ -221,3 +221,85 @@ test_that("Previsao de Modelos Periodicos -- C/ Variavel Explicativa", {
     expect_equal(tsp(prevs), c(41.75, 44, 4))
     expect_equal(as.numeric(prevs), as.numeric(comp_prevs))
 })
+
+# ATUALIZACAO --------------------------------------------------------------------------------------
+
+test_that("Atualizacao de Modelos Periodicos -- S/ Variavel Explicativa _ Init S = 1", {
+
+    ll <- gera_dados_p_sX(n = 160)
+    ll[[1]] <- lapply(seq(ll[[1]]), function(i) ts(ll[[1]][[i]], start = 1 + (i - 1) * .25, freq = 1))
+
+    serie_0 <- lapply(seq(ll[[1]]), function(i) window(ll[[1]][[i]],
+        start = 1 + (i - 1) * .25, end = 20 + (i - 1) * .25))
+    serie_p <- window(ll[[2]], 1, 20.75)
+
+    serie_02 <- lapply(seq(ll[[1]]), function(i) window(ll[[1]][[i]], start = 21 + (i - 1) * .25))
+    serie_p2 <- window(ll[[2]], 21)
+
+    # SARIMA -------------------------------------------------------------------
+
+    modp     <- estimamodelo(serie_p, "sarima", periodico = TRUE)
+    modp_upd <- update.modprevP(modp, newseries = serie_p2, refit = FALSE)
+
+    equal_mods <- mapply(modp$modelos, modp_upd$modelos, FUN = function(m, mu) {
+        identical(coef(m$modelo), coef(mu$modelo))
+    })
+    expect_true(all(equal_mods))
+
+    upd_ss <- mapply(modp_upd$modelos, serie_02, FUN = function(m, s2) {
+        all(m$serie == s2)
+    })
+    expect_true(all(upd_ss))
+
+    expect_equal(attr(modp_upd, "mod_atrs")$tsp, c(21, 40.75, 4))
+})
+
+test_that("Atualizacao de Modelos Periodicos -- S/ Variavel Explicativa _ Init S = 2", {
+
+    ll <- gera_dados_p_sX(n = 160)
+    ll[[1]] <- lapply(seq(ll[[1]]), function(i) ts(ll[[1]][[i]], start = 1 + (i - 1) * .25, freq = 1))
+
+    posit <- c(21.25, 21.25, 21, 21)
+    serie_0 <- lapply(seq(ll[[1]]), function(i) window(ll[[1]][[i]],
+        start = 1 + (i - 1) * .25, end = posit[i]))
+    serie_p <- window(ll[[2]], 1, 21.25)
+
+    serie_02 <- lapply(seq(ll[[1]]), function(i) window(ll[[1]][[i]], posit[i] + .25))
+    serie_p2 <- window(ll[[2]], 21.5)
+
+    # SARIMA -------------------------------------------------------------------
+
+    # SEM REFIT
+
+    modp     <- estimamodelo(serie_p, "sarima", periodico = TRUE)
+    modp_upd <- update.modprevP(modp, newseries = serie_p2, refit = FALSE)
+
+    equal_mods <- mapply(modp$modelos, modp_upd$modelos, FUN = function(m, mu) {
+        identical(coef(m$modelo), coef(mu$modelo))
+    })
+    expect_true(all(equal_mods))
+
+    upd_ss <- mapply(modp_upd$modelos, serie_02, FUN = function(m, s2) {
+        all(m$serie == s2)
+    })
+    expect_true(all(upd_ss))
+
+    expect_equal(attr(modp_upd, "mod_atrs")$tsp, c(21.5, 40.75, 4))
+
+    # COM REFIT
+
+    modp_upd <- update.modprevP(modp, newseries = serie_p2, refit = TRUE)
+    compmods <- lapply(serie_02, forecast::auto.arima, allowdrift = FALSE)
+
+    equal_mods <- mapply(modp_upd$modelos, compmods, FUN = function(m, mu) {
+        identical(coef(m$modelo), coef(mu))
+    })
+    expect_true(all(equal_mods))
+
+    upd_ss <- mapply(modp_upd$modelos, serie_02, FUN = function(m, s2) {
+        all(m$serie == s2)
+    })
+    expect_true(all(upd_ss))
+
+    expect_equal(attr(modp_upd, "mod_atrs")$tsp, c(21.5, 40.75, 4))
+})
