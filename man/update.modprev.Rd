@@ -13,7 +13,8 @@
 
 \item{refit}{booleano indicando se o modelo deve ser reajustado}
 
-\item{...}{existe apenas para consistência com a genérica}
+\item{...}{Opcionalmente, pode ser passado o \code{newregdata}, um \code{data.frame}-like
+contendo variaveis explicativas pareadas com \code{newseries} para modelos que as necessitem}
 }
 \value{
 modelo com novos dados, possivelmente reajustado

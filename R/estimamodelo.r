@@ -216,7 +216,8 @@ predict.modprev <- function(object, n.ahead, ...) {
 #' @param object modelo ajustado atraves de \code{estimamodelo}
 #' @param newseries nova serie para associar ao modelo
 #' @param refit booleano indicando se o modelo deve ser reajustado
-#' @param ... existe apenas para consistência com a genérica
+#' @param ... Opcionalmente, pode ser passado o \code{newregdata}, um \code{data.frame}-like 
+#'     contendo variaveis explicativas pareadas com \code{newseries} para modelos que as necessitem
 #' 
 #' @examples 
 #' 
