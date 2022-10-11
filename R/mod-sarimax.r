@@ -80,3 +80,42 @@ predict.sarimax <- function(object, newdata, n.ahead, ...) {
 
     return(prev)
 }
+
+#' 
+#' @param newseries nova série com a qual atualizar o modelo
+#' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
+#' @param refit booleano indicando se o modelo deve ou nao ser reajustado
+#' @param ... nao possui uso, existe apenas para consistencia com a generica
+#' 
+#' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
+#'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
+#' 
+#' @rdname modelos_sarimax
+#' 
+#' @export
+
+update.sarimax <- function(object, newseries, newregdata, refit = FALSE, ...) {
+
+    mod_atrs <- attr(object, "mod_atrs")
+
+    if(refit) {
+        formula <- mod_atrs$formula
+        object <- estimamodelo(newseries, "sarimax", regdata = newregdata, formula = formula)
+    } else {
+
+        if(missing(newregdata)) {
+            stop("Forneca nova variavel explicativa atraves do parametro newregdata")
+        }
+
+        formula <- mod_atrs$formula
+        Xreg <- model.frame(formula, data = newregdata)
+        Xreg <- data.matrix(Xreg)
+
+        newseries <- if(is.ts(newseries)) newseries else ts(newseries)
+        modelo <- Arima(newseries, xreg = Xreg, model = object$modelo)
+
+        object <- new_modprev(modelo, newseries, "sarima")
+    }
+
+    return(object)
+}

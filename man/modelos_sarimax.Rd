@@ -4,11 +4,14 @@
 \alias{modelos_sarimax}
 \alias{sarimax}
 \alias{predict.sarimax}
+\alias{update.sarimax}
 \title{Modelos \code{sarimax}}
 \usage{
 sarimax(serie, regdata = NULL, formula = NULL)
 
 \method{predict}{sarimax}(object, newdata, n.ahead, ...)
+
+\method{update}{sarimax}(object, newseries, newregdata, refit = FALSE, ...)
 }
 \arguments{
 \item{serie}{serie para ajustar}
@@ -26,6 +29,12 @@ utilizadas. So tem uso se \code{regdata} for passado}
 seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
+
+\item{newseries}{nova série com a qual atualizar o modelo}
+
+\item{newregdata}{\code{data.frame}-like contendo variáveis explicativas na nova amostra}
+
+\item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
 }
 \value{
 Objeto da classe \code{modprev} e subclasse \code{sarimax}, uma lista de dois elementos:
@@ -33,6 +42,9 @@ Objeto da classe \code{modprev} e subclasse \code{sarimax}, uma lista de dois el
 
 \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
 previsão \code{n.ahead} passos à frente;
+
+\code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado.
+Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
 }
 \description{
 Estimação e métodos de modelos da classe \code{sarimax}
