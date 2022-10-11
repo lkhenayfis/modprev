@@ -29,3 +29,13 @@ test_that("Intervalos de tempo em sistema ts", {
 
     expect_equal(deltats(tt, -20, 12), c(1, 6))
 })
+
+test_that("Expansao de formula", {
+    dd1 <- data.frame(a = 1, b = 2, c = 3)
+    expect_warning(ff1 <- expandeformula(dd1))
+    expect_equal(as.character(ff1), c("~", "a + b + c"))
+
+    dd2 <- data.frame(V = 1, V4 = 2, BB = 3, CAD = 0, f1j = 10)
+    expect_warning(ff2 <- expandeformula(dd2))
+    expect_equal(as.character(ff2), c("~", "V + V4 + BB + CAD + f1j"))
+})
