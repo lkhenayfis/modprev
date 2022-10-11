@@ -26,7 +26,7 @@ NULL
 #' @rdname modelos_sarimax
 
 sarimax <- function(serie, regdata, formula) {
-    
+
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
     if(missing(formula)) formula <- expandeformula(regdata)
@@ -59,7 +59,7 @@ sarimax <- function(serie, regdata, formula) {
 predict.sarimax <- function(object, newdata, n.ahead, ...) {
     modelo <- object$modelo
 
-    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro newdata")
+    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
 
     if(!missing(n.ahead)) {
         regobs <- min(n.ahead, nrow(newdata))
@@ -99,9 +99,7 @@ update.sarimax <- function(object, newseries, newregdata, refit = FALSE, ...) {
         object <- estimamodelo(newseries, "sarimax", regdata = newregdata, formula = formula)
     } else {
 
-        if(missing(newregdata)) {
-            stop("Forneca nova variavel explicativa atraves do parametro newregdata")
-        }
+        if(missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
 
         Xreg <- expandexreg(newregdata, formula)
 

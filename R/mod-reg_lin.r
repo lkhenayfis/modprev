@@ -78,7 +78,7 @@ predict.reg_lin <- function(object, newdata, n.ahead, ...) {
     modelo <- object$modelo
     aux_tsp <- attr(object, "mod_atrs")$tsp
 
-    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro newdata")
+    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
 
     if(!missing(n.ahead)) {
         regobs <- min(n.ahead, nrow(newdata))
@@ -120,9 +120,7 @@ update.reg_lin <- function(object, newseries, newregdata, refit = FALSE, ...) {
 
         modelo <- object$modelo
 
-        if(missing(newregdata)) {
-            stop("Forneca nova variavel explicativa atraves do parametro newregdata")
-        }
+        if(missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
 
         modelo$model <- cbind.data.frame(Y = as.numeric(newseries), newregdata)
         modelo$fitted.values <- predict(modelo)

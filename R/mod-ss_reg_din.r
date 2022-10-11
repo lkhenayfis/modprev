@@ -103,7 +103,7 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE
 predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
     modelo <- object$modelo
 
-    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro newdata")
+    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
 
     if(!missing(n.ahead)) {
         regobs <- min(n.ahead, nrow(newdata))
@@ -154,9 +154,7 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
 
         modelo <- object$modelo
 
-        if(missing(newregdata)) {
-            stop("Forneca nova variavel explicativa atraves do parametro newregdata")
-        }
+        if(missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
 
         saz <- mod_atrs$saz
 
