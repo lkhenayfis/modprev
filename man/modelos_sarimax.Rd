@@ -3,9 +3,12 @@
 \name{modelos_sarimax}
 \alias{modelos_sarimax}
 \alias{sarimax}
+\alias{predict.sarimax}
 \title{Modelos \code{sarimax}}
 \usage{
 sarimax(serie, regdata = NULL, formula = NULL)
+
+\method{predict}{sarimax}(object, newdata, n.ahead, ...)
 }
 \arguments{
 \item{serie}{serie para ajustar}
@@ -14,10 +17,22 @@ sarimax(serie, regdata = NULL, formula = NULL)
 
 \item{formula}{formula da regressão. Se for omitido, todas as variaveis em \code{regdata} serão
 utilizadas. So tem uso se \code{regdata} for passado}
+
+\item{object}{objeto com classes \code{c("sarimax", "modprev")} contendo modelo}
+
+\item{newdata}{\code{data.frame}-like contendo variéveis explicativas fora da amostra}
+
+\item{n.ahead}{número de passos à frente para previsão. Este argumento não é necessario, caso não
+seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}}
+
+\item{...}{nao possui uso, existe apenas para consistencia com a generica}
 }
 \value{
 Objeto da classe \code{modprev} e subclasse \code{sarimax}, uma lista de dois elementos:
 \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
+
+\code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
+previsão \code{n.ahead} passos à frente;
 }
 \description{
 Estimação e métodos de modelos da classe \code{sarimax}
