@@ -19,13 +19,14 @@ NULL
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula formula da regressão. Se for omitido, todas as variaveis em \code{regdata} serão
 #'     utilizadas. So tem uso se \code{regdata} for passado
+#' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{sarimax}, uma lista de dois elementos:
 #'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_sarimax
 
-sarimax <- function(serie, regdata, formula) {
+sarimax <- function(serie, regdata, formula, ...) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 

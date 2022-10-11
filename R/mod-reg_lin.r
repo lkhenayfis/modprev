@@ -28,6 +28,7 @@ NULL
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
 #'     \code{regdata} serão utilizadas
+#' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{reg_lin}, uma lista de dois 
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada

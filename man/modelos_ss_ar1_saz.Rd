@@ -7,7 +7,7 @@
 \alias{update.ss_ar1_saz}
 \title{Modelos \code{ss_ar1_saz}}
 \usage{
-ss_ar1_saz(serie)
+ss_ar1_saz(serie, ...)
 
 \method{predict}{ss_ar1_saz}(object, n.ahead, ...)
 
@@ -16,11 +16,11 @@ ss_ar1_saz(serie)
 \arguments{
 \item{serie}{serie para ajustar}
 
+\item{...}{existe apenas para consistência com a genérica}
+
 \item{object}{objeto com classes \code{c("ss_ar1_saz", "modprev")} contendo modelo}
 
 \item{n.ahead}{número de passos à frente para previsão}
-
-\item{...}{existe apenas para consistência com a genérica}
 
 \item{newseries}{nova série com a qual atualizar o modelo}
 

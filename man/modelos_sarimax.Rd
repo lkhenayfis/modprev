@@ -7,7 +7,7 @@
 \alias{update.sarimax}
 \title{Modelos \code{sarimax}}
 \usage{
-sarimax(serie, regdata, formula)
+sarimax(serie, regdata, formula, ...)
 
 \method{predict}{sarimax}(object, newdata, n.ahead, ...)
 
@@ -21,14 +21,14 @@ sarimax(serie, regdata, formula)
 \item{formula}{formula da regressão. Se for omitido, todas as variaveis em \code{regdata} serão
 utilizadas. So tem uso se \code{regdata} for passado}
 
+\item{...}{nao possui uso, existe apenas para consistencia com a generica}
+
 \item{object}{objeto com classes \code{c("sarimax", "modprev")} contendo modelo}
 
 \item{newdata}{\code{data.frame}-like contendo variéveis explicativas fora da amostra}
 
 \item{n.ahead}{número de passos à frente para previsão. Este argumento não é necessario, caso não
 seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}}
-
-\item{...}{nao possui uso, existe apenas para consistencia com a generica}
 
 \item{newseries}{nova série com a qual atualizar o modelo}
 

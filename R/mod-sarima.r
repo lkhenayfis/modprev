@@ -19,13 +19,14 @@ NULL
 #' @param regdata opcional, \code{data.frame}-like contendo variáveis explicativas
 #' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
 #'     \code{regdata} serão utilizadas. So tem uso se \code{regdata} for passado
+#' @param ... nao possui uso, existe apenas para consistencia com a generica 
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{sarima}, uma lista de dois elementos:
 #'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_sarima
 
-sarima <- function(serie, regdata, formula) {
+sarima <- function(serie, regdata, formula, ...) {
 
     # o is.null e necessario para garantir que nao entre no sarimax errado durante janelamovel
     if(!missing(regdata) && !is.null(regdata)) return(sarimax(serie, regdata, formula))

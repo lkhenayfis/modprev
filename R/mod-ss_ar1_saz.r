@@ -16,13 +16,14 @@ NULL
 # ESTIMACAO ----------------------------------------------------------------------------------------
 
 #' @param serie serie para ajustar
+#' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{ss_ar1_saz}, uma lista de dois 
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_ss_ar1_saz
 
-ss_ar1_saz <- function(serie) {
+ss_ar1_saz <- function(serie, ...) {
 
     Z <- matrix(c(1, 1), 1)
     T <- matrix(c(1, 0, 0, 0), 2)

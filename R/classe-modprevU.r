@@ -25,11 +25,10 @@
 
 estimamodelo_U <- function(serie, tipo, ...) {
 
-    args_tipo <- names(formals(tipo))
     tipo <- str2lang(paste0("modprev:::", tipo))
 
     mc <- match.call()
-    mc <- mc[c(TRUE, names(mc)[-1] %in% args_tipo)]
+    mc$tipo <- NULL
     mc[[1]] <- tipo
 
     out <- eval(mc, envir = parent.frame(), enclos = parent.frame())

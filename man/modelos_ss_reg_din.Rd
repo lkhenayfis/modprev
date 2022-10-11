@@ -7,7 +7,7 @@
 \alias{update.ss_reg_din}
 \title{Modelos \code{ss_reg_din}}
 \usage{
-ss_reg_din(serie, regdata, formula, vardin = FALSE, estatica = FALSE)
+ss_reg_din(serie, regdata, formula, vardin = FALSE, estatica = FALSE, ...)
 
 \method{predict}{ss_reg_din}(object, newdata, n.ahead, ...)
 
@@ -27,14 +27,14 @@ valor como a sazonalidade}
 
 \item{estatica}{booleano indicando se a regressao deve ser de coeficientes estaticos}
 
+\item{...}{nao possui uso, existe apenas para consistencia com a generica}
+
 \item{object}{objeto com classes \code{c("ss_reg_din", "modprev")} contendo modelo}
 
 \item{newdata}{\code{data.frame}-like contendo variéveis explicativas fora da amostra}
 
 \item{n.ahead}{número de passos à frente para previsão. Este argumento não é necessario, caso não
 seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}}
-
-\item{...}{nao possui uso, existe apenas para consistencia com a generica}
 
 \item{newseries}{nova série com a qual atualizar o modelo}
 

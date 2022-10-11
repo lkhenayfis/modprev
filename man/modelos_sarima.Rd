@@ -7,7 +7,7 @@
 \alias{update.sarima}
 \title{Modelos \code{sarima}}
 \usage{
-sarima(serie, regdata, formula)
+sarima(serie, regdata, formula, ...)
 
 \method{predict}{sarima}(object, n.ahead, ...)
 
@@ -21,11 +21,11 @@ sarima(serie, regdata, formula)
 \item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
 \code{regdata} serão utilizadas. So tem uso se \code{regdata} for passado}
 
+\item{...}{existe apenas para consistência com a genérica}
+
 \item{object}{objeto com classes \code{c("sarima", "modprev")} contendo modelo}
 
 \item{n.ahead}{número de passos à frente para previsão}
-
-\item{...}{existe apenas para consistência com a genérica}
 
 \item{newseries}{nova série com a qual atualizar o modelo}
 
