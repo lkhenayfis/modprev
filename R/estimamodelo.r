@@ -13,6 +13,7 @@
 #' \describe{
 #'     \item{\code{reg_lin}}{Regressao linear comum}
 #'     \item{\code{sarima}}{SARIMA(p, d, q)(P, D, Q)}
+#'     \item{\code{sarima}}{SARIMAX(p, d, q)(P, D, Q)}
 #'     \item{\code{ss_ar1_saz}}{Espaço de estados composto por processo AR(1) + Sazonalidade}
 #'     \item{\code{ss_reg_din}}{Regressão dinâmica}
 #' }
@@ -21,6 +22,10 @@
 #' de estados podem ser estimadas para séries multivariadas. Este comportamento não é testado nem
 #' suportado explicitamente até a presente versão. Consulte as páginas de ajuda de cada 
 #' especificação para maiores detalhes acerca de sua estimação, previsão e etc.
+#' 
+#' Modelos \code{sarimax} podem ser estimados especificando \code{tipo} como \code{"sarima"} ou 
+#' \code{"sarimax"}. No primeiro caso, se for informado um argumento \code{regdata} no momento da 
+#' estimacção, o código redireciona para \code{sarimax} automaticamente. 
 #' 
 #' A principio \code{serie} pode ser um vetor simples, porém isto não é recomendável por uma série
 #' de razões. A principal delas diz respeito à sazonalidade: os modelos \code{sarima} e 
