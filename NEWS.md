@@ -1,3 +1,9 @@
+# sarimax
+
+## New features
+
+* Introduz modelos `SARIMAX` por meio de regressões lineares com erros SARIMA.
+
 # modelosP
 
 ## New features
