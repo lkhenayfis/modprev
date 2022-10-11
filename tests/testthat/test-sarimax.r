@@ -16,6 +16,13 @@ test_that("Estimacao de modelo SARIMAX", {
 
     # Sem passar regdata
     expect_error(mod2 <- estimamodelo(serie, "sarimax"))
+
+    # Quando a serie tem sazonalidade
+    serie <- window(co2, end = 1963.9167)
+    regdata <- head(datregdin$varex, 60)
+    mod <- estimamodelo(serie, "sarima", regdata = regdata, formula = ~ V1 + V2 + V3)
+
+    expect_equal(mod$modelo$arma, c(1, 1, 1, 0, 12, 0, 1))
 })
 
 test_that("Previsao de modelo SARIMAX", {
@@ -48,10 +55,11 @@ test_that("Previsao de modelo SARIMAX", {
 
     # Com sazonalidade
 
-    ss <- ts(yy, frequency = 10)
-    mod  <- estimamodelo(ss, "sarima", regdata = xx, formula = ~ V1 + V2 + V3)
+    serie <- window(co2, end = 1963.9167)
+    regdata <- head(datregdin$varex, 60)
+    mod  <- estimamodelo(serie, "sarima", regdata = regdata, formula = ~ V1 + V2 + V3)
     prev <- predict(mod, newdata = datregdin$varex[151:160, ])
 
-    expect_equal(start(prev), c(16, 1))
-    expect_equal(end(prev), c(16, 10))
+    expect_equal(start(prev), c(1964, 1))
+    expect_equal(end(prev), c(1964, 10))
 })
