@@ -32,8 +32,7 @@ sarimax <- function(serie, regdata = NULL, formula = NULL) {
         formula <- as.formula(paste0("~ ", formula))
     }
 
-    Xreg <- model.frame(formula, data = regdata)
-    Xreg <- data.matrix(Xreg)
+    Xreg <- expandexreg(regdata, formula)
 
     mod <- auto.arima(serie, xreg = Xreg)
 
@@ -68,9 +67,7 @@ predict.sarimax <- function(object, newdata, n.ahead, ...) {
         newdata <- newdata[seq(regobs), , drop = FALSE]
     }
 
-    formula <- attr(object, "mod_atrs")$formula
-    Xreg    <- model.frame(formula, data = newdata)
-    Xreg    <- data.matrix(Xreg)
+    Xreg <- expandexreg(newdata, formula)
 
     prev   <- forecast(modelo, xreg = Xreg, level = c(.95), ...)
     prevsd <- with(prev, mean - lower) / qnorm(.975)
@@ -107,9 +104,7 @@ update.sarimax <- function(object, newseries, newregdata, refit = FALSE, ...) {
             stop("Forneca nova variavel explicativa atraves do parametro newregdata")
         }
 
-        formula <- mod_atrs$formula
-        Xreg <- model.frame(formula, data = newregdata)
-        Xreg <- data.matrix(Xreg)
+        Xreg <- expandexreg(newregdata, formula)
 
         newseries <- if(is.ts(newseries)) newseries else ts(newseries)
         modelo <- Arima(newseries, xreg = Xreg, model = object$modelo)
@@ -118,4 +113,14 @@ update.sarimax <- function(object, newseries, newregdata, refit = FALSE, ...) {
     }
 
     return(object)
+}
+
+# HELPERS ------------------------------------------------------------------------------------------
+
+expandexreg <- function(data, formula) {
+    formula <- mod_atrs$formula
+    Xreg <- model.frame(formula, data = newregdata)
+    Xreg <- data.matrix(Xreg)
+
+    return(Xreg)
 }
