@@ -108,7 +108,7 @@ update.sarimax <- function(object, newseries, newregdata, refit = FALSE, ...) {
         newseries <- if(is.ts(newseries)) newseries else ts(newseries)
         modelo <- Arima(newseries, xreg = Xreg, model = object$modelo)
 
-        object <- new_modprev(modelo, newseries, "sarima")
+        object <- new_modprevU(modelo, newseries, "sarima")
     }
 
     return(object)

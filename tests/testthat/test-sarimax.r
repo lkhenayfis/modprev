@@ -63,3 +63,29 @@ test_that("Previsao de modelo SARIMAX", {
     expect_equal(start(prev), c(1964, 1))
     expect_equal(end(prev), c(1964, 10))
 })
+
+test_that("Atualizacao de modelo SARIMAX", {
+    yy <- window(datregdin$obs, 1, 150)
+    xx <- head(datregdin$varex, 150)
+    mod <- estimamodelo(yy, "sarima", regdata = xx, formula = ~ V1 + V2 + V3)
+
+    yy2 <- window(datregdin$obs, 151, 200)
+    xx2 <- tail(datregdin$varex, 50)
+
+    mod_upd <- update(mod, yy2, xx2)
+    expect_equal(coef(mod$modelo), coef(mod_upd$modelo))
+    expect_equal(mod_upd$serie, yy2)
+
+    # Erro quando nao passa newseries ou newregdata
+
+    expect_error(mod_erro <- update(mod))
+    expect_error(mod_erro <- update(mod, newseries = yy2))
+    expect_error(mod_erro <- update(mod, newregdata = xx2))
+
+    # Com refit
+
+    mod_refit <- update(mod, yy2, xx2, refit = TRUE)
+    expect_equal(mod_refit$serie, yy2)
+
+    expect_snapshot_value(coef(mod_refit$modelo), style = "deparse")
+})
