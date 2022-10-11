@@ -66,6 +66,7 @@ predict.sarimax <- function(object, newdata, n.ahead, ...) {
         newdata <- newdata[seq(regobs), , drop = FALSE]
     }
 
+    formula <- attr(object, "mod_atrs")$formula
     Xreg <- expandexreg(newdata, formula)
 
     prev   <- forecast(modelo, xreg = Xreg, level = c(.95), ...)
@@ -101,6 +102,7 @@ update.sarimax <- function(object, newseries, newregdata, refit = FALSE, ...) {
 
         if(missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
 
+        formula <- mod_atrs$formula
         Xreg <- expandexreg(newregdata, formula)
 
         newseries <- if(is.ts(newseries)) newseries else ts(newseries)
