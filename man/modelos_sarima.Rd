@@ -7,7 +7,7 @@
 \alias{update.sarima}
 \title{Modelos \code{sarima}}
 \usage{
-sarima(serie, regdata = NULL, formula = NULL)
+sarima(serie, regdata, formula)
 
 \method{predict}{sarima}(object, n.ahead, ...)
 

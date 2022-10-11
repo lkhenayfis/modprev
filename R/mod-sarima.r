@@ -27,7 +27,8 @@ NULL
 
 sarima <- function(serie, regdata, formula) {
 
-    if(!missing(regdata)) return(sarimax(serie, regdata, formula))
+    # o is.null e necessario para garantir que nao entre no sarimax errado durante janelamovel
+    if(!missing(regdata) && !is.null(regdata)) return(sarimax(serie, regdata, formula))
 
     mod <- auto.arima(serie, allowdrift = FALSE)
     out <- new_modprevU(mod, serie, "sarima")
