@@ -7,7 +7,7 @@
 \alias{update.sarimax}
 \title{Modelos \code{sarimax}}
 \usage{
-sarimax(serie, regdata = NULL, formula)
+sarimax(serie, regdata, formula)
 
 \method{predict}{sarimax}(object, newdata, n.ahead, ...)
 

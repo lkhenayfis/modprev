@@ -36,7 +36,7 @@ NULL
  
 reg_lin <- function(serie, regdata, formula, ...) {
 
-    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
+    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
     if(missing(formula)) formula <- expandeformula(regdata)
     formula <- update(formula, Y ~ .)

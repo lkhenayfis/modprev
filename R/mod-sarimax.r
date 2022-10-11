@@ -25,7 +25,9 @@ NULL
 #' 
 #' @rdname modelos_sarimax
 
-sarimax <- function(serie, regdata = NULL, formula) {
+sarimax <- function(serie, regdata, formula) {
+    
+    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
     if(missing(formula)) formula <- expandeformula(regdata)
 

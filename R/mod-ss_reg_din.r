@@ -47,7 +47,7 @@ NULL
 
 ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE) {
 
-    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
+    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
     if(missing(formula)) formula <- expandeformula(regdata)
 
