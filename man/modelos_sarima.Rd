@@ -7,7 +7,7 @@
 \alias{update.sarima}
 \title{Modelos \code{sarima}}
 \usage{
-sarima(serie)
+sarima(serie, regdata = NULL, formula = NULL)
 
 \method{predict}{sarima}(object, n.ahead, ...)
 
@@ -15,6 +15,11 @@ sarima(serie)
 }
 \arguments{
 \item{serie}{serie para ajustar}
+
+\item{regdata}{opcional, \code{data.frame}-like contendo variáveis explicativas}
+
+\item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
+\code{regdata} serão utilizadas. So tem uso se \code{regdata} for passado}
 
 \item{object}{objeto com classes \code{c("sarima", "modprev")} contendo modelo}
 
