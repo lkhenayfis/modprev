@@ -33,20 +33,13 @@ NULL
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_reg_lin
-
+ 
 reg_lin <- function(serie, regdata, formula, ...) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
 
-    if(missing(formula) || is.null(formula)) {
-        warning("'formula' nao foi passado -- usando todas as variaveis de forma aditiva")
-        formula <- colnames(regdata)
-        if(length(formula) > 1) formula <- paste0(colnames(regdata), collapse = " + ")
-        formula <- paste0("Y ~ ", formula)
-        formula <- as.formula(formula)
-    } else {
-        formula <- update(formula, Y ~ .)
-    }
+    if(missing(formula)) formula <- expandeformula(regdata)
+    formula <- update(formula, Y ~ .)
 
     if(!is.ts(serie)) serie <- ts(serie)
     aux_tsp <- tsp(serie)

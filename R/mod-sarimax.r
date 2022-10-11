@@ -25,12 +25,9 @@ NULL
 #' 
 #' @rdname modelos_sarimax
 
-sarimax <- function(serie, regdata = NULL, formula = NULL) {
+sarimax <- function(serie, regdata = NULL, formula) {
 
-    if(is.null(formula)) {
-        formula <- paste0(colnames(regdata), collapse = " + ")
-        formula <- as.formula(paste0("~ ", formula))
-    }
+    if(missing(formula)) formula <- expandeformula(regdata)
 
     Xreg <- expandexreg(regdata, formula)
 

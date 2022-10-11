@@ -78,3 +78,15 @@ deltats <- function(ini, delta, freq) {
 
     return(out)
 }
+
+# AUXILIAR PARA MODELOS COM VARIAVEL EXPLICATIVA ---------------------------------------------------
+
+expandeformula <- function(data) {
+    warning("'formula' nao foi passado -- usando todas as variaveis de forma aditiva")
+    formula <- colnames(data)
+    formula <- paste0(colnames(data), collapse = " + ")
+    formula <- paste0(" ~ ", formula)
+    formula <- as.formula(formula)
+
+    return(formula)
+}
