@@ -36,7 +36,7 @@ sarimax <- function(serie, regdata, formula) {
     mod <- auto.arima(serie, xreg = Xreg)
 
     mod_atrs <- list(formula = formula)
-    out <- new_modprev(mod, serie, "sarimax", mod_atrs)
+    out <- new_modprevU(mod, serie, "sarimax", mod_atrs)
 
     return(out)
 }
@@ -115,8 +115,8 @@ update.sarimax <- function(object, newseries, newregdata, refit = FALSE, ...) {
 # HELPERS ------------------------------------------------------------------------------------------
 
 expandexreg <- function(data, formula) {
-    formula <- mod_atrs$formula
-    Xreg <- model.frame(formula, data = newregdata)
+    formula <- formula
+    Xreg <- model.frame(formula, data = data)
     Xreg <- data.matrix(Xreg)
 
     return(Xreg)

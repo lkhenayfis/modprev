@@ -25,9 +25,9 @@ NULL
 #' 
 #' @rdname modelos_sarima
 
-sarima <- function(serie, regdata = NULL, formula = NULL) {
+sarima <- function(serie, regdata, formula) {
 
-    if(!is.null(regdata)) return(sarimax(serie, regdata, formula))
+    if(!missing(regdata)) return(sarimax(serie, regdata, formula))
 
     mod <- auto.arima(serie, allowdrift = FALSE)
     out <- new_modprevU(mod, serie, "sarima")
