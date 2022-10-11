@@ -1,3 +1,10 @@
+# modprev 1.6.1
+
+## Bug fixes
+
+* `update.sarimax` sem `refit` estava devolvendo objetos com classe `sarima`, de modo que a previsao
+  seguinte quebra. Isto afetava a execucao de janelas moveis com este modelo
+
 # modprev 1.6
 
 ## New features

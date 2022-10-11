@@ -73,8 +73,10 @@ test_that("Atualizacao de modelo SARIMAX", {
     xx2 <- tail(datregdin$varex, 50)
 
     mod_upd <- update(mod, yy2, xx2)
+    expect_equal(class(mod)[1], "sarimax")
     expect_equal(coef(mod$modelo), coef(mod_upd$modelo))
     expect_equal(mod_upd$serie, yy2)
+    expect_equal(attr(mod, "mod_atrs"), attr(mod_upd, "mod_atrs"))
 
     # Erro quando nao passa newseries ou newregdata
 
@@ -86,6 +88,8 @@ test_that("Atualizacao de modelo SARIMAX", {
 
     mod_refit <- update(mod, yy2, xx2, refit = TRUE)
     expect_equal(mod_refit$serie, yy2)
+    expect_equal(class(mod_refit)[1], "sarimax")
+    expect_equal(attr(mod, "mod_atrs"), attr(mod_refit, "mod_atrs"))
 
     expect_snapshot_value(coef(mod_refit$modelo), style = "deparse")
 })
