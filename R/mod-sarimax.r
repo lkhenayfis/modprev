@@ -33,7 +33,7 @@ sarimax <- function(serie, regdata, formula) {
 
     Xreg <- expandexreg(regdata, formula)
 
-    mod <- auto.arima(serie, xreg = Xreg)
+    mod <- auto.arima(serie, allowdrift = FALSE, xreg = Xreg)
 
     mod_atrs <- list(formula = formula)
     out <- new_modprevU(mod, serie, "sarimax", mod_atrs)
