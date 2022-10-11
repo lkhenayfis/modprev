@@ -1,8 +1,6 @@
 ####################################################################################################
-# SUPERCLASSE ABSTRATA DOS DIFERENTES TIPOS DE MODELOS
+# ESTIMACAO DE MODELOS
 ####################################################################################################
-
-# CONSTRUTOR ---------------------------------------------------------------------------------------
 
 #' Ajuste De Modelos
 #' 
@@ -34,6 +32,14 @@
 #' Por fim, deve ser notado que se \code{serie} for um vetor, sera convertido internamente para 
 #' \code{ts} com \code{start = c(1, 1), frequency = 1}.
 #' 
+#' \bold{Modelos periódicos:}
+#' 
+#' Se o argumento \code{periodico} for \code{TRUE}, serao estimados S modelos individuais, onde S 
+#' representa o número de estações em \code{serie}. Desta forma, assim como para a estimação de 
+#' modelos com sazonalidade, a estimação de modelos periódicos \bold{NECESSITA} que \code{serie} 
+#' seja um objeto de serie temporal com sazonalidade. Do contrário será estimado um modelo único 
+#' para a série completa.
+#' 
 #' \bold{Modelos com variáveis explicativas:}
 #' 
 #' No caso de modelos que contenham variáveis explicativas, dois argumentos extras se tornam 
@@ -45,6 +51,7 @@
 #' 
 #' @param serie série para ajustar
 #' @param tipo tipo de modelo a ser ajustado. Ver Detalhes
+#' @param periodico booleano indicando se o modelo é global ou periódico. Ver Detalhes
 #' @param ... demais parâmetros passados para as funções de fit específicas de cada modelo. Ver
 #'     Detalhes
 #' 
@@ -107,59 +114,26 @@
 #' @return Objeto da classe modprev e subclasse igual a \code{tipo}, uma lista de dois elementos:
 #'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
-#' @family Metodos modprev
-#' 
 #' @seealso \code{\link{janelamovel}} para backtest dos modelos em horizonte rolante
 #' 
+#' @family Metodos modprev
+#' 
 #' @export
 
-estimamodelo <- function(serie, tipo, ...) UseMethod("estimamodelo")
+estimamodelo <- function(serie, tipo, periodico = FALSE, ...) UseMethod("estimamodelo")
 
 #' @export
 
-estimamodelo.numeric <- function(serie, tipo, ...) estimamodelo.ts(ts(serie), tipo, ...)
+estimamodelo.numeric <- function(serie, tipo, periodico = FALSE, ...) estimamodelo.ts(ts(serie), tipo, ...)
 
 #' @export
 
-estimamodelo.ts <- function(serie, tipo, ...) {
+estimamodelo.ts <- function(serie, tipo, periodico = FALSE, ...) {
 
-    args_tipo <- names(formals(tipo))
-    tipo <- str2lang(paste0("modprev:::", tipo))
-
-    mc <- match.call()
-    mc <- mc[c(TRUE, names(mc)[-1] %in% args_tipo)]
-    mc[[1]] <- tipo
-
-    out <- eval(mc, envir = parent.frame(), enclos = parent.frame())
+    fitfunc <- ifelse(periodico, estimamodelo_P, estimamodelo_U)
+    out <- fitfunc(serie, tipo, ...)
 
     return(out)
-}
-
-#' Contrutor Interno De \code{modprev}
-#' 
-#' Função interna, não deve ser chamada diretamente pelo usuário
-#' 
-#' \code{atrs} Existe para permitir que outras informacoes, nao necessariamente contidas no objeto 
-#' do modelo (como por exemplo a formula de regressao nos modelos de regressao dinamica), sejam 
-#' passadas adiante para os metodos de cada modelagem. A lista aqui passada sera adicionada ao 
-#' objeto \code{modprev} de saida como um atributo chamado "mod_atrs".
-#' 
-#' @param fit modelo estimado
-#' @param serie serie para qual o modelo foi estimado
-#' @param tipo string indicando espcificação do modelo
-#' @param atrs lista nomeada contendo atributos extras pertinentes ao modelo. Ver Detalhes
-#' 
-#' @return Objeto da classe \code{modprev} e subclasse igual a \code{tipo}, uma lista de dois 
-#'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada. 
-#'     Adicionalmente, se \code{atrs} for passada, um atributo "mod_atrs" contendo o argumento
-
-new_modprev <- function(fit, serie, tipo, atrs) {
-    new <- list(modelo = fit, serie = serie)
-    class(new) <- c(tipo, "modprev")
-
-    if(!missing("atrs")) attr(new, "mod_atrs") <- atrs
-
-    return(new)
 }
 
 # METODOS -----------------------------------------------------------------------------------------
@@ -179,9 +153,26 @@ new_modprev <- function(fit, serie, tipo, atrs) {
 #' previsão será feita tantos passos à frente quanto há observações em \code{newdata}, porém se
 #' \code{n.ahead} for fornecido será usado com precedência sobre o número de observações novas.
 #' 
+#' \bold{Modelos periódicos:}
+#' 
+#' Nos casos de modelos periódicos que necessitam variaveis explicativas, alguns cuidados devem ser
+#' tomados. O usuario informara um argumento \code{newdata} contendo um \code{data.frame}-like unico
+#' contendo todas as variaveis explicativas fora da amostra. Se assume que as linhas neste dado 
+#' correspondem as variaveis explicativas nos tempos apos o ultimo da serie, cronologicamente.
+#' 
+#' Isto significa que, se a serie orignal era mensal terminando em junho/2020, o programa assume que 
+#' \code{newdata} tem, na primeira linha, as variaveis explicativas para julho/2020, na segunda, 
+#' para ago/2020 e assim por diante. Esta suposicao se sustenta no fato de que o pacote 
+#' \code{modprev} foi feito para modelagem de  series temporais em principio.
+#' 
+#' Alternativamente, o usuario pode passar \code{newdata} como uma lista de \code{data.frame}-likes;
+#' neste caso se assume que cada elemento da lista corresponde a uma estacao do dado, em ordem. 
+#' Observe que, se a serie comeca em maio, entao MAIO CORRESPONDE A PRIMEIRA ESTACAO.
+#' 
 #' @param object modelo ajustado através de \code{\link{estimamodelo}}
 #' @param n.ahead número de passos à frente para prever
-#' @param ... existe apenas para consistência com a genérica
+#' @param ... Opcionalmente, pode ser passado o argumento \code{newdata} \code{data.frame}-like 
+#'     contendo variaveis explicativas fora da amostra para modelos que necessitem
 #' 
 #' @examples
 #' 
@@ -225,7 +216,8 @@ predict.modprev <- function(object, n.ahead, ...) {
 #' @param object modelo ajustado atraves de \code{estimamodelo}
 #' @param newseries nova serie para associar ao modelo
 #' @param refit booleano indicando se o modelo deve ser reajustado
-#' @param ... existe apenas para consistência com a genérica
+#' @param ... Opcionalmente, pode ser passado o \code{newregdata}, um \code{data.frame}-like 
+#'     contendo variaveis explicativas pareadas com \code{newseries} para modelos que as necessitem
 #' 
 #' @examples 
 #' 

@@ -52,7 +52,7 @@ ss_ar1_saz <- function(serie) {
         fit$model$Z[] <- NA
     }
 
-    out <- new_modprev(fit$model, serie, "ss_ar1_saz")
+    out <- new_modprevU(fit$model, serie, "ss_ar1_saz")
 
     return(out)
 }
@@ -124,7 +124,7 @@ update.ss_ar1_saz <- function(object, newseries, refit = FALSE, ...) {
 
         newseries  <- if(is.ts(newseries)) newseries else ts(newseries)
 
-        object <- new_modprev(modelo, newseries, "ss_ar1_saz")
+        object <- new_modprevU(modelo, newseries, "ss_ar1_saz")
     }
 
     return(object)

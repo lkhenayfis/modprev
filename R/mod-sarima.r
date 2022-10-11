@@ -30,8 +30,7 @@ sarima <- function(serie, regdata = NULL, formula = NULL) {
     if(!is.null(regdata)) return(sarimax(serie, regdata, formula))
 
     mod <- auto.arima(serie, allowdrift = FALSE)
-    out <- new_modprev(mod, serie, "sarima")
-
+    out <- new_modprevU(mod, serie, "sarima")
     return(out)
 }
 
@@ -77,7 +76,7 @@ update.sarima <- function(object, newseries, refit = FALSE, ...) {
         newseries <- if(is.ts(newseries)) newseries else ts(newseries)
         modelo <- Arima(newseries, model = object$modelo)
 
-        object <- new_modprev(modelo, newseries, "sarima")
+        object <- new_modprevU(modelo, newseries, "sarima")
     }
 
     return(object)
