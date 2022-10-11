@@ -17,3 +17,41 @@ test_that("Estimacao de modelo SARIMAX", {
     # Sem passar regdata
     expect_error(mod2 <- estimamodelo(serie, "sarimax"))
 })
+
+test_that("Previsao de modelo SARIMAX", {
+    yy <- window(datregdin$obs, 1, 150)
+    xx <- head(datregdin$varex, 150)
+
+    compmod <- forecast::auto.arima(yy, xreg = data.matrix(xx))
+    mod <- estimamodelo(yy, "sarima", regdata = xx, formula = ~ V1 + V2 + V3)
+
+    prevcomp <- forecast(compmod, xreg = data.matrix(datregdin$varex[151:160, ]), level = .95)
+    sdcomp   <- with(prevcomp, upper - mean) / qnorm(.975)
+    prev     <- predict(mod, newdata = datregdin$varex[151:160, ])
+
+    expect_equal(prev[, 1], unname(prevcomp$mean))
+    expect_equal(as.numeric(prev[, 2]), unname(as.numeric(sdcomp)))
+
+    # Erro quando nao passa newdata
+
+    expect_error(prev_erro <- predict(mod))
+
+    # Manutencao de serie temporal sem sazo
+
+    expect_equal(start(prev), c(151, 1))
+    expect_equal(end(prev), c(160, 1))
+
+    # Passando n.ahead tambem
+
+    prev <- predict(mod, newdata = datregdin$varex[151:160, ], n.ahead = 5)
+    expect_equal(nrow(prev), 5)
+
+    # Com sazonalidade
+
+    ss <- ts(yy, frequency = 10)
+    mod  <- estimamodelo(ss, "sarima", regdata = xx, formula = ~ V1 + V2 + V3)
+    prev <- predict(mod, newdata = datregdin$varex[151:160, ])
+
+    expect_equal(start(prev), c(16, 1))
+    expect_equal(end(prev), c(16, 10))
+})
