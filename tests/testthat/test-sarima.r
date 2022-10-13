@@ -8,11 +8,6 @@ test_that("Estimacao de modelo SARIMA", {
 
     serie <- c(AirPassengers)
     mod   <- estimamodelo(serie, "sarima")
-
-    # Teste de argumentos extras que nao existe na funcao
-
-    mod2 <- estimamodelo(c(AirPassengers), "sarima", erro = 1)
-    expect_true(identical(mod, mod2))
 })
 
 test_that("Previsao de modelo SARIMA", {

@@ -10,16 +10,31 @@
 #' \code{\link[forecast]{auto.arima}}, que realiza uma busca no espaço de hiperparâmetros de ordem
 #' do modelo por aquele conjunto com menor BIC.
 #' 
+#' @param ... Para estimacao, demais argumentos que possam ser passados a
+#'     \code{\link[forecast]{auto.arima}} -- Ver Detalhes; Para \code{predict}, demais argumentos 
+#'     passados a \code{\link[stats]{predict.Arima}}, exceto por \code{n.ahead} que ja vai 
+#'     automaticamente; para \code{update} nao tem uso, existe apenas para consistência com a
+#'     generica
+#' 
+#' 
 #' @name modelos_sarimax
 NULL
 
 # ESTIMACAO ----------------------------------------------------------------------------------------
 
+#' \bold{Estimacao:}
+#' 
+#' \code{...} pode conter qualquer, ou nenhum, argumento de \code{\link[forecast]{auto.arima}} 
+#' exceto por \code{y}, que sera passado automaticamente como \code{serie}, e \code{xreg} que e 
+#' montado internamente pelo estimador. Alem disso, por padrao \code{allowdrift = FALSE} dado que em
+#' geral as series com as quais \code{modprev} lida nao possuem tendencias lineares no tempo.
+#' 
 #' @param serie serie para ajustar
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula formula da regressão. Se for omitido, todas as variaveis em \code{regdata} serão
 #'     utilizadas. So tem uso se \code{regdata} for passado
-#' @param ... nao possui uso, existe apenas para consistencia com a generica
+#' @param ... Para estimacao, demais argumentos que possam ser passados a
+#'     \code{\link[forecast]{auto.arima}} -- Ver Detalhes
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{sarimax}, uma lista de dois elementos:
 #'     \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
@@ -34,7 +49,12 @@ sarimax <- function(serie, regdata, formula, ...) {
 
     Xreg <- expandexreg(regdata, formula)
 
-    mod <- auto.arima(serie, allowdrift = FALSE, xreg = Xreg)
+    args <- list(...)
+    args$xreg <- Xreg
+    if(!("allowdrift" %in% names(args))) args$allowdrift <- FALSE
+
+    mc <- as.call(c(list(auto.arima, substitute(serie)), args))
+    mod <- eval(mc, envir = parent.frame())
 
     mod_atrs <- list(formula = formula)
     out <- new_modprevU(mod, serie, "sarimax", mod_atrs)
@@ -48,7 +68,8 @@ sarimax <- function(serie, regdata, formula, ...) {
 #' @param newdata \code{data.frame}-like contendo variéveis explicativas fora da amostra
 #' @param n.ahead número de passos à frente para previsão. Este argumento não é necessario, caso não
 #'     seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}
-#' @param ... nao possui uso, existe apenas para consistencia com a generica
+#' @param ... Para \code{predict}, demais argumentos passados a \code{\link[stats]{predict.Arima}}, 
+#'     exceto por \code{n.ahead} que ja vai automaticamente
 #' 
 #' @return \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
 #'     previsão \code{n.ahead} passos à frente;
@@ -83,7 +104,7 @@ predict.sarimax <- function(object, newdata, n.ahead, ...) {
 #' @param newseries nova série com a qual atualizar o modelo
 #' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
 #' @param refit booleano indicando se o modelo deve ou nao ser reajustado
-#' @param ... nao possui uso, existe apenas para consistencia com a generica
+#' @param ... para \code{update} nao tem uso, existe apenas para consistência com a genérica
 #' 
 #' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
 #'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};

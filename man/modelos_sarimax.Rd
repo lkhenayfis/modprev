@@ -21,7 +21,7 @@ sarimax(serie, regdata, formula, ...)
 \item{formula}{formula da regressão. Se for omitido, todas as variaveis em \code{regdata} serão
 utilizadas. So tem uso se \code{regdata} for passado}
 
-\item{...}{nao possui uso, existe apenas para consistencia com a generica}
+\item{...}{para \code{update} nao tem uso, existe apenas para consistência com a genérica}
 
 \item{object}{objeto com classes \code{c("sarimax", "modprev")} contendo modelo}
 
@@ -48,6 +48,11 @@ Contrário à função de estimação, \code{update} já retorna o objeto da cla
 }
 \description{
 Estimação e métodos de modelos da classe \code{sarimax}
+
+\code{...} pode conter qualquer, ou nenhum, argumento de \code{\link[forecast]{auto.arima}}
+exceto por \code{y}, que sera passado automaticamente como \code{serie}, e \code{xreg} que e
+montado internamente pelo estimador. Alem disso, por padrao \code{allowdrift = FALSE} dado que em
+geral as series com as quais \code{modprev} lida nao possuem tendencias lineares no tempo.
 }
 \details{
 Esta especificação identifica e ajusta um modelo SARIMAX(p, d, q)(P, D, Q)^s através da função

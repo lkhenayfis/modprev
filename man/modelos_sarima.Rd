@@ -21,7 +21,7 @@ sarima(serie, regdata, formula, ...)
 \item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
 \code{regdata} serão utilizadas. So tem uso se \code{regdata} for passado}
 
-\item{...}{existe apenas para consistência com a genérica}
+\item{...}{para \code{update} nao tem uso, existe apenas para consistência com a genérica}
 
 \item{object}{objeto com classes \code{c("sarima", "modprev")} contendo modelo}
 
@@ -43,6 +43,11 @@ Contrário à função de estimação, \code{update} já retorna o objeto da cla
 }
 \description{
 Estimação e métodos de modelos da classe \code{sarima}
+
+\code{...} pode conter qualquer, ou nenhum, argumento de \code{\link[forecast]{auto.arima}}
+exceto por \code{y}, que sera passado automaticamente como \code{serie}. Alem disso, por padrao
+\code{allowdrift = FALSE} dado que em geral as series com as quais \code{modprev} lida nao
+possuem tendencias lineares no tempo.
 }
 \details{
 Esta especificação identifica e ajusta um modelo SARIMA(p, d, q)(P, D, Q)^s através da função
