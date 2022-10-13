@@ -1,3 +1,13 @@
+# master
+
+## New features
+
+* Melhorias nos modelos `sarima(x)`:
+  * o argumento `...` agora permite que os demais argumentos de `auto.arima` sejam passados para a
+    estimacao destes tipos de modelo. Isto permite maior controle sobre a pesquisa de especificacao
+  * caso `order` e/ou `seasonal` sejam passados para a estimacao, sera retornado o modelo com esta
+    especificacao exata, pulando a parte de pesquisa do `auto.arima`
+
 # modprev 1.6.1
 
 ## Bug fixes
