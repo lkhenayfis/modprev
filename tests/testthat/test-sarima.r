@@ -8,6 +8,16 @@ test_that("Estimacao de modelo SARIMA", {
 
     serie <- c(AirPassengers)
     mod   <- estimamodelo(serie, "sarima")
+
+    # Estimando um modelo pre especificado -------------------------------------
+
+    mod <- estimamodelo(AirPassengers, "sarima", order = c(1, 0, 0))
+    expect_equal("sarima", class(mod)[1])
+    expect_equal(length(coef(mod$modelo)), 2)
+
+    mod <- estimamodelo(AirPassengers, "sarima", order = c(0, 0, 1), seasonal = c(1, 0, 0))
+    expect_equal("sarima", class(mod)[1])
+    expect_equal(length(coef(mod$modelo)), 3)
 })
 
 test_that("Previsao de modelo SARIMA", {

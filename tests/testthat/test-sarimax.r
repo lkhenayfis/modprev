@@ -23,6 +23,16 @@ test_that("Estimacao de modelo SARIMAX", {
     mod <- estimamodelo(serie, "sarima", regdata = regdata, formula = ~ V1 + V2 + V3)
 
     expect_equal(mod$modelo$arma, c(1, 1, 1, 0, 12, 0, 1))
+
+    # Estimando um modelo pre especificado -------------------------------------
+
+    mod <- estimamodelo(serie, tipo = "sarima", regdata = regdata, formula = ~ V1 + V2 + V3,
+        order = c(1, 0, 0))
+    expect_equal(length(coef(mod$modelo)), 5)
+
+    mod <- estimamodelo(serie, tipo = "sarima", regdata = regdata, formula = ~ V1 + V2 + V3,
+        order = c(1, 0, 0), seasonal = c(1, 0, 0))
+    expect_equal(length(coef(mod$modelo)), 6)
 })
 
 test_that("Previsao de modelo SARIMAX", {

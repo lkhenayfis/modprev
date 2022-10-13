@@ -28,11 +28,16 @@ NULL
 #' \code{allowdrift = FALSE} dado que em geral as series com as quais \code{modprev} lida nao 
 #' possuem tendencias lineares no tempo.
 #' 
+#' Paralelamente, se \code{order} ou \code{seasonal} forem passados, sera estimado um modelo com 
+#' estas ordens especificas. Observe que a selecao automatica nao funciona para so uma das partes,
+#' isto e, se um for especificado, nao e possivel fazer uma pesquisa para as melhores ordens da
+#' outra parte.
+#' 
 #' @param serie serie para ajustar
 #' @param regdata opcional, \code{data.frame}-like contendo variáveis explicativas
 #' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
 #'     \code{regdata} serão utilizadas. So tem uso se \code{regdata} for passado
-#' @param ... Para estimacao, demais argumentos que possam ser passados a
+#' @param ... Para estimacao, argumentos que possam ser passados a \code{\link[forecast]{Arima}} ou
 #'     \code{\link[forecast]{auto.arima}} -- Ver Detalhes
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{sarima}, uma lista de dois elementos:
@@ -46,9 +51,16 @@ sarima <- function(serie, regdata, formula, ...) {
     if(!missing(regdata) && !is.null(regdata)) return(sarimax(serie, regdata, formula, ...))
 
     args <- list(...)
-    if(!("allowdrift" %in% names(args))) args$allowdrift <- FALSE
 
-    mc <- as.call(c(list(auto.arima, substitute(serie)), args))
+    # caso seja passado 'order' ou 'seasonal', estima direto sem parte automatica
+    # atualmente, pelo auto.arima nao da pra fixar uma parte ou outra e pesquisar o resto, de modo
+    # que ou estima um modelo cravado ou deixa a pesquisa ser completa
+    not_auto <- any(c("order", "seasonal") %in% names(args))
+    fitfunc <- ifelse(not_auto, Arima, auto.arima)
+
+    if(!not_auto && !("allowdrift" %in% names(args))) args$allowdrift <- FALSE
+
+    mc <- as.call(c(list(fitfunc, substitute(serie)), args))
     mod <- eval(mc, envir = parent.frame())
     out <- new_modprevU(mod, serie, "sarima")
     return(out)

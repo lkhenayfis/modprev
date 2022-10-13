@@ -53,4 +53,9 @@ possuem tendencias lineares no tempo.
 Esta especificação identifica e ajusta um modelo SARIMA(p, d, q)(P, D, Q)^s através da função
 \code{\link[forecast]{auto.arima}}, que realiza uma busca no espaço de hiperparâmetros de ordem
 do modelo por aquele conjunto com menor BIC.
+
+Paralelamente, se \code{order} ou \code{seasonal} forem passados, sera estimado um modelo com
+estas ordens especificas. Observe que a selecao automatica nao funciona para so uma das partes,
+isto e, se um for especificado, nao e possivel fazer uma pesquisa para as melhores ordens da
+outra parte.
 }

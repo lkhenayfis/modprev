@@ -29,11 +29,16 @@ NULL
 #' montado internamente pelo estimador. Alem disso, por padrao \code{allowdrift = FALSE} dado que em
 #' geral as series com as quais \code{modprev} lida nao possuem tendencias lineares no tempo.
 #' 
+#' Paralelamente, se \code{order} ou \code{seasonal} forem passados, sera estimado um modelo com 
+#' estas ordens especificas. Observe que a selecao automatica nao funciona para so uma das partes,
+#' isto e, se um for especificado, nao e possivel fazer uma pesquisa para as melhores ordens da
+#' outra parte.
+#' 
 #' @param serie serie para ajustar
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula formula da regressão. Se for omitido, todas as variaveis em \code{regdata} serão
 #'     utilizadas. So tem uso se \code{regdata} for passado
-#' @param ... Para estimacao, demais argumentos que possam ser passados a
+#' @param ... Para estimacao, argumentos que possam ser passados a \code{\link[forecast]{Arima}} ou
 #'     \code{\link[forecast]{auto.arima}} -- Ver Detalhes
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{sarimax}, uma lista de dois elementos:
@@ -51,9 +56,16 @@ sarimax <- function(serie, regdata, formula, ...) {
 
     args <- list(...)
     args$xreg <- Xreg
-    if(!("allowdrift" %in% names(args))) args$allowdrift <- FALSE
 
-    mc <- as.call(c(list(auto.arima, substitute(serie)), args))
+    # caso seja passado 'order' ou 'seasonal', estima direto sem parte automatica
+    # atualmente, pelo auto.arima nao da pra fixar uma parte ou outra e pesquisar o resto, de modo
+    # que ou estima um modelo cravado ou deixa a pesquisa ser completa
+    not_auto <- any(c("order", "seasonal") %in% names(args))
+    fitfunc <- ifelse(not_auto, Arima, auto.arima)
+
+    if(!not_auto && !("allowdrift" %in% names(args))) args$allowdrift <- FALSE
+
+    mc <- as.call(c(list(fitfunc, substitute(serie)), args))
     mod <- eval(mc, envir = parent.frame())
 
     mod_atrs <- list(formula = formula)
