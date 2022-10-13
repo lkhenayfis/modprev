@@ -9,14 +9,6 @@ test_that("Estimacao de modelo S.S. AR1+Saz", {
 
     serie <- c(AirPassengers)
     mod   <- estimamodelo(serie, "ss_ar1_saz")
-
-    # Teste de argumentos extras que nao existe na funcao
-
-    mod2 <- estimamodelo(c(AirPassengers), "ss_ar1_saz", erro = 1)
-    expect_equal(mod$modelo["H"], mod2$modelo["H"])
-    expect_equal(mod$modelo["Q"], mod2$modelo["Q"])
-    expect_equal(mod$modelo["T"], mod2$modelo["T"])
-    expect_equal(mod$modelo["Z"], mod2$modelo["Z"])
 })
 
 test_that("Previsao de modelo S.S. AR1+Saz", {
