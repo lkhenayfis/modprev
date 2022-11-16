@@ -55,7 +55,7 @@ reg_lin <- function(serie, regdata, formula, pesos = rep(1, length(serie)), ...)
     regdata <- cbind(Y = as.numeric(serie), regdata, pesos = pesos)
     fit <- lm(formula, regdata, weights = pesos)
 
-    mod_atrs <- list(formula = formula, tsp = aux_tsp)
+    mod_atrs <- list(formula = formula, tsp = aux_tsp, pesos = pesos)
 
     new_modprevU(fit, serie, "reg_lin", mod_atrs)
 }
@@ -122,8 +122,10 @@ update.reg_lin <- function(object, newseries, newregdata, refit = FALSE, ...) {
     mod_atrs <- attr(object, "mod_atrs")
 
     if(refit) {
+        pesos   <- mod_atrs$pesos[seq_along(newseries)]
         formula <- mod_atrs$formula
-        object  <- estimamodelo(newseries, "reg_lin", regdata = newregdata, formula = formula)
+        object  <- estimamodelo(newseries, "reg_lin", regdata = newregdata, formula = formula,
+            pesos = pesos)
     } else {
 
         modelo <- object$modelo
