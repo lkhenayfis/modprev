@@ -24,18 +24,23 @@ NULL
 #' seja omitido, todas as variáveis em \code{regdata} serão utilizadas aditivamemte, i.e. se existem
 #' as colunas \code{c("V1", "V2", "V3")}, formula sera \code{~ V1 + V2 + V3}.
 #' 
+#' Na execucao em janela movel, o vetor de pesos deve ser passado com o tamanho igual ao da janela.
+#' O mesmo vetor sera aplicado em todas as janelas avaliadas.
+#' 
 #' @param serie série para ajustar
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
 #'     \code{regdata} serão utilizadas
+#' @param pesos opcional, vetor de pesos para cada observacao no ajuste. Sera normalizado 
+#'     internamente
 #' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{reg_lin}, uma lista de dois 
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_reg_lin
- 
-reg_lin <- function(serie, regdata, formula, ...) {
+
+reg_lin <- function(serie, regdata, formula, pesos = rep(1, length(serie)), ...) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
@@ -45,8 +50,10 @@ reg_lin <- function(serie, regdata, formula, ...) {
     if(!is.ts(serie)) serie <- ts(serie)
     aux_tsp <- tsp(serie)
 
-    regdata <- cbind(Y = as.numeric(serie), regdata)
-    fit <- lm(formula, regdata)
+    pesos <- pesos / sum(pesos)
+
+    regdata <- cbind(Y = as.numeric(serie), regdata, pesos = pesos)
+    fit <- lm(formula, regdata, weights = pesos)
 
     mod_atrs <- list(formula = formula, tsp = aux_tsp)
 

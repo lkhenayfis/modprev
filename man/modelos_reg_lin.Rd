@@ -7,7 +7,7 @@
 \alias{update.reg_lin}
 \title{Modelos \code{reg_lin}}
 \usage{
-reg_lin(serie, regdata, formula, ...)
+reg_lin(serie, regdata, formula, pesos = rep(1, length(serie)), ...)
 
 \method{predict}{reg_lin}(object, newdata, n.ahead, ...)
 
@@ -20,6 +20,9 @@ reg_lin(serie, regdata, formula, ...)
 
 \item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
 \code{regdata} serão utilizadas}
+
+\item{pesos}{opcional, vetor de pesos para cada observacao no ajuste. Sera normalizado
+internamente}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
 
@@ -65,6 +68,9 @@ Opcionalmente pode ser informado o argumento \code{formula} contendo a especific
 linear, no formato padrão do R (veja \code{\link{formula}}) porém sem o LHS. Caso \code{formula}
 seja omitido, todas as variáveis em \code{regdata} serão utilizadas aditivamemte, i.e. se existem
 as colunas \code{c("V1", "V2", "V3")}, formula sera \code{~ V1 + V2 + V3}.
+
+Na execucao em janela movel, o vetor de pesos deve ser passado com o tamanho igual ao da janela.
+O mesmo vetor sera aplicado em todas as janelas avaliadas.
 
 
 }
