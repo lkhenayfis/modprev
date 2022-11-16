@@ -19,7 +19,8 @@ Depends:
     stats (>= 3.6)
 Imports: 
     forecast (>= 8.12),
-    KFAS (>= 1.4.4)
+    KFAS (>= 1.4.4),
+    quantreg (>= 5.9)
 Suggests: 
     knitr,
     rmarkdown,
