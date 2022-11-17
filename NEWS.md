@@ -1,3 +1,10 @@
+# better_regs
+
+## New features
+
+* `reg_lin` agora pode receber pesos para a estimacao
+* Adiciona modelagem por regressao quantilica atraves da especificacao de tipo `reg_quant`
+
 # master
 
 ## New features
