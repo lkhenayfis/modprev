@@ -1,14 +1,9 @@
-# better_regs
+# modprev 1.7
 
 ## New features
 
 * `reg_lin` agora pode receber pesos para a estimacao
 * Adiciona modelagem por regressao quantilica atraves da especificacao de tipo `reg_quant`
-
-# master
-
-## New features
-
 * Melhorias nos modelos `sarima(x)`:
   * o argumento `...` agora permite que os demais argumentos de `auto.arima` sejam passados para a
     estimacao destes tipos de modelo. Isto permite maior controle sobre a pesquisa de especificacao
