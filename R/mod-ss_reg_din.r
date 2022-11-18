@@ -46,7 +46,8 @@ NULL
 #' 
 #' @rdname modelos_ss_reg_din
 
-ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE, ...) {
+ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE,
+    lambda = 0, ...) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
@@ -68,11 +69,12 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE
     upfunc <- function(par, mod) updH(par, updQ(par, mod), saz = saz)
 
     start <- rep(0, nvars * is.na(Qfill) + 1 + (vardin != 0))
-    fit <- fitSSM(mod, start, upfunc, method = "BFGS")
+    fit <- fitSSM2(mod, start, upfunc, method = "BFGS", lambda = lambda)
 
     if(fit$optim.out$convergence < 0) fit$model$Z[] <- NA
 
-    mod_atrs <- list(formula = formula, vardin = vardin, saz = saz, estatica = estatica)
+    mod_atrs <- list(formula = formula, vardin = vardin, saz = saz, estatica = estatica,
+        lambda = lambda)
     out <- new_modprevU(fit$model, serie, "ss_reg_din", mod_atrs)
 
     return(out)
@@ -149,8 +151,9 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
     if(refit) {
         formula <- mod_atrs$formula
         vardin  <- mod_atrs$vardin
+        lambda  <- mod_atrs$lambda
         object  <- estimamodelo(newseries, "ss_reg_din", regdata = newregdata, formula = formula,
-            vardin = vardin)
+            vardin = vardin, lambda = lambda)
     } else {
 
         modelo <- object$modelo
