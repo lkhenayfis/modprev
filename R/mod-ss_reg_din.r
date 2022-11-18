@@ -284,3 +284,99 @@ parsedesloc <- function(serie, newseries, saz) {
 
     return(desloc)
 }
+
+# CROSS VALIDATION ---------------------------------------------------------------------------------
+
+#' Estimacao De SSM Com lambda
+#' 
+#' Funcao que faz a estimacao de modelos em espaco de estado com penalizacao da matriz Q
+#' 
+#' \code{fitSSM2} e uma copia de \code{\link[KFAS]{fitSSM}}, com uma simples modificacao: a funcao 
+#' objetivo agora e uma ponderacao entre a verossimilhanca e uma penalizacao da variacao total da 
+#' matriz Q. Isto e feito no contexto de regressoes dinamicas com o intuito de controlar o quao 
+#' variaveis sao os regressores. 
+#' 
+#' Para maiores detalhes, ver \code{\link[KFAS]{fitSSM}}, pois todo o restante de interface e saidas
+#' e igual
+
+fitSSM2 <- function (model, inits, updatefn, checkfn, update_args = NULL, lambda = 0, ...) {
+    is_gaussian <- all(model$distribution == "gaussian")
+    if (missing(updatefn)) {
+        estH <- is_gaussian && any(is.na(model$H))
+        estQ <- any(is.na(model$Q))
+        if ((dim(model$H)[3] > 1 && estH || (dim(model$Q)[3] >
+            1) && estQ))
+            stop("No model updating function supplied, but cannot use default\n   
+          function as the covariance matrices are time varying.")
+        updatefn <- function(pars, model) {
+            if (estQ) {
+                Q <- as.matrix(model$Q[, , 1])
+                naQd <- which(is.na(diag(Q)))
+                naQnd <- which(upper.tri(Q[naQd, naQd]) & is.na(Q[naQd,
+                  naQd]))
+                Q[naQd, naQd][lower.tri(Q[naQd, naQd])] <- 0
+                diag(Q)[naQd] <- exp(0.5 * pars[1:length(naQd)])
+                Q[naQd, naQd][naQnd] <- pars[length(naQd) + 1:length(naQnd)]
+                model$Q[naQd, naQd, 1] <- crossprod(Q[naQd, naQd])
+            }
+            else naQnd <- naQd <- NULL
+            if (estH) {
+                H <- as.matrix(model$H[, , 1])
+                naHd <- which(is.na(diag(H)))
+                naHnd <- which(upper.tri(H[naHd, naHd]) & is.na(H[naHd,
+                  naHd]))
+                H[naHd, naHd][lower.tri(H[naHd, naHd])] <- 0
+                diag(H)[naHd] <- exp(0.5 * pars[length(naQd) +
+                  length(naQnd) + 1:length(naHd)])
+                H[naHd, naHd][naHnd] <- pars[length(naQd) + length(naQnd) +
+                  length(naHd) + 1:length(naHnd)]
+                model$H[naHd, naHd, 1] <- crossprod(H[naHd, naHd])
+            }
+            model
+        }
+    }
+    is.SSModel(do.call(updatefn, args = c(list(inits, model),
+        update_args)), na.check = TRUE, return.logical = FALSE)
+    if (!is_gaussian && is.null(list(...)$theta)) {
+        theta <- initTheta(model$y, model$u, model$distribution)
+    }
+    else theta <- NULL
+    if (missing(checkfn)) {
+        if (is_gaussian) {
+            checkfn <- function(model) {
+                all(sapply(c("H", "T", "R",
+                  "Q", "a1", "P1", "P1inf"),
+                  function(x) {
+                    all(is.finite(model[[x]]))
+                  })) && max(model$Q) <= 1e+07 && max(model$H) <=
+                  1e+07
+            }
+        }
+        else {
+            checkfn <- function(model) {
+                all(sapply(c("u", "T", "R",
+                  "Q", "a1", "P1", "P1inf"),
+                  function(x) {
+                    all(is.finite(model[[x]]))
+                  })) && max(model$Q) <= 1e+07
+            }
+        }
+    }
+    likfn <- function(pars, model, ...) {
+        model <- do.call(updatefn, args = c(list(pars, model),
+            update_args))
+        if (checkfn(model)) {
+            out <- -logLik(object = model, check.model = FALSE, theta = theta, ...)
+        }
+        else out <- .Machine$double.xmax^0.75
+
+        out <- out + lambda * sum(model["Q"])
+    }
+    out <- NULL
+    out$optim.out <- optim(par = inits, fn = likfn, model = model,
+        ...)
+    out$model <- do.call(updatefn, args = c(list(out$optim.out$par,
+        model), update_args))
+    is.SSModel(out$model, na.check = TRUE, return.logical = FALSE)
+    out
+}
