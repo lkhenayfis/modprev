@@ -383,3 +383,53 @@ fitSSM2 <- function (model, inits, updatefn, checkfn, update_args = NULL, lambda
     is.SSModel(out$model, na.check = TRUE, return.logical = FALSE)
     out
 }
+
+#' Validacao Cruzada De Regressao Dinamica
+#' 
+#' Realiza validacao cruzada de regressao dinamica por grid check
+#' 
+#' 
+
+CV_regdin <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE,
+    cv_control = list()) {
+
+    df_cv_ctrl <- list(
+        janela = floor(length(serie) / 10),
+        passo = 1L,
+        obj.ahead = 5:10,
+        refit.cada = NA,
+        error_func = function(x) sum(x^2),
+        lambda = c(0, exp(seq(0, 5, .5)))
+    )
+    df_cv_ctrl[names(cv_control)] <- cv_control
+
+    params_janela <- lapply(df_cv_ctrl$lambda, function(lambda) {
+        out <- df_cv_ctrl
+        out$lambda <- lambda
+        out$n.ahead <- max(df_cv_ctrl$obj.ahead)
+        out
+    })
+
+    jms <- match.call()
+    jms <- lapply(params_janela, function(params) {
+        jms[[1]] <- quote(janelamovel)
+        jms$cv_control <- NULL
+        jms <- c(as.list(jms), params)
+        jms$error_func <- NULL
+        jms$tipo <- "ss_reg_din"
+        as.call(jms)
+    })
+    jms <- lapply(jms, function(jm) eval(jm, parent.frame(), parent.frame()))
+
+    erros <- sapply(jms, function(jm) {
+        out <- sapply(jm, function(prev) {
+            erro <- serie - prev
+            df_cv_ctrl$error_func(erro[df_cv_ctrl$obj.ahead])
+        })
+        mean(out)
+    })
+
+    final_lambda <- df_cv_ctrl$lambda[which.min(erros)]
+
+    return(final_lambda)
+}
