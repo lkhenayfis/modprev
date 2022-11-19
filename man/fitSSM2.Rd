@@ -6,6 +6,29 @@
 \usage{
 fitSSM2(model, inits, updatefn, checkfn, update_args = NULL, lambda = 0, ...)
 }
+\arguments{
+\item{model}{Model object of class \code{SSModel}.}
+
+\item{inits}{Initial values for \code{\link{optim}}.}
+
+\item{updatefn}{User defined function which updates the model given the
+parameters. Must be of form \code{updatefn(pars, model, ...)},
+where \code{...} correspond to optional additional arguments.
+Function should return the original model with updated parameters.
+See details for description of the default \code{updatefn}.}
+
+\item{checkfn}{Optional function of form \code{checkfn(model)} for checking
+the validity of the model. Should return \code{TRUE} if the model is valid,
+and \code{FALSE} otherwise. See details.}
+
+\item{update_args}{Optional list containing additional arguments to \code{updatefn}.}
+
+\item{lambda}{penality coefficient}
+
+\item{...}{Further arguments for functions \code{optim} and
+\code{logLik.SSModel}, such as \code{nsim = 1000}, \code{marginal = TRUE},
+and \code{method = "BFGS"}.}
+}
 \description{
 Funcao que faz a estimacao de modelos em espaco de estado com penalizacao da matriz Q
 }

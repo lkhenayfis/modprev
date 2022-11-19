@@ -308,6 +308,22 @@ parsedesloc <- function(serie, newseries, saz) {
 #' 
 #' Para maiores detalhes, ver \code{\link[KFAS]{fitSSM}}, pois todo o restante de interface e saidas
 #' e igual
+#' 
+#' @param inits Initial values for \code{\link{optim}}.
+#' @param model Model object of class \code{SSModel}.
+#' @param updatefn User defined function which updates the model given the
+#'   parameters. Must be of form \code{updatefn(pars, model, ...)},
+#'   where \code{...} correspond to optional additional arguments.
+#'   Function should return the original model with updated parameters.
+#'   See details for description of the default \code{updatefn}.
+#' @param checkfn Optional function of form \code{checkfn(model)} for checking
+#' the validity of the model. Should return \code{TRUE} if the model is valid,
+#' and \code{FALSE} otherwise. See details.
+#' @param update_args Optional list containing additional arguments to \code{updatefn}.
+#' @param lambda penality coefficient
+#' @param ... Further arguments for functions \code{optim} and
+#'  \code{logLik.SSModel}, such as \code{nsim = 1000}, \code{marginal = TRUE}, 
+#'   and \code{method = "BFGS"}.
 
 fitSSM2 <- function (model, inits, updatefn, checkfn, update_args = NULL, lambda = 0, ...) {
     is_gaussian <- all(model$distribution == "gaussian")
@@ -348,7 +364,7 @@ fitSSM2 <- function (model, inits, updatefn, checkfn, update_args = NULL, lambda
     is.SSModel(do.call(updatefn, args = c(list(inits, model),
         update_args)), na.check = TRUE, return.logical = FALSE)
     if (!is_gaussian && is.null(list(...)$theta)) {
-        theta <- initTheta(model$y, model$u, model$distribution)
+        theta <- KFAS:::initTheta(model$y, model$u, model$distribution)
     }
     else theta <- NULL
     if (missing(checkfn)) {
@@ -457,7 +473,7 @@ CV_regdin <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE,
         jms$tipo <- "ss_reg_din"
         as.call(jms)
     })
-    jms <- lapply(jms, function(jm) eval(jm, parent.frame(), parent.frame()))
+    for(i in seq(jms)) jms[[i]] <- eval(jms[[i]], parent.frame(), parent.frame())
 
     erros <- sapply(jms, function(jm) {
         out <- sapply(jm, function(prev) {
