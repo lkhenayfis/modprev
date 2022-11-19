@@ -1,3 +1,11 @@
+# regdin_cv
+
+## New features
+
+* `ss_reg_din` agora recebe argumento `lambda`, uma penalidade aplicada ao traco da matriz Q nos
+  modelos para controle da variabilidade das regressoes
+* Adiciona funcao `CV_regdin` para validacao cruzada da penalidade `lambda` 
+
 # modprev 1.7
 
 ## New features
