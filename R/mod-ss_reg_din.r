@@ -31,6 +31,12 @@ NULL
 #' a partir da sazonalidade. Isto garante que os valores sejam consistentes entre se e, mais 
 #' importante, só possui um parâmetro a mais em relação aos modelos homocedásticos.
 #' 
+#' O argumento \code{lambda} permite que seja introduzida uma penalidade na estimacao do modelo. O 
+#' valor passado por este argumento ser multiplicado pelo traco da matriz Q e somado a funcao 
+#' objetivo. Isso permite que a regressao dinamica seja controlada para apresentar comportamento 
+#' menos adaptativo. A funcao \code{\link{CV_regdin}} permite otimizar o coeficiente de penalidade
+#' por validacao cruzada.
+#' 
 #' @param serie série para ajustar
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
@@ -39,6 +45,7 @@ NULL
 #'     Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro assume este
 #'     valor como a sazonalidade
 #' @param estatica booleano indicando se a regressao deve ser de coeficientes estaticos
+#' @param lambda penalidade multiplicando o traco da matriz Q. Ver Detalhes
 #' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{ss_reg_din}, uma lista de dois 
@@ -388,7 +395,38 @@ fitSSM2 <- function (model, inits, updatefn, checkfn, update_args = NULL, lambda
 #' 
 #' Realiza validacao cruzada de regressao dinamica por grid check
 #' 
+#' Esta funcao executa uma regressao dinamica em janela movel com diferentes valores de penalidade
+#' \code{lambda} buscando aquele que leva ao melhor modelo do ponto de vista de previsao.
 #' 
+#' A lista \code{cv_control} pode conter um ou mais dos seguintes elementos nomeados
+#' 
+#' \describe{
+#' \item{janela}{tamanho da janela para ajuste -- similar ao argumento homonimo em 
+#'     \code{\link{janelamovel}}}
+#' \item{passo}{salto entre uma janela e outra -- similar ao argumento homonimo em 
+#'     \code{\link{janelamovel}}}
+#' \item{refit.cada}{inteiro indicando de quantas em quantas janelas o modelo deve ser reajustado -- 
+#'     similar ao argumento homonimo em \code{\link{janelamovel}}}
+#' \item{obj.ahead}{vetor de inteiros indicando a janela de passos a frente de interesse para a 
+#'     previsao}
+#' \item{error_func}{funcao que recebe um vetor de erros de previsao e retorna um escalar como 
+#'     metrica de performance. Default function(x) sum(x^2)}
+#' \item{lambda}{vetor de lambdas a serem testados}
+#' } 
+#' 
+#' @param serie série para ajustar
+#' @param regdata \code{data.frame}-like contendo variáveis explicativas
+#' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
+#'     \code{regdata} serão utilizadas
+#' @param vardin booleano ou inteiro indicando se deve ser estimado modelo com heterocedasticidade.
+#'     Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro assume este
+#'     valor como a sazonalidade
+#' @param estatica booleano indicando se a regressao deve ser de coeficientes estaticos
+#' @param cv_control opcional, uma lista de controle da validacao cruzada. Ver Detalhes
+#' 
+#' @return valor otimo de \code{lambda}
+#' 
+#' @export
 
 CV_regdin <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE,
     cv_control = list()) {
@@ -423,7 +461,7 @@ CV_regdin <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE,
 
     erros <- sapply(jms, function(jm) {
         out <- sapply(jm, function(prev) {
-            erro <- serie - prev
+            erro <- serie - prev[, 1]
             df_cv_ctrl$error_func(erro[df_cv_ctrl$obj.ahead])
         })
         mean(out)
