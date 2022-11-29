@@ -4,7 +4,18 @@
 \alias{fitSSM2}
 \title{Estimacao De SSM Com lambda}
 \usage{
-fitSSM2(model, inits, updatefn, checkfn, update_args = NULL, lambda = 0, ...)
+fitSSM2(
+  model,
+  inits,
+  updatefn,
+  checkfn,
+  update_args = NULL,
+  lambda,
+  obj,
+  regdata,
+  mse_config,
+  ...
+)
 }
 \arguments{
 \item{model}{Model object of class \code{SSModel}.}
@@ -25,6 +36,12 @@ and \code{FALSE} otherwise. See details.}
 
 \item{lambda}{penality coefficient}
 
+\item{obj}{string entre \code{c("loglik", "mse")} indicando o tipo de função objetivo}
+
+\item{regdata}{data.frame com variaveis explicativas no horizonte de estimacao}
+
+\item{mse_config}{lista de configurações da otimização quando \code{tipo_obj = "mse"}}
+
 \item{...}{Further arguments for functions \code{optim} and
 \code{logLik.SSModel}, such as \code{nsim = 1000}, \code{marginal = TRUE},
 and \code{method = "BFGS"}.}
@@ -33,10 +50,9 @@ and \code{method = "BFGS"}.}
 Funcao que faz a estimacao de modelos em espaco de estado com penalizacao da matriz Q
 }
 \details{
-\code{fitSSM2} e uma copia de \code{\link[KFAS]{fitSSM}}, com uma simples modificacao: a funcao
-objetivo agora e uma ponderacao entre a verossimilhanca e uma penalizacao da variacao total da
-matriz Q. Isto e feito no contexto de regressoes dinamicas com o intuito de controlar o quao
-variaveis sao os regressores.
+\code{fitSSM2} e uma copia de \code{\link[KFAS]{fitSSM}}, com algumas modificacoes: a funcao
+objetivo agora pode ser uma ponderacao entre a verossimilhanca e uma penalizacao da variacao total
+da matriz Q; a funcao objetivo pode ser o MSE de previsao n:m passos a frente
 
 Para maiores detalhes, ver \code{\link[KFAS]{fitSSM}}, pois todo o restante de interface e saidas
 e igual

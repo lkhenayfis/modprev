@@ -14,6 +14,8 @@ ss_reg_din(
   vardin = FALSE,
   estatica = FALSE,
   lambda = 0,
+  tipo_obj = c("loglik", "mse"),
+  mse_config = list(n.ahead = 1, janela = 0.1, passo = 1),
   ...
 )
 
@@ -36,6 +38,12 @@ valor como a sazonalidade}
 \item{estatica}{booleano indicando se a regressao deve ser de coeficientes estaticos}
 
 \item{lambda}{penalidade multiplicando o traco da matriz Q. Ver Detalhes}
+
+\item{tipo_obj}{string entre \code{c("loglik", "mse")} indicando o tipo de função objetivo. Ver
+Detalhes}
+
+\item{mse_config}{lista de configurações da otimização quando \code{tipo_obj = "mse"}. Ver
+Detalhes}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
 
@@ -92,9 +100,27 @@ importante, só possui um parâmetro a mais em relação aos modelos homocedást
 
 O argumento \code{lambda} permite que seja introduzida uma penalidade na estimacao do modelo. O
 valor passado por este argumento ser multiplicado pelo traco da matriz Q e somado a funcao
-objetivo. Isso permite que a regressao dinamica seja controlada para apresentar comportamento
-menos adaptativo. A funcao \code{\link{CV_regdin}} permite otimizar o coeficiente de penalidade
-por validacao cruzada.
+objetivo. A funcao \code{\link{CV_regdin}} permite otimizar o coeficiente de penalidade por
+validacao cruzada.
+
+Quando \code{tipo_obj = "loglik"} o modelo é estimado por maximização da verossimilhança, o
+padrão e método tradicional de estimação de hiperparâmetros em modelos estatísticos. A
+alternativa \code{tipo_obj = "mse"} permite uma otimização minimizado o MSE em um determinado
+horizonte de previsão. Isto é feito se realizando uma avaliação do modelo em janela móvel a cada
+iteração da otimização.
+
+O argumento \code{mse_config} permite controlar a execução da janela móvel. Este deve ser uma
+lista com, pelo menos, os elementos nomeados
+
+\describe{
+\item{n.ahead}{um escalar ou vetor indicando o(s) horizonte(s) de previsão no(s) qual(is) se deseja
+minimizar o MSE}
+\item{janela}{ou um escalar inteiro indicando a largura da janela ou valor menor que 1 indicando
+o percentual de observações em \code{serie} que devem ser utilizadas como largura de janela}
+\item{passo}{escalar indicando quantas observacoes sao puladas entre janelas}
+}
+
+Todos estes elementos são argumentos da função \code{\link{janelamovel}}
 
 \bold{Update}:
 

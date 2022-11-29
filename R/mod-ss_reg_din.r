@@ -33,9 +33,27 @@ NULL
 #' 
 #' O argumento \code{lambda} permite que seja introduzida uma penalidade na estimacao do modelo. O 
 #' valor passado por este argumento ser multiplicado pelo traco da matriz Q e somado a funcao 
-#' objetivo. Isso permite que a regressao dinamica seja controlada para apresentar comportamento 
-#' menos adaptativo. A funcao \code{\link{CV_regdin}} permite otimizar o coeficiente de penalidade
-#' por validacao cruzada.
+#' objetivo. A funcao \code{\link{CV_regdin}} permite otimizar o coeficiente de penalidade por 
+#' validacao cruzada.
+#' 
+#' Quando \code{tipo_obj = "loglik"} o modelo é estimado por maximização da verossimilhança, o 
+#' padrão e método tradicional de estimação de hiperparâmetros em modelos estatísticos. A 
+#' alternativa \code{tipo_obj = "mse"} permite uma otimização minimizado o MSE em um determinado 
+#' horizonte de previsão. Isto é feito se realizando uma avaliação do modelo em janela móvel a cada
+#' iteração da otimização.
+#' 
+#' O argumento \code{mse_config} permite controlar a execução da janela móvel. Este deve ser uma 
+#' lista com, pelo menos, os elementos nomeados
+#' 
+#' \describe{
+#' \item{n.ahead}{um escalar ou vetor indicando o(s) horizonte(s) de previsão no(s) qual(is) se deseja 
+#' minimizar o MSE}
+#' \item{janela}{ou um escalar inteiro indicando a largura da janela ou valor menor que 1 indicando
+#' o percentual de observações em \code{serie} que devem ser utilizadas como largura de janela}
+#' \item{passo}{escalar indicando quantas observacoes sao puladas entre janelas}
+#' }
+#' 
+#' Todos estes elementos são argumentos da função \code{\link{janelamovel}}
 #' 
 #' @param serie série para ajustar
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
@@ -46,6 +64,10 @@ NULL
 #'     valor como a sazonalidade
 #' @param estatica booleano indicando se a regressao deve ser de coeficientes estaticos
 #' @param lambda penalidade multiplicando o traco da matriz Q. Ver Detalhes
+#' @param tipo_obj string entre \code{c("loglik", "mse")} indicando o tipo de função objetivo. Ver
+#'     Detalhes
+#' @param mse_config lista de configurações da otimização quando \code{tipo_obj = "mse"}. Ver 
+#'     Detalhes
 #' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{ss_reg_din}, uma lista de dois 
@@ -55,7 +77,7 @@ NULL
 
 ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE,
     lambda = 0, tipo_obj = c("loglik", "mse"),
-    mse_config = list(h = 1, janela = .1, passo = 1), ...) {
+    mse_config = list(n.ahead = 1, janela = .1, passo = 1), ...) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
@@ -63,7 +85,7 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE
 
     tipo_obj <- match.arg(tipo_obj)
 
-    mse_config_def <- list(h = 1, janela = .1, passo = 1)
+    mse_config_def <- list(n.ahead = 1, janela = .1, passo = 1)
     mse_config <- c(mse_config, mse_config_def)
     mse_config <- mse_config[!duplicated(names(mse_config))]
     if(mse_config$janela < 1) mse_config$janela <- ceiling(length(serie) * mse_config$janela)
@@ -205,10 +227,9 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
 #' 
 #' Funcao que faz a estimacao de modelos em espaco de estado com penalizacao da matriz Q
 #' 
-#' \code{fitSSM2} e uma copia de \code{\link[KFAS]{fitSSM}}, com uma simples modificacao: a funcao 
-#' objetivo agora e uma ponderacao entre a verossimilhanca e uma penalizacao da variacao total da 
-#' matriz Q. Isto e feito no contexto de regressoes dinamicas com o intuito de controlar o quao 
-#' variaveis sao os regressores. 
+#' \code{fitSSM2} e uma copia de \code{\link[KFAS]{fitSSM}}, com algumas modificacoes: a funcao 
+#' objetivo agora pode ser uma ponderacao entre a verossimilhanca e uma penalizacao da variacao total 
+#' da matriz Q; a funcao objetivo pode ser o MSE de previsao n:m passos a frente
 #' 
 #' Para maiores detalhes, ver \code{\link[KFAS]{fitSSM}}, pois todo o restante de interface e saidas
 #' e igual
@@ -225,6 +246,9 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
 #' and \code{FALSE} otherwise. See details.
 #' @param update_args Optional list containing additional arguments to \code{updatefn}.
 #' @param lambda penality coefficient
+#' @param obj string entre \code{c("loglik", "mse")} indicando o tipo de função objetivo
+#' @param regdata data.frame com variaveis explicativas no horizonte de estimacao
+#' @param mse_config lista de configurações da otimização quando \code{tipo_obj = "mse"}
 #' @param ... Further arguments for functions \code{optim} and
 #'  \code{logLik.SSModel}, such as \code{nsim = 1000}, \code{marginal = TRUE}, 
 #'   and \code{method = "BFGS"}.
@@ -325,8 +349,6 @@ updfun_default <- function(pars, model) {
     model
 }
 
-#' Funcao Objetivo LogLik
-
 likfn <- function(pars, model, updatefn, checkfn, update_args, theta, lambda, ...) {
     model <- do.call(updatefn, args = c(list(pars, model),
         update_args))
@@ -338,17 +360,15 @@ likfn <- function(pars, model, updatefn, checkfn, update_args, theta, lambda, ..
     out <- out + lambda * sum(model["Q"])
 }
 
-#' Funcao Objetivo MSE 
-
 msefn <- function(pars, model, updatefn, checkfn, update_args, regdata = regdata, mse_config, ...) {
     model$modelo <- do.call(updatefn, args = c(list(pars, model$modelo),
         update_args))
     if (checkfn(model$modelo)) {
         jms <- janelamovel(model$modelo$y, model, mse_config$janela, mse_config$passo,
-            n.ahead = max(mse_config$h), regdata = regdata)
+            n.ahead = max(mse_config$n.ahead), regdata = regdata)
         out <- sapply(jms, function(prev) {
             erro <- (model$modelo$y - prev[, 1])^2
-            mean(erro[mse_config$h])
+            mean(erro[mse_config$n.ahead])
         })
         out <- mean(out)
     }

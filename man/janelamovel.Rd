@@ -19,7 +19,8 @@ janelamovel(
 \arguments{
 \item{serie}{serie temporal pela qual passar a janela movel}
 
-\item{tipo}{tipo de modelo a ser ajustado. Ver \code{\link{estimamodelo}}.}
+\item{tipo}{tipo de modelo a ser ajustado (\code{\link{estimamodelo}}). Alternativamente, pode
+ser um objeto \code{"modprev"} já estimado, com o qual rodar a janela móvel}
 
 \item{janela}{especificação da janela móvel ou expansível}
 
