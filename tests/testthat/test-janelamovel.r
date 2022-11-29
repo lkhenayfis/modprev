@@ -128,6 +128,14 @@ test_that("Testes de previsao em janela", {
     expect_equal(length(jm), 6)
     expect_true(all(sapply(jm, function(m) all(dim(m) == c(6, 2)))))
 
+    # Passando um modelo ja estimado --------------------------------
+
+    mod0 <- estimamodelo(window(serie, c(1, 1), c(12, 4)), "ss_ar1_saz")
+    jm_alt <- janelamovel(serie, mod0, 48, 12, 6)
+
+    compara <- mapply("-", jm, jm_alt)
+    expect_true(all(compara == 0))
+
     # Modelo regressao dinamica -------------------------------------
 
     dados <- geradado()

@@ -37,7 +37,8 @@
 #' últimas janelas.
 #' 
 #' @param serie serie temporal pela qual passar a janela movel
-#' @param tipo tipo de modelo a ser ajustado. Ver \code{\link{estimamodelo}}.
+#' @param tipo tipo de modelo a ser ajustado (\code{\link{estimamodelo}}). Alternativamente, pode 
+#'     ser um objeto \code{"modprev"} já estimado, com o qual rodar a janela móvel
 #' @param janela especificação da janela móvel ou expansível
 #' @param passo inteiro de saltos temporais entre cada janela. Ver Detalhes
 #' @param n.ahead número de passos à frente para prever a cada passo
@@ -110,8 +111,13 @@ janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cad
     ij <- janelas[[1]]
     iserie   <- window(serie, ij[[1]], ij[[2]])
     iregdata <- regdata[window(aux, ij[[1]], ij[[2]]), , drop = FALSE]
-    mod <- c(list(quote(estimamodelo), serie = iserie, tipo = tipo, regdata = iregdata), args)
-    mod <- eval(as.call(mod), parent.frame(), parent.frame())
+
+    if("modprev" %in% class(tipo)) {
+        mod <- tipo
+    } else {
+        mod <- c(list(quote(estimamodelo), serie = iserie, tipo = tipo, regdata = iregdata), args)
+        mod <- eval(as.call(mod), parent.frame(), parent.frame())
+    }
 
     retfun <- whichreturn(full.output)
 
