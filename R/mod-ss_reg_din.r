@@ -216,46 +216,28 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
 
 fitSSM2 <- function(model, inits, updatefn, checkfn, update_args = NULL, lambda = 0, ...) {
     is_gaussian <- all(model$distribution == "gaussian")
+
     if (missing(updatefn)) {
         estH <- is_gaussian && any(is.na(model$H))
         estQ <- any(is.na(model$Q))
-        if ((dim(model$H)[3] > 1 && estH || (dim(model$Q)[3] >
-            1) && estQ))
-            stop("No model updating function supplied, but cannot use default\n   
-          function as the covariance matrices are time varying.")
-        updatefn <- function(pars, model) {
-            if (estQ) {
-                Q <- as.matrix(model$Q[, , 1])
-                naQd <- which(is.na(diag(Q)))
-                naQnd <- which(upper.tri(Q[naQd, naQd]) & is.na(Q[naQd,
-                  naQd]))
-                Q[naQd, naQd][lower.tri(Q[naQd, naQd])] <- 0
-                diag(Q)[naQd] <- exp(0.5 * pars[1:length(naQd)])
-                Q[naQd, naQd][naQnd] <- pars[length(naQd) + 1:length(naQnd)]
-                model$Q[naQd, naQd, 1] <- crossprod(Q[naQd, naQd])
-            }
-            else naQnd <- naQd <- NULL
-            if (estH) {
-                H <- as.matrix(model$H[, , 1])
-                naHd <- which(is.na(diag(H)))
-                naHnd <- which(upper.tri(H[naHd, naHd]) & is.na(H[naHd,
-                  naHd]))
-                H[naHd, naHd][lower.tri(H[naHd, naHd])] <- 0
-                diag(H)[naHd] <- exp(0.5 * pars[length(naQd) +
-                  length(naQnd) + 1:length(naHd)])
-                H[naHd, naHd][naHnd] <- pars[length(naQd) + length(naQnd) +
-                  length(naHd) + 1:length(naHnd)]
-                model$H[naHd, naHd, 1] <- crossprod(H[naHd, naHd])
-            }
-            model
+        if ((dim(model$H)[3] > 1 && estH || (dim(model$Q)[3] > 1) && estQ)) {
+            msg <- paste0("No model updating function supplied, but cannot use default\n",
+                "function as the covariance matrices are time varying.")
+            stop(msg)
         }
+        updatefn <- updfun_default
     }
-    is.SSModel(do.call(updatefn, args = c(list(inits, model),
-        update_args)), na.check = TRUE, return.logical = FALSE)
+
+    is.SSModel(do.call(updatefn, args = c(list(inits, model), update_args)),
+        na.check = TRUE, return.logical = FALSE)
+
     if (!is_gaussian && is.null(list(...)$theta)) {
         theta <- KFAS:::initTheta(model$y, model$u, model$distribution)
     }
-    else theta <- NULL
+    else {
+        theta <- NULL
+    }
+
     if (missing(checkfn)) {
         if (is_gaussian) {
             checkfn <- function(model) {
@@ -282,10 +264,36 @@ fitSSM2 <- function(model, inits, updatefn, checkfn, update_args = NULL, lambda 
     out$optim.out <- optim(par = inits, fn = likfn, model = model,
         updatefn = updatefn, checkfn = checkfn, update_args = update_args, theta = theta,
         lambda = lambda, ...)
-    out$model <- do.call(updatefn, args = c(list(out$optim.out$par,
-        model), update_args))
+    out$model <- do.call(updatefn, args = c(list(out$optim.out$par, model), update_args))
     is.SSModel(out$model, na.check = TRUE, return.logical = FALSE)
-    out
+    return(out)
+}
+
+updfun_default <- function(pars, model) {
+    Q <- as.matrix(model$Q[, , 1])
+    if(any(is.na(Q))) {
+        naQd <- which(is.na(diag(Q)))
+        naQnd <- which(upper.tri(Q[naQd, naQd]) & is.na(Q[naQd,
+            naQd]))
+        Q[naQd, naQd][lower.tri(Q[naQd, naQd])] <- 0
+        diag(Q)[naQd] <- exp(0.5 * pars[1:length(naQd)])
+        Q[naQd, naQd][naQnd] <- pars[length(naQd) + 1:length(naQnd)]
+        model$Q[naQd, naQd, 1] <- crossprod(Q[naQd, naQd])
+    }
+    else naQnd <- naQd <- NULL
+    H <- as.matrix(model$H[, , 1])
+    if(any(is.na(H))) {
+        naHd <- which(is.na(diag(H)))
+        naHnd <- which(upper.tri(H[naHd, naHd]) & is.na(H[naHd,
+            naHd]))
+        H[naHd, naHd][lower.tri(H[naHd, naHd])] <- 0
+        diag(H)[naHd] <- exp(0.5 * pars[length(naQd) +
+            length(naQnd) + 1:length(naHd)])
+        H[naHd, naHd][naHnd] <- pars[length(naQd) + length(naQnd) +
+            length(naHd) + 1:length(naHnd)]
+        model$H[naHd, naHd, 1] <- crossprod(H[naHd, naHd])
+    }
+    model
 }
 
 #' Funcao Objetivo LogLik
