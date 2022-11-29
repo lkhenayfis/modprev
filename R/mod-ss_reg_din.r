@@ -368,7 +368,7 @@ msefn <- function(pars, model, updatefn, checkfn, update_args, regdata = regdata
             n.ahead = max(mse_config$n.ahead), regdata = regdata)
         out <- sapply(jms, function(prev) {
             erro <- (model$modelo$y - prev[, 1])^2
-            mean(erro[mse_config$n.ahead])
+            mean(erro[mse_config$n.ahead], na.rm = TRUE)
         })
         out <- mean(out)
     }
