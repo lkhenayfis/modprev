@@ -370,7 +370,7 @@ msefn <- function(pars, model, updatefn, checkfn, update_args, regdata = regdata
             erro <- (model$modelo$y - prev[, 1])^2
             mean(erro[mse_config$n.ahead], na.rm = TRUE)
         })
-        out <- mean(out)
+        out <- mean(out, na.rm = TRUE)
     }
     else out <- .Machine$double.xmax^0.75
 
