@@ -33,6 +33,14 @@ test_that("Estimacao de modelo S.S. RegDin - regressao simples", {
     expect_equal(mod$modelo["Q"], mod2$modelo["Q"])
     expect_equal(mod$modelo["T"], mod2$modelo["T"])
     expect_equal(mod$modelo["Z"], mod2$modelo["Z"])
+
+    # Estimacao por MSE ---------------------------------------------
+
+    serie <- window(datregdin$obs, 1, 200)
+    varex <- datregdin$varex[, "V1", drop = FALSE]
+    mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din", formula = ~ V1, tipo_obj = "mse",
+        mse_config = list(janela = 100, passo = 10))
+
 })
 
 test_that("Previsao de modelo S.S. RegDin - regressao simples", {

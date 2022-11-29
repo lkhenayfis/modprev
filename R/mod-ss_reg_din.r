@@ -54,11 +54,19 @@ NULL
 #' @rdname modelos_ss_reg_din
 
 ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE,
-    lambda = 0, ...) {
+    lambda = 0, tipo_obj = c("loglik", "mse"),
+    mse_config = list(h = 1, janela = .1, passo = 1), ...) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
     if(missing(formula)) formula <- expandeformula(regdata)
+
+    tipo_obj <- match.arg(tipo_obj)
+
+    mse_config_def <- list(h = 1, janela = .1, passo = 1)
+    mse_config <- c(mse_config, mse_config_def)
+    mse_config <- mse_config[!duplicated(names(mse_config))]
+    if(mse_config$janela < 1) mse_config$janela <- ceiling(length(serie) * mse_config$janela)
 
     nvars  <- ncol(model.matrix(formula, data = regdata)) - 1 # model.matrix inclui intercept
 
@@ -75,13 +83,20 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE
     updH <- ifelse(vardin == 0, updH_homoc, updH_heter_trig)
     upfunc <- function(par, mod) updH(par, updQ(par, mod), saz = saz)
 
+    mod_atrs <- list(formula = formula, vardin = vardin, saz = saz, estatica = estatica,
+        lambda = lambda, obj = tipo_obj, mse_config = mse_config)
+
+    # E criado um mod dummy aqui para os casos em que se usa obj_fun MSE. A estimacao desses modelos
+    # envolve rodar janelamovel, e esta funcao e escrita para o aracabouco da classe modprev deste
+    # pacote. Modelos internos de cada classe especifica nao possuem metodos update e predict 
+    # homogeneos com os quais janelamovel conta
+
     start <- rep(0, nvars * is.na(Qfill) + 1 + (vardin != 0))
-    fit <- fitSSM2(mod, start, upfunc, method = "BFGS", lambda = lambda)
+    mod <- new_modprevU(mod, serie, "ss_reg_din", mod_atrs)
+    fit <- fitSSM2(mod, start, upfunc, method = "BFGS", lambda = lambda, obj = tipo_obj,
+        regdata = regdata, mse_config = mse_config)
 
     if(fit$optim.out$convergence < 0) fit$model$Z[] <- NA
-
-    mod_atrs <- list(formula = formula, vardin = vardin, saz = saz, estatica = estatica,
-        lambda = lambda)
     out <- new_modprevU(fit$model, serie, "ss_reg_din", mod_atrs)
 
     return(out)
@@ -214,7 +229,12 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
 #'  \code{logLik.SSModel}, such as \code{nsim = 1000}, \code{marginal = TRUE}, 
 #'   and \code{method = "BFGS"}.
 
-fitSSM2 <- function(model, inits, updatefn, checkfn, update_args = NULL, lambda = 0, ...) {
+fitSSM2 <- function(model, inits, updatefn, checkfn, update_args = NULL, lambda, obj,
+    regdata, mse_config, ...) {
+
+    outer_model <- model
+    model <- model$modelo
+
     is_gaussian <- all(model$distribution == "gaussian")
 
     if (missing(updatefn)) {
@@ -261,11 +281,20 @@ fitSSM2 <- function(model, inits, updatefn, checkfn, update_args = NULL, lambda 
     }
 
     out <- NULL
-    out$optim.out <- optim(par = inits, fn = likfn, model = model,
+
+    obj_fun <- switch(obj, "loglik" = likfn, "mse" = msefn)
+
+    # No caso "mse" precisa de um truque porque a funcao objetivo envolve rodar a janelamovel deste
+    # pacote, e esta funcao so pode receber modelos da classe modprev definida no pacote
+    model_aux <- switch(obj, "loglik" = model, "mse" = outer_model)
+    out$optim.out <- optim(par = inits, fn = obj_fun, model = model_aux,
         updatefn = updatefn, checkfn = checkfn, update_args = update_args, theta = theta,
-        lambda = lambda, ...)
+        lambda = lambda, regdata = regdata, mse_config = mse_config, ...)
+
     out$model <- do.call(updatefn, args = c(list(out$optim.out$par, model), update_args))
+
     is.SSModel(out$model, na.check = TRUE, return.logical = FALSE)
+
     return(out)
 }
 
