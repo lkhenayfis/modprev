@@ -309,6 +309,25 @@ likfn <- function(pars, model, updatefn, checkfn, update_args, theta, lambda, ..
     out <- out + lambda * sum(model["Q"])
 }
 
+#' Funcao Objetivo MSE 
+
+msefn <- function(pars, model, updatefn, checkfn, update_args, regdata = regdata, mse_config, ...) {
+    model$modelo <- do.call(updatefn, args = c(list(pars, model$modelo),
+        update_args))
+    if (checkfn(model$modelo)) {
+        jms <- janelamovel(model$modelo$y, model, mse_config$janela, mse_config$passo,
+            n.ahead = max(mse_config$h), regdata = regdata)
+        out <- sapply(jms, function(prev) {
+            erro <- (model$modelo$y - prev[, 1])^2
+            mean(erro[mse_config$h])
+        })
+        out <- mean(out)
+    }
+    else out <- .Machine$double.xmax^0.75
+
+    out
+}
+
 # HELPERS ------------------------------------------------------------------------------------------
 
 #' Auxiliares Para Estimacao
