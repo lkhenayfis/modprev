@@ -20,7 +20,8 @@ Depends:
 Imports: 
     forecast (>= 8.12),
     KFAS (>= 1.4.4),
-    quantreg (>= 5.9)
+    quantreg (>= 5.9),
+    glmnet (>= 4.1)
 Suggests: 
     knitr,
     rmarkdown,
