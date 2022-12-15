@@ -1,4 +1,5 @@
 ^informals$
+^profiling$
 ^data-raw$
 ^LICENSE\.md$
 ^README\.Rmd$
