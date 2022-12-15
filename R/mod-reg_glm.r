@@ -56,7 +56,7 @@ reg_glm <- function(serie, regdata, formula, pesos = rep(1, length(serie)), dist
     pesos <- pesos / sum(pesos)
     regdata <- model.matrix(formula, data = regdata)[, -1]
 
-    if(args$lambda == "cv") args$lambda <- cv.glmnet(regdata, serie, alpha = args$alpha)
+    if(lambda == "cv") lambda <- cv.glmnet(regdata, as.numeric(serie), alpha = alpha)$lambda.min
 
     fit <- glmnet(regdata, serie, dist, pesos, alpha = alpha, lambda = lambda, ...)
 
