@@ -33,6 +33,12 @@ reg_glm(
 \item{pesos}{opcional, vetor de pesos para cada observacao no ajuste. Sera normalizado
 internamente}
 
+\item{dist}{distribuição da variável dependente}
+
+\item{alpha}{coeficiente de combinação convexa entre lasso e ridge. 0 = ridge; 1 = lasso}
+
+\item{lambda}{coeficiente de penalizacao. "cv" para selecao automatica}
+
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
 
 \item{object}{objeto com classes \code{c("reg_glm", "modprev")} contendo modelo}

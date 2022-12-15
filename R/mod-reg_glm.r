@@ -33,6 +33,9 @@ NULL
 #'     \code{regdata} serão utilizadas
 #' @param pesos opcional, vetor de pesos para cada observacao no ajuste. Sera normalizado 
 #'     internamente
+#' @param dist distribuição da variável dependente
+#' @param alpha coeficiente de combinação convexa entre lasso e ridge. 0 = ridge; 1 = lasso
+#' @param lambda coeficiente de penalizacao. "cv" para selecao automatica
 #' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{reg_glm}, uma lista de dois 
