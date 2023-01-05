@@ -58,10 +58,11 @@ NULL
 
 ss_reg_din_pm <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE, ...) {
 
-    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
-    nvars <- ncol(model.matrix(formula, data = regdata)) - 1 # model.matrix inclui intercept
-
     if(missing(formula)) formula <- expandeformula(regdata)
+
+    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
+    regdata <- as.data.frame(model.matrix(formula, data = regdata))
+    nvars <- ncol(regdata) - 1 # model.matrix inclui intercept
 
     freq <- frequency(serie)
     if(freq == 1) stop("'serie' nao possui sazonalidade")
@@ -102,7 +103,7 @@ expande_sist_mats <- function(regdata, freq, pers, nvars) {
 
     ff <- function(...) abind::abind(..., along = 3)
 
-    Z <- split(cbind(b0 = 1, regdata), rep(seq_len(pers), each = freq))
+    Z <- split(regdata, rep(seq_len(pers), each = freq))
     Z <- do.call(ff, Z)
 
     T <- diag(nvars + 1)
@@ -110,10 +111,13 @@ expande_sist_mats <- function(regdata, freq, pers, nvars) {
 
     R <- matrix(rep(0, nvars), nrow = 1)
     R <- rbind(R, diag(nvars))
+    R <- array(R, c(dim(R), 1))
 
     Q <- diag(NA_real_, nvars)
+    Q <- array(Q, c(dim(Q), 1))
 
     H <- diag(NA_real_, freq)
+    H <- array(H, c(dim(H), 1))
 
     out <- list(Z = Z, T = T, R = R, Q = Q, H = H)
 
@@ -169,6 +173,8 @@ updH_heter_trig_pm <- function(par, mod, freq, ...) {
 updQ_pm <- function(par, mod, ...) {
     nQ <- dim(mod["Q"])[1]
     parQ <- tail(par, nQ)
-    diag(mod["Q"][, , 1]) <- exp(parQ)
+
+    mod["Q"][matrix(c(seq_len(nQ), seq_len(nQ), rep(1, nQ)), ncol = 3)] <- exp(parQ)
+
     return(mod)
 }
