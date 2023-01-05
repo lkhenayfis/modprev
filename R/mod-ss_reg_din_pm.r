@@ -58,23 +58,21 @@ NULL
 
 ss_reg_din_pm <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE, ...) {
 
+    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
+    if(any(is.na(regdata))) warning("Ha NAs em 'regdata'")
+
     if(missing(formula)) formula <- expandeformula(regdata)
 
-    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
-    regdata <- as.data.frame(model.matrix(formula, data = regdata))
+    regdata <- model.frame(formula, data = regdata, na.action = na.pass)
+    regdata <- cbind(b0 = 1, regdata)
     nvars <- ncol(regdata) - 1 # model.matrix inclui intercept
 
     freq <- frequency(serie)
     if(freq == 1) stop("'serie' nao possui sazonalidade")
 
-    sobra <- nrow(regdata) %% freq
+    sobra <- length(serie) %% freq
     if(sobra != 0) stop("'serie' nao possui numero inteiro de periodos de sazonalidade")
-    pers <- nrow(regdata) %/% freq
-
-    if(vardin & (frequency(serie) == 1)) {
-        warning("'vardin' e TRUE mas 'serie' nao possui sazonalidade -- ignorando 'vardin'")
-        vardin <- FALSE
-    }
+    pers <- length(serie) %/% freq
 
     serie_m <- ts(matrix(serie, ncol = freq, byrow = TRUE), start = start(serie), frequency = 1)
     mats <- expande_sist_mats(regdata, freq, pers, nvars)
