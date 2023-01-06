@@ -105,6 +105,12 @@ multivar2univar <- function(serie) {
     return(serie_u)
 }
 
+list2cube <- function(lista) {
+    dims <- c(dim(lista[[1]]), length(lista))
+    out <- array(unlist(lista), dims)
+    return(out)
+}
+
 expande_sist_mats <- function(serie_m, regdata, formula) {
 
     oldopt <- options("na.action")
@@ -117,13 +123,12 @@ expande_sist_mats <- function(serie_m, regdata, formula) {
     freq <- ncol(serie_m)
     pers <- nrow(serie_m)
 
-    ff <- function(...) abind::abind(..., along = 3)
-
     Z <- split(regdata, rep(seq_len(pers), each = freq))
-    Z <- do.call(ff, Z)
+    Z <- list2cube(Z)
 
     T <- diag(nvars + 1)
-    T <- do.call(ff, lapply(seq_len(pers), function(i) return(T)))
+    T <- lapply(seq_len(pers), function(i) return(T))
+    T <- list2cube(T)
 
     R <- matrix(rep(0, nvars), nrow = 1)
     R <- rbind(R, diag(nvars))
