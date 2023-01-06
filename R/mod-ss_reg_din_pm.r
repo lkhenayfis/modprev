@@ -87,7 +87,7 @@ ss_reg_din_pm <- function(serie, regdata, formula, vardin = FALSE, ...) {
 
     if(fit$optim.out$convergence < 0) fit$model$Z[] <- NA
 
-    mod_atrs <- list(formula = formula, vardin = vardin, freq = frequency(serie))
+    mod_atrs <- list(formula = formula, vardin = vardin)
     out <- new_modprevU(fit$model, serie, "ss_reg_din_pm", mod_atrs)
 
     return(out)
