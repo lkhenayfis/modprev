@@ -44,3 +44,35 @@ test_that("Estimacao de modelo S.S. RegDin Pseudo Multivar - regressao simples",
     expect_equal(mod$modelo["T"], mod2$modelo["T"])
     expect_equal(mod$modelo["Z"], mod2$modelo["Z"])
 })
+
+test_that("Geracao de matrizes do sistema", {
+
+    varex <- geradado()[[1]]
+    f <- 10
+    p <- 25
+    n <- 3
+
+    mats <- expande_sist_mats(varex, f, p, n)
+
+    # matriz Z
+    expect_equal(dim(mats$Z), c(f, n, p))
+    expect_true(all((data.matrix(head(varex, f)) - mats$Z[, , 1]) == 0))
+
+    # matriz T
+    expect_equal(dim(mats$T), c(n + 1, n + 1, p))
+    alldiag <- lapply(seq_len(dim(mats$T)[3]), function(k) mats$T[, , k] == diag(n + 1))
+    expect_true(all(Reduce("&", alldiag)))
+
+    # matriz R
+    expect_equal(dim(mats$R), c(n + 1, n, 1))
+    expect_equal(mats$R[1, , 1], rep(0, n))
+    expect_equal(mats$R[-1, , 1], diag(n))
+
+    # matriz Q
+    expect_equal(dim(mats$Q), c(n, n, 1))
+    expect_equal(mats$Q[, , 1], diag(NA_real_, n))
+
+    # matriz H
+    expect_equal(dim(mats$H), c(f, f, 1))
+    expect_equal(mats$H[, , 1], diag(NA_real_, f))
+})
