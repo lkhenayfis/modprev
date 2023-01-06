@@ -4,14 +4,14 @@
 \alias{parsedesloc}
 \title{Deslocamento Do Array De Variancias}
 \usage{
-parsedesloc(serie, newseries, saz)
+parsedesloc(serie, newseries, freq)
 }
 \arguments{
 \item{serie}{a serie original do modelo}
 
 \item{newseries}{nova serie para update}
 
-\item{saz}{frequencia da heterocedasticidade}
+\item{freq}{frequencia da heterocedasticidade}
 }
 \value{
 inteiro indicando número de posicoes a deslocar por \code{\link{shift}}

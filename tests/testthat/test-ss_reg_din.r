@@ -74,7 +74,7 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao simples", {
 
     expect_equal(mod_atr_upd$formula, mod_atr$formula)
     expect_equal(mod_atr_upd$vardin, mod_atr$vardin)
-    expect_equal(mod_atr_upd$saz, mod_atr$saz)
+    expect_equal(mod_atr_upd$freq, mod_atr$freq)
 
     mod_refit <- update(mod, serie2, newregdata = varex2, refit = TRUE)
     expect_equal(c(mod_refit$modelo$y), c(serie2))
@@ -84,7 +84,7 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao simples", {
 
     expect_equal(mod_atr_upd$formula, mod_atr$formula)
     expect_equal(mod_atr_upd$vardin, mod_atr$vardin)
-    expect_equal(mod_atr_upd$saz, mod_atr$saz)
+    expect_equal(mod_atr_upd$freq, mod_atr$freq)
 })
 
 test_that("Estimacao de modelo S.S. RegDin - regressao multipla", {
@@ -155,7 +155,7 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla", {
 
     expect_equal(mod_atr_upd$formula, mod_atr$formula)
     expect_equal(mod_atr_upd$vardin, mod_atr$vardin)
-    expect_equal(mod_atr_upd$saz, mod_atr$saz)
+    expect_equal(mod_atr_upd$freq, mod_atr$freq)
 
     mod_refit <- update(mod, newseries = newseries, newregdata = newregdata, refit = TRUE)
 
@@ -166,7 +166,7 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla", {
 
     expect_equal(mod_atr_upd$formula, mod_atr$formula)
     expect_equal(mod_atr_upd$vardin, mod_atr$vardin)
-    expect_equal(mod_atr_upd$saz, mod_atr$saz)
+    expect_equal(mod_atr_upd$freq, mod_atr$freq)
 })
 
 test_that("Estimacao de modelo S.S. RegDin - regressao multipla heterocedastica", {
@@ -180,23 +180,11 @@ test_that("Estimacao de modelo S.S. RegDin - regressao multipla heterocedastica"
     mod1 <- estimamodelo(serie, "ss_reg_din", regdata = varex, formula = ~ V1 + V2 * V3, vardin = TRUE)
 
     expect_equal("ss_reg_din", class(mod1)[1])
-    expect_equal(attr(mod1, "mod_atrs")$vardin, 1)
+    expect_equal(attr(mod1, "mod_atrs")$vardin, TRUE)
     matH <- matrix(c(mod1$model["H"]), 10)
     expect_true(all(apply(matH, 1, function(v) all(v == v[1]))))
     expect_snapshot_value(round(mod1$modelo["Q"][, , 1], 5), style = "deparse")
     expect_snapshot_value(round(mod1$modelo["H"][1, 1, 1:10], 5), style = "deparse")
-
-    # Serie temporal sem sazonalidade com vardin = 10
-
-    serie <- c(serie)
-    expect_warning(
-        mod2 <- estimamodelo(serie, "ss_reg_din", regdata = varex, formula = ~ V1 + V2 * V3, vardin = 10)
-    )
-
-    expect_equal("ss_reg_din", class(mod2)[1])
-    expect_equal(attr(mod2, "mod_atrs")$vardin, 10)
-    expect_equal(c(mod2$model["H"]), c(mod1$model["H"]))
-    expect_equal(c(mod2$model["Q"]), c(mod1$model["Q"]))
 })
 
 test_that("Previsao de modelo S.S. RegDin - regressao multipla - heterocedastica", {
@@ -241,17 +229,17 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla heterocedastic
 
     newseries  <- ts(seq(20), start = c(2, 4), freq = 10)
     mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
-    desloc     <- parsedesloc(serie, newseries, attr(mod_upd, "mod_atrs")$saz)
+    desloc     <- parsedesloc(serie, newseries, frequency(serie))
     expect_equal(mod_upd$modelo["H"][1, 1, 1:10], shift(mod$modelo["H"][1, 1, 1:10], desloc))
 
     newseries  <- ts(seq(20), start = c(2, 10), freq = 10)
     mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
-    desloc     <- parsedesloc(serie, newseries, attr(mod_upd, "mod_atrs")$saz)
+    desloc     <- parsedesloc(serie, newseries, frequency(serie))
     expect_equal(mod_upd$modelo["H"][1, 1, 1:10], shift(mod$modelo["H"][1, 1, 1:10], desloc))
 
     newseries  <- ts(seq(20), start = c(2, 2), freq = 10)
     mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
-    desloc     <- parsedesloc(serie, newseries, attr(mod_upd, "mod_atrs")$saz)
+    desloc     <- parsedesloc(serie, newseries, frequency(serie))
     expect_equal(mod_upd$modelo["H"][1, 1, 1:10], shift(mod$modelo["H"][1, 1, 1:10], desloc))
 
     # Atualizacao quando a serie e sazonal mas vardin = FALSE
@@ -261,8 +249,7 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla heterocedastic
     newseries  <- ts(seq(20), start = c(2, 4), freq = 10)
     newregdata <- datregdin$varex[1:20, ]
     mod_upd    <- update(mod, newseries = newseries, newregdata = newregdata)
-    desloc     <- parsedesloc(serie, newseries, attr(mod, "mod_atrs")$saz)
-    expect_equal(desloc, 0)
+    expect_equal(mod_upd$modelo["H"][1, 1, ], shift(mod$modelo["H"][1, 1, ], desloc))
 })
 
 test_that("Identificacao de deslocamento de array", {

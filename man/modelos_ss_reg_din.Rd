@@ -21,9 +21,7 @@ ss_reg_din(serie, regdata, formula, vardin = FALSE, ...)
 \item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
 \code{regdata} serão utilizadas}
 
-\item{vardin}{booleano ou inteiro indicando se deve ser estimado modelo com heterocedasticidade.
-Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro assume este
-valor como a sazonalidade}
+\item{vardin}{booleano indicando se deve ser estimado modelo com heterocedasticidade.}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
 

@@ -9,7 +9,7 @@
 \usage{
 updH_homoc(par, mod, ...)
 
-updH_heter_trig(par, mod, saz, ...)
+updH_heter_trig(par, mod, freq, ...)
 
 updQ(par, mod, ...)
 }
@@ -20,7 +20,7 @@ updQ(par, mod, ...)
 
 \item{...}{sem uso, apenas para consistencia de argumentos entre funcoes}
 
-\item{saz}{sazonalidade da serie modelada}
+\item{freq}{sazonalidade da serie modelada}
 }
 \value{
 \code{mod} com a matriz modificada

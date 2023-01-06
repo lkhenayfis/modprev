@@ -41,9 +41,7 @@ NULL
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
 #'     \code{regdata} serão utilizadas
-#' @param vardin booleano ou inteiro indicando se deve ser estimado modelo com heterocedasticidade.
-#'     Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro assume este
-#'     valor como a sazonalidade
+#' @param vardin booleano indicando se deve ser estimado modelo com heterocedasticidade.
 #' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{ss_reg_din}, uma lista de dois 
@@ -59,23 +57,23 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, ...) {
 
     nvars  <- ncol(model.matrix(formula, data = regdata)) - 1 # model.matrix inclui intercept
 
-    if(vardin & (frequency(serie) == 1)) warning("'vardin' e TRUE mas 'serie' nao possui sazonalidade")
-    vardin <- vardin * 1
-
-    saz <- ifelse(vardin == 0, 1, frequency(serie) * (vardin == 1) + vardin * (vardin > 1))
+    if(vardin & (frequency(serie) == 1)) {
+        warning("'vardin' e TRUE mas 'serie' nao possui sazonalidade -- ignorando 'vardin'")
+        vardin <- FALSE
+    }
 
     mod <- SSModel(serie ~ SSMregression(formula, regdata, Q = diag(NA_real_, nvars)),
-        H = array(NA_real_, c(1, 1, saz)))
+        H = array(NA_real_, c(1, 1, ifelse(vardin, frequency(serie), 1))))
 
-    updH <- ifelse(vardin == 0, updH_homoc, updH_heter_trig)
-    upfunc <- function(par, mod) updH(par, updQ(par, mod), saz = saz)
+    updH <- ifelse(!vardin, updH_homoc, updH_heter_trig)
+    upfunc <- function(par, mod) updH(par, updQ(par, mod), freq = frequency(serie))
 
     start <- rep(0, nvars + 1 + (vardin != 0))
     fit <- fitSSM(mod, start, upfunc, method = "BFGS")
 
     if(fit$optim.out$convergence < 0) fit$model$Z[] <- NA
 
-    mod_atrs <- list(formula = formula, vardin = vardin, saz = saz)
+    mod_atrs <- list(formula = formula, vardin = vardin)
     out <- new_modprevU(fit$model, serie, "ss_reg_din", mod_atrs)
 
     return(out)
@@ -160,12 +158,12 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
 
         if(missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
 
-        saz <- mod_atrs$saz
+        freqvar <- ifelse(mod_atrs$vardin, frequency(object$serie), 1)
 
-        desloc <- parsedesloc(object$serie, newseries, saz)
+        desloc <- parsedesloc(object$serie, newseries, freqvar)
 
-        Hmat <- modelo["H"][, , seq_len(saz), drop = FALSE]
-        Hmat <- Hmat[, , shift(seq_len(saz), desloc), drop = FALSE]
+        Hmat <- modelo["H"][, , seq_len(freqvar), drop = FALSE]
+        Hmat <- Hmat[, , shift(seq_len(freqvar), desloc), drop = FALSE]
 
         Qmat <- modelo["Q"]
         form <- mod_atrs$formula
@@ -194,7 +192,7 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
 #' 
 #' @param par vetor completo de hiperparametros. Ver Detalhes
 #' @param mod o modelo a ser atualizado
-#' @param saz sazonalidade da serie modelada
+#' @param freq sazonalidade da serie modelada
 #' @param ... sem uso, apenas para consistencia de argumentos entre funcoes
 #' 
 #' @return \code{mod} com a matriz modificada
@@ -211,9 +209,9 @@ updH_homoc <- function(par, mod, ...) {
 
 #' @rdname update_funs
 
-updH_heter_trig <- function(par, mod, saz, ...) {
-    uH   <- cos(0:(saz - 1) * 2 * pi / saz)
-    vH   <- sin(0:(saz - 1) * 2 * pi / saz)
+updH_heter_trig <- function(par, mod, freq, ...) {
+    uH   <- cos(0:(freq - 1) * 2 * pi / freq)
+    vH   <- sin(0:(freq - 1) * 2 * pi / freq)
 
     parH <- head(par, 2)
     mod["H"][] <- rep(exp(parH[1] * uH + parH[2] * vH), length.out = dim(mod["H"])[3])
@@ -252,31 +250,31 @@ updQ <- function(par, mod, ...) {
 #' 
 #' @param serie a serie original do modelo
 #' @param newseries nova serie para update
-#' @param saz frequencia da heterocedasticidade
+#' @param freq frequencia da heterocedasticidade
 #' 
 #' @return inteiro indicando número de posicoes a deslocar por \code{\link{shift}}
 
-parsedesloc <- function(serie, newseries, saz) {
+parsedesloc <- function(serie, newseries, freq) {
 
     freq_old <- frequency(serie)
     freq_new <- frequency(newseries)
 
-    if(saz == 1) return(0)
+    if(freq == 1) return(0)
 
-    if(freq_old != saz) {
+    if(freq_old != freq) {
         wrn <- paste0("O modelo foi ajustado com heterocedasticidade, mas 'serie' nao era um objeto",
             "ts -- Sera transformado com inicio = c(1, 1) e frequecia igual a da heterocedasticidade")
         warning(wrn)
-        serie <- ts(serie, frequency = saz)
+        serie <- ts(serie, frequency = freq)
     }
     init_old <- start(serie)[2]
 
-    if(freq_new != saz) {
+    if(freq_new != freq) {
         wrn <- paste0("'newseries' nao e serie temporal ou nao tem sazonalidade igual a da",
             " heterocedasticidade -- Sera transformada para uma ts iniciando imediatamente apos ",
             "o termino da serie original")
         warning(wrn)
-        newseries <- ts(newseries, start = deltats(end(serie), 1, saz), frequency = saz)
+        newseries <- ts(newseries, start = deltats(end(serie), 1, freq), frequency = freq)
     }
     init_new <- start(newseries)[2]
 
