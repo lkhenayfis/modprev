@@ -47,32 +47,32 @@ test_that("Estimacao de modelo S.S. RegDin Pseudo Multivar - regressao simples",
 
 test_that("Geracao de matrizes do sistema", {
 
-    varex <- geradado()[[1]]
-    f <- 10
-    p <- 25
-    n <- 3
+    dados <- geradado()
+    varex <- dados[[1]]
+    formula <- ~ V1 + V2 + V3
+    serie_m <- ts(matrix(dados[[2]], 50, 5))
 
-    mats <- expande_sist_mats(varex, f, p, n)
+    mats <- expande_sist_mats(serie_m, varex, formula)
 
     # matriz Z
-    expect_equal(dim(mats$Z), c(f, n, p))
-    expect_true(all((data.matrix(head(varex, f)) - mats$Z[, , 1]) == 0))
+    expect_equal(dim(mats$Z), c(5, 4, 50))
+    expect_true(all((data.matrix(cbind(1, head(varex, 5))) - mats$Z[, , 1]) == 0))
 
     # matriz T
-    expect_equal(dim(mats$T), c(n + 1, n + 1, p))
-    alldiag <- lapply(seq_len(dim(mats$T)[3]), function(k) mats$T[, , k] == diag(n + 1))
+    expect_equal(dim(mats$T), c(4, 4, 50))
+    alldiag <- lapply(seq_len(dim(mats$T)[3]), function(k) mats$T[, , k] == diag(4))
     expect_true(all(Reduce("&", alldiag)))
 
     # matriz R
-    expect_equal(dim(mats$R), c(n + 1, n, 1))
-    expect_equal(mats$R[1, , 1], rep(0, n))
-    expect_equal(mats$R[-1, , 1], diag(n))
+    expect_equal(dim(mats$R), c(4, 3, 1))
+    expect_equal(mats$R[1, , 1], rep(0, 3))
+    expect_equal(mats$R[-1, , 1], diag(3))
 
     # matriz Q
-    expect_equal(dim(mats$Q), c(n, n, 1))
-    expect_equal(mats$Q[, , 1], diag(NA_real_, n))
+    expect_equal(dim(mats$Q), c(3, 3, 1))
+    expect_equal(mats$Q[, , 1], diag(NA_real_, 3))
 
     # matriz H
-    expect_equal(dim(mats$H), c(f, f, 1))
-    expect_equal(mats$H[, , 1], diag(NA_real_, f))
+    expect_equal(dim(mats$H), c(5, 5, 1))
+    expect_equal(mats$H[, , 1], diag(NA_real_, 5))
 })

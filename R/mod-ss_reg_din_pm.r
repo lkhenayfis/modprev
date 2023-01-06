@@ -63,19 +63,13 @@ ss_reg_din_pm <- function(serie, regdata, formula, vardin = FALSE, estatica = FA
 
     if(missing(formula)) formula <- expandeformula(regdata)
 
-    regdata <- model.frame(formula, data = regdata, na.action = na.pass)
-    regdata <- cbind(b0 = 1, regdata)
-    nvars <- ncol(regdata) - 1 # model.matrix inclui intercept
-
     freq <- frequency(serie)
     if(freq == 1) stop("'serie' nao possui sazonalidade")
 
-    sobra <- length(serie) %% freq
-    if(sobra != 0) stop("'serie' nao possui numero inteiro de periodos de sazonalidade")
-    pers <- length(serie) %/% freq
+    if((length(serie) %% freq) != 0) stop("'serie' nao possui numero inteiro de periodos de sazonalidade")
 
     serie_m <- ts(matrix(serie, ncol = freq, byrow = TRUE), start = start(serie), frequency = 1)
-    mats <- expande_sist_mats(regdata, freq, pers, nvars)
+    mats <- expande_sist_mats(serie_m, regdata, formula)
 
     mod <- SSModel(serie_m ~ SSMcustom(mats$Z, mats$T, mats$R, mats$Q) - 1, H = mats$H)
 
@@ -84,8 +78,8 @@ ss_reg_din_pm <- function(serie, regdata, formula, vardin = FALSE, estatica = FA
 
     start <- rep(0,
         1 +          # variancia de epsilon se vardin = FALSE; intercept da funcao de variancia c.c.
-        2 * vardin + # coeficientes harmonicos caso vardin = TRUE
-        nvars        # coeficientes de regressao
+        2 * vardin +         # coeficientes harmonicos caso vardin = TRUE
+        sum(is.na(mod["Q"])) # coeficientes de regressao
     )
     fit <- fitSSM(mod, start, upfunc, method = "BFGS")
 
@@ -97,7 +91,14 @@ ss_reg_din_pm <- function(serie, regdata, formula, vardin = FALSE, estatica = FA
     return(out)
 }
 
-expande_sist_mats <- function(regdata, freq, pers, nvars) {
+expande_sist_mats <- function(serie_m, regdata, formula) {
+
+    regdata <- model.frame(formula, data = regdata, na.action = na.pass)
+    regdata <- cbind(b0 = 1, regdata)
+    nvars <- ncol(regdata) - 1
+
+    freq <- ncol(serie_m)
+    pers <- nrow(serie_m)
 
     ff <- function(...) abind::abind(..., along = 3)
 
