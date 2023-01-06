@@ -56,7 +56,7 @@ NULL
 #' 
 #' @rdname modelos_ss_reg_din_pm
 
-ss_reg_din_pm <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE, ...) {
+ss_reg_din_pm <- function(serie, regdata, formula, vardin = FALSE, ...) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
     if(any(is.na(regdata))) warning("Ha NAs em 'regdata'")
@@ -267,7 +267,7 @@ update.ss_reg_din_pm <- function(object, newseries, newregdata, refit = FALSE, .
 #' 
 #' @param par vetor completo de hiperparametros. Ver Detalhes
 #' @param mod o modelo a ser atualizado
-#' @param saz sazonalidade da serie modelada
+#' @param freq sazonalidade da serie modelada
 #' @param ... sem uso, apenas para consistencia de argumentos entre funcoes
 #' 
 #' @return \code{mod} com a matriz modificada

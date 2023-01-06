@@ -7,7 +7,7 @@
 \alias{update.ss_reg_din_pm}
 \title{Modelos \code{ss_reg_din_pm}}
 \usage{
-ss_reg_din_pm(serie, regdata, formula, vardin = FALSE, estatica = FALSE, ...)
+ss_reg_din_pm(serie, regdata, formula, vardin = FALSE, ...)
 
 \method{predict}{ss_reg_din_pm}(object, newdata, n.ahead, ...)
 
