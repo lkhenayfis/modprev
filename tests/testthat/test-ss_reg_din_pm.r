@@ -199,6 +199,65 @@ test_that("Atualizacao de modelo S.S. RegDin Pseudo Multivar - regressao multipl
     expect_equal(mod_atr_refit$vardin, mod_atr$vardin)
 })
 
+test_that("Estimacao de modelo S.S. RegDin - regressao multipla heterocedastica", {
+
+    # Serie temporal com sazonalidade especificada e vardin = TRUE
+
+    dados <- geradado_pm(f = 10)
+
+    varex <- dados[[1]][1:150, ]
+    serie <- window(dados[[2]], c(1, 1), c(15, 10))
+
+    mod1 <- estimamodelo(serie, "ss_reg_din_pm", regdata = varex, formula = ~ V1 + V2 * V3, vardin = TRUE)
+
+    expect_equal("ss_reg_din_pm", class(mod1)[1])
+    expect_equal(attr(mod1, "mod_atrs")$vardin, TRUE)
+    expect_snapshot_value(round(mod1$modelo["Q"][, , 1], 5), style = "deparse")
+    expect_snapshot_value(round(mod1$modelo["H"][, , 1], 5), style = "deparse")
+})
+
+test_that("Previsao de modelo S.S. RegDin - regressao multipla - heterocedastica", {
+
+    dados <- geradado_pm(f = 10)
+
+    varex <- dados[[1]][1:150, ]
+    serie <- window(dados[[2]], c(1, 1), c(15, 10))
+
+    mod <- estimamodelo(serie, "ss_reg_din_pm", formula = ~ V1 + V2 * V3, regdata = varex, vardin = TRUE)
+
+    newdata <- datregdin$varex[151:170, ]
+    prev    <- predict(mod, newdata = newdata)
+
+    expect_true(all(dim(prev) == c(20, 2)))
+    expect_equal(c("prev", "sd"), colnames(prev))
+
+    expect_snapshot_value(round(c(prev), 5), style = "deparse")
+
+    prev <- predict(mod, newdata = newdata, n.ahead = 10)
+
+    expect_true(all(dim(prev) == c(10, 2)))
+    expect_equal(c("prev", "sd"), colnames(prev))
+
+    expect_snapshot_value(round(c(prev), 5), style = "deparse")
+
+    expect_error(predict(mod))
+})
+
+test_that("Atualizacao de modelo S.S. RegDin - regressao multipla heterocedastica", {
+
+    dados <- geradado_pm()
+
+    serie1 <- window(dados[[2]], c(1, 1), c(20, 5))
+    varex1 <- dados[[1]][1:100, ]
+    serie2 <- window(dados[[2]], c(21, 1), c(40, 5))
+    varex2 <- dados[[1]][101:200, ]
+
+    mod <- estimamodelo(serie1, "ss_reg_din_pm", formula = ~ V1 + V2 * V3, regdata = varex1, vardin = TRUE)
+    mod_refit <- update(mod, serie2, newregdata = varex2, refit = TRUE)
+
+    expect_true(!any(duplicated(diag(mod_refit$modelo["H"][, , 1]))))
+})
+
 test_that("Geracao de matrizes do sistema", {
 
     dados <- geradado_pm()
