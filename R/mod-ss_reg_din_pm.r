@@ -72,7 +72,8 @@ ss_reg_din_pm <- function(serie, regdata, formula, vardin = FALSE, estatica = FA
     serie_m <- univar2multivar(serie)
     mats <- expande_sist_mats(serie_m, regdata, formula)
 
-    mod <- SSModel(serie_m ~ SSMcustom(mats$Z, mats$T, mats$R, mats$Q) - 1, H = mats$H)
+    mod <- SSModel(serie_m ~ SSMcustom(mats$Z, mats$T, mats$R, mats$Q, state_names = mats$nomes) - 1,
+        H = mats$H)
 
     updH <- ifelse(vardin, updH_heter_trig_pm, updH_homoc_pm)
     upfunc <- function(par, mod) updH(par, updQ_pm(par, mod), freq = frequency(serie))
@@ -131,7 +132,9 @@ expande_sist_mats <- function(serie_m, regdata, formula) {
     H <- diag(NA_real_, freq)
     H <- array(H, c(dim(H), 1))
 
-    out <- list(Z = Z, T = T, R = R, Q = Q, H = H)
+    nomes <- names(regdata)
+
+    out <- list(Z = Z, T = T, R = R, Q = Q, H = H, nomes = nomes)
 
     return(out)
 }
@@ -229,7 +232,9 @@ update.ss_reg_din_pm <- function(object, newseries, newregdata, refit = FALSE, .
         newseries_m <- univar2multivar(newseries)
         mats <- expande_sist_mats(newseries_m, newregdata, mod_atrs$formula)
 
-        modelo <- SSModel(newseries_m ~ SSMcustom(mats$Z, mats$T, mats$R, Qmat) - 1, H = Hmat)
+        modelo <- SSModel(
+            newseries_m ~ SSMcustom(mats$Z, mats$T, mats$R, Qmat, state_names = mats$nomes) - 1,
+            H = Hmat)
 
         object <- new_modprevU(modelo, newseries, "ss_reg_din_pm", mod_atrs)
     }
