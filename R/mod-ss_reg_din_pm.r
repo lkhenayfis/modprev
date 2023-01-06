@@ -63,18 +63,19 @@ ss_reg_din_pm <- function(serie, regdata, formula, vardin = FALSE, estatica = FA
 
     if(missing(formula)) formula <- expandeformula(regdata)
 
-    freq <- frequency(serie)
-    if(freq == 1) stop("'serie' nao possui sazonalidade")
+    if(frequency(serie) == 1) stop("'serie' nao possui sazonalidade")
 
-    if((length(serie) %% freq) != 0) stop("'serie' nao possui numero inteiro de periodos de sazonalidade")
+    if((length(serie) %% frequency(serie)) != 0) {
+        stop("'serie' nao possui numero inteiro de periodos de sazonalidade")
+    }
 
-    serie_m <- ts(matrix(serie, ncol = freq, byrow = TRUE), start = start(serie), frequency = 1)
+    serie_m <- converte_serie(serie)
     mats <- expande_sist_mats(serie_m, regdata, formula)
 
     mod <- SSModel(serie_m ~ SSMcustom(mats$Z, mats$T, mats$R, mats$Q) - 1, H = mats$H)
 
     updH <- ifelse(vardin, updH_heter_trig_pm, updH_homoc_pm)
-    upfunc <- function(par, mod) updH(par, updQ_pm(par, mod), freq = freq)
+    upfunc <- function(par, mod) updH(par, updQ_pm(par, mod), freq = frequency(serie))
 
     start <- rep(0,
         1 +          # variancia de epsilon se vardin = FALSE; intercept da funcao de variancia c.c.
@@ -85,10 +86,16 @@ ss_reg_din_pm <- function(serie, regdata, formula, vardin = FALSE, estatica = FA
 
     if(fit$optim.out$convergence < 0) fit$model$Z[] <- NA
 
-    mod_atrs <- list(formula = formula, vardin = vardin, freq = freq)
+    mod_atrs <- list(formula = formula, vardin = vardin, freq = frequency(serie))
     out <- new_modprevU(fit$model, serie, "ss_reg_din_pm", mod_atrs)
 
     return(out)
+}
+
+converte_serie <- function(serie) {
+    serie_m <- matrix(serie, ncol = frequency(serie), byrow = TRUE)
+    serie_m <- ts(serie_m, start = start(serie), frequency = 1)
+    return(serie_m)
 }
 
 expande_sist_mats <- function(serie_m, regdata, formula) {
