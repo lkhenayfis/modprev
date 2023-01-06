@@ -110,3 +110,32 @@ test_that("Geracao de matrizes do sistema", {
     expect_equal(dim(mats$H), c(5, 5, 1))
     expect_equal(mats$H[, , 1], diag(NA_real_, 5))
 })
+
+test_that("Conversao univar <-> multivar", {
+
+    # iniciando em c(1, 1)
+
+    s1 <- ts(seq_len(50), frequency = 5)
+
+    s1_m <- univar2multivar(s1)
+    expect_equal(dim(s1_m), c(10, 5))
+    expect_equal(frequency(s1_m), 1)
+    expect_equal(start(s1_m), c(1, 1))
+    expect_equal(end(s1_m), c(10, 1))
+
+    s1_u <- multivar2univar(s1_m)
+    expect_equal(s1_u, s1)
+
+    # iniciando em c(4, 1)
+
+    s2 <- ts(seq_len(50), frequency = 5, start = c(4, 1))
+
+    s2_m <- univar2multivar(s2)
+    expect_equal(dim(s2_m), c(10, 5))
+    expect_equal(frequency(s2_m), 1)
+    expect_equal(start(s2_m), c(4, 1))
+    expect_equal(end(s2_m), c(13, 1))
+
+    s2_u <- multivar2univar(s2_m)
+    expect_equal(s2_u, s2)
+})
