@@ -52,21 +52,21 @@ test_that("Previsao de modelo S.S. RegDin Pseudo Multivar - regressao simples", 
     mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din_pm", formula = ~ V1)
 
     newdata <- dados[[1]][101:120, "V1", drop = FALSE]
-    prev    <- predict.ss_reg_din_pm(mod, newdata = newdata)
+    prev    <- predict(mod, newdata = newdata)
 
     expect_true(all(dim(prev) == c(20, 2)))
     expect_equal(c("prev", "sd"), colnames(prev))
 
     expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
-    prev <- predict.ss_reg_din_pm(mod, newdata = newdata, n.ahead = 10)
+    prev <- predict(mod, newdata = newdata, n.ahead = 10)
 
     expect_true(all(dim(prev) == c(10, 2)))
     expect_equal(c("prev", "sd"), colnames(prev))
 
     expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
-    expect_error(predict.ss_reg_din_pm(mod))
+    expect_error(predict(mod))
 })
 
 test_that("Atualizacao de modelo S.S. RegDin Pseudo Multivar - regressao simples", {
@@ -80,7 +80,7 @@ test_that("Atualizacao de modelo S.S. RegDin Pseudo Multivar - regressao simples
 
     mod <- estimamodelo(serie1, tipo = "ss_reg_din_pm", regdata = varex1, formula = ~ V1)
 
-    mod_upd <- update.ss_reg_din_pm(mod, serie2, newregdata = varex2)
+    mod_upd <- update(mod, serie2, newregdata = varex2)
     expect_equal(c(mod$modelo["Q"]), c(mod_upd$modelo["Q"]))
     expect_equal(c(mod$modelo["H"]), c(mod_upd$modelo["H"]))
     expect_equal(c(mod$modelo["T"]), c(mod_upd$modelo["T"]))
@@ -94,10 +94,10 @@ test_that("Atualizacao de modelo S.S. RegDin Pseudo Multivar - regressao simples
     expect_equal(mod_atr_upd$vardin, mod_atr$vardin)
 
     # passando dados ruins
-    expect_error(update.ss_reg_din_pm(mod, c(serie2), newregdata = varex2))
-    expect_error(update.ss_reg_din_pm(mod, window(serie2, c(21, 1), c(40, 3)), newregdata = varex2))
+    expect_error(update(mod, c(serie2), newregdata = varex2))
+    expect_error(update(mod, window(serie2, c(21, 1), c(40, 3)), newregdata = varex2))
 
-    mod_refit <- update.ss_reg_din_pm(mod, serie2, newregdata = varex2, refit = TRUE)
+    mod_refit <- update(mod, serie2, newregdata = varex2, refit = TRUE)
     expect_equal(c(t(mod_refit$modelo$y)), c(serie2))
     expect_snapshot_value(round(mod_refit$modelo["Q"][, , 1], 5), style = "deparse")
     expect_snapshot_value(round(mod_refit$modelo["H"][, , 1], 5), style = "deparse")
