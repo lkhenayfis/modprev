@@ -56,13 +56,19 @@ test_that("Previsao de modelo S.S. RegDin Pseudo Multivar - regressao simples", 
 
     expect_true(all(dim(prev) == c(20, 2)))
     expect_equal(c("prev", "sd"), colnames(prev))
+    expect_equal(frequency(prev), frequency(serie))
+    expect_equal(tsp(prev)[1], tsp(serie)[2] + 1 / tsp(serie)[3])
 
     expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
-    prev <- predict(mod, newdata = newdata, n.ahead = 10)
+    # previsao "1 passo a frente" (no modo multivariado)
 
-    expect_true(all(dim(prev) == c(10, 2)))
+    prev <- predict(mod, newdata = newdata, n.ahead = 5)
+
+    expect_true(all(dim(prev) == c(5, 2)))
     expect_equal(c("prev", "sd"), colnames(prev))
+    expect_equal(frequency(prev), frequency(serie))
+    expect_equal(tsp(prev)[1], tsp(serie)[2] + 1 / tsp(serie)[3])
 
     expect_snapshot_value(round(c(prev), 5), style = "deparse")
 

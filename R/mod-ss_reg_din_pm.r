@@ -187,6 +187,7 @@ predict.ss_reg_din_pm <- function(object, newdata, n.ahead, ...) {
     prev <- predict(modelo, newdata = extmod, se.fit = TRUE, filtered = TRUE, ...)
     prev <- lapply(seq_len(2), function(i) {
         mm <- sapply(seq_along(prev), function(s) prev[[s]][, i, drop = FALSE])
+        if(is.null(dim(mm))) mm <- matrix(mm, nrow = 1)
         ts(mm, start = start(prev[[1]]))
     })
     prev <- lapply(prev, multivar2univar)
