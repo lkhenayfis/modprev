@@ -107,9 +107,12 @@ multivar2univar <- function(serie) {
 
 expande_sist_mats <- function(serie_m, regdata, formula) {
 
-    regdata <- model.frame(formula, data = regdata, na.action = na.pass)
-    regdata <- cbind(b0 = 1, regdata)
+    oldopt <- options("na.action")
+    options(na.action = "na.pass")
+    regdata <- model.matrix(formula, data = regdata, na.action = na.pass)
+    regdata <- as.data.frame(regdata)
     nvars <- ncol(regdata) - 1
+    options(na.action = oldopt[[1]])
 
     freq <- ncol(serie_m)
     pers <- nrow(serie_m)
