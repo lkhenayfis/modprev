@@ -68,7 +68,11 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, ...) {
     updH <- ifelse(!vardin, updH_homoc, updH_heter_trig)
     upfunc <- function(par, mod) updH(par, updQ(par, mod), freq = frequency(serie))
 
-    start <- rep(0, nvars + 1 + (vardin != 0))
+    start <- rep(0,
+        1 +          # variancia de epsilon se vardin = FALSE; intercept da funcao de variancia c.c.
+        2 * vardin + # coeficientes harmonicos caso vardin = TRUE
+        nvars        # coeficientes de regressao
+    )
     fit <- fitSSM(mod, start, upfunc, method = "BFGS")
 
     if(fit$optim.out$convergence < 0) fit$model$Z[] <- NA
@@ -213,8 +217,8 @@ updH_heter_trig <- function(par, mod, freq, ...) {
     uH   <- cos(0:(freq - 1) * 2 * pi / freq)
     vH   <- sin(0:(freq - 1) * 2 * pi / freq)
 
-    parH <- head(par, 2)
-    mod["H"][] <- rep(exp(parH[1] * uH + parH[2] * vH), length.out = dim(mod["H"])[3])
+    parH <- head(par, 3)
+    mod["H"][] <- rep(exp(par[1] + parH[2] * uH + parH[3] * vH), length.out = dim(mod["H"])[3])
 
     return(mod)
 }
