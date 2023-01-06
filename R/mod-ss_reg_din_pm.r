@@ -171,6 +171,10 @@ update.ss_reg_din_pm <- function(object, newseries, newregdata, refit = FALSE, .
         modelo <- object$modelo
 
         if(missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
+        if(frequency(newseries) == 1) stop("'newseries' nao possui sazonalidade")
+        if((length(newseries) %% frequency(newseries)) != 0) {
+            stop("'newseries' nao possui numero inteiro de periodos de sazonalidade")
+        }
 
         Hmat <- modelo["H"]
         Qmat <- modelo["Q"]

@@ -69,6 +69,10 @@ test_that("Atualizacao de modelo S.S. RegDin Pseudo Multivar - regressao simples
     expect_equal(mod_atr_upd$formula, mod_atr$formula)
     expect_equal(mod_atr_upd$vardin, mod_atr$vardin)
 
+    # passando dados ruins
+    expect_error(update.ss_reg_din_pm(mod, c(serie2), newregdata = varex2))
+    expect_error(update.ss_reg_din_pm(mod, window(serie2, c(21, 1), c(40, 3)), newregdata = varex2))
+
     mod_refit <- update.ss_reg_din_pm(mod, serie2, newregdata = varex2, refit = TRUE)
     expect_equal(c(t(mod_refit$modelo$y)), c(serie2))
     expect_snapshot_value(round(mod_refit$modelo["Q"][, , 1], 5), style = "deparse")
