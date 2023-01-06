@@ -163,14 +163,16 @@ test_that("Atualizacao de modelo S.S. RegDin - regressao multipla", {
 
     mod_refit <- update(mod, newseries = newseries, newregdata = newregdata, refit = TRUE)
 
-    expect_true(all(mod_upd$modelo["Z"][, 2:4, ] - t(data.matrix(newregdata)) == 0))
-    expect_true(all(mod_upd$serie - newseries == 0))
+    expect_true(all(mod_refit$modelo["Z"][, 2:4, ] - t(data.matrix(newregdata)) == 0))
+    expect_true(all(mod_refit$serie - newseries == 0))
     expect_snapshot_value(round(mod$modelo["Q"][, , 1], 5), style = "deparse")
     expect_snapshot_value(round(mod$modelo["H"][, , 1], 5), style = "deparse")
 
-    expect_equal(mod_atr_upd$formula, mod_atr$formula)
-    expect_equal(mod_atr_upd$vardin, mod_atr$vardin)
-    expect_equal(mod_atr_upd$saz, mod_atr$saz)
+    mod_atr_refit <- attr(mod_refit, "mod_atrs")
+
+    expect_equal(mod_atr_refit$formula, mod_atr$formula)
+    expect_equal(mod_atr_refit$vardin, mod_atr$vardin)
+    expect_equal(mod_atr_refit$saz, mod_atr$saz)
 })
 
 test_that("Estimacao de modelo S.S. RegDin - regressao multipla heterocedastica", {
