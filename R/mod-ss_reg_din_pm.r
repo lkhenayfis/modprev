@@ -130,6 +130,56 @@ expande_sist_mats <- function(serie_m, regdata, formula) {
     return(out)
 }
 
+# METODOS ------------------------------------------------------------------------------------------
+
+#' \bold{Update}:
+#' 
+#' A atualização de modelos \code{ss_reg_din_pm} sempre vai checar se o modelo passado foi estimado
+#' corretamente. Como modelos em espaçoo de estados dependem bastante de inicialização, às vezes não
+#' dá para estimar direito. Nesses casos ele tenta reestimar o modelo independentemente de 
+#' \code{refit}
+#' 
+#' @param newseries nova série com a qual atualizar o modelo
+#' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
+#' @param refit booleano indicando se o modelo deve ou nao ser reajustado
+#' @param ... nao possui uso, existe apenas para consistencia com a generica
+#' 
+#' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
+#'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
+#' 
+#' @rdname modelos_ss_reg_din_pm
+#' 
+#' @export
+
+update.ss_reg_din_pm <- function(object, newseries, newregdata, refit = FALSE, ...) {
+
+    mod_atrs <- attr(object, "mod_atrs")
+
+    if(refit) {
+        formula <- mod_atrs$formula
+        vardin  <- mod_atrs$vardin
+        object  <- estimamodelo(newseries, "ss_reg_din_pm", regdata = newregdata, formula = formula,
+            vardin = vardin)
+    } else {
+
+        modelo <- object$modelo
+
+        if(missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
+
+        Hmat <- modelo["H"]
+        Qmat <- modelo["Q"]
+
+        newseries_m <- converte_serie(newseries)
+        mats <- expande_sist_mats(newseries_m, newregdata, mod_atrs$formula)
+
+        modelo <- SSModel(newseries_m ~ SSMcustom(mats$Z, mats$T, mats$R, Qmat) - 1, H = Hmat)
+
+        object <- new_modprevU(modelo, newseries, "ss_reg_din_pm", mod_atrs)
+    }
+
+    return(object)
+}
+
 # HELPERS ------------------------------------------------------------------------------------------
 
 #' Auxiliares Para Estimacao

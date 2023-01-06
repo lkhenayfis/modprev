@@ -45,6 +45,40 @@ test_that("Estimacao de modelo S.S. RegDin Pseudo Multivar - regressao simples",
     expect_equal(mod$modelo["Z"], mod2$modelo["Z"])
 })
 
+test_that("Atualizacao de modelo S.S. RegDin Pseudo Multivar - regressao simples", {
+
+    dados <- geradado()
+
+    serie1 <- window(dados[[2]], c(1, 1), c(20, 5))
+    varex1 <- dados[[1]][1:100, "V1", drop = FALSE]
+    serie2 <- window(dados[[2]], c(21, 1), c(40, 5))
+    varex2 <- dados[[1]][101:200, "V1", drop = FALSE]
+
+    mod <- estimamodelo(serie1, tipo = "ss_reg_din_pm", regdata = varex1, formula = ~ V1)
+
+    mod_upd <- update.ss_reg_din_pm(mod, serie2, newregdata = varex2)
+    expect_equal(c(mod$modelo["Q"]), c(mod_upd$modelo["Q"]))
+    expect_equal(c(mod$modelo["H"]), c(mod_upd$modelo["H"]))
+    expect_equal(c(mod$modelo["T"]), c(mod_upd$modelo["T"]))
+    expect_equal(c(mod_upd$modelo["Z"][, 2, ]), c(varex2[[1]]))
+    expect_true(all(mod_upd$serie - serie2 == 0))
+
+    mod_atr     <- attr(mod, "mod_atrs")
+    mod_atr_upd <- attr(mod_upd, "mod_atrs")
+
+    expect_equal(mod_atr_upd$formula, mod_atr$formula)
+    expect_equal(mod_atr_upd$vardin, mod_atr$vardin)
+
+    mod_refit <- update.ss_reg_din_pm(mod, serie2, newregdata = varex2, refit = TRUE)
+    expect_equal(c(t(mod_refit$modelo$y)), c(serie2))
+    expect_snapshot_value(round(mod_refit$modelo["Q"][, , 1], 5), style = "deparse")
+    expect_snapshot_value(round(mod_refit$modelo["H"][, , 1], 5), style = "deparse")
+    expect_equal(c(mod_refit$modelo["Z"][, 2, ]), c(varex2[[1]]))
+
+    expect_equal(mod_atr_upd$formula, mod_atr$formula)
+    expect_equal(mod_atr_upd$vardin, mod_atr$vardin)
+})
+
 test_that("Geracao de matrizes do sistema", {
 
     dados <- geradado()
