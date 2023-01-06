@@ -45,6 +45,30 @@ test_that("Estimacao de modelo S.S. RegDin Pseudo Multivar - regressao simples",
     expect_equal(mod$modelo["Z"], mod2$modelo["Z"])
 })
 
+test_that("Previsao de modelo S.S. RegDin Pseudo Multivar - regressao simples", {
+    dados <- geradado()
+    serie <- window(dados[[2]], c(1, 1), c(20, 5))
+    varex <- dados[[1]][1:100, "V1", drop = FALSE]
+    mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din_pm", formula = ~ V1)
+
+    newdata <- dados[[1]][101:120, "V1", drop = FALSE]
+    prev    <- predict.ss_reg_din_pm(mod, newdata = newdata)
+
+    expect_true(all(dim(prev) == c(20, 2)))
+    expect_equal(c("prev", "sd"), colnames(prev))
+
+    expect_snapshot_value(round(c(prev), 5), style = "deparse")
+
+    prev <- predict.ss_reg_din_pm(mod, newdata = newdata, n.ahead = 10)
+
+    expect_true(all(dim(prev) == c(10, 2)))
+    expect_equal(c("prev", "sd"), colnames(prev))
+
+    expect_snapshot_value(round(c(prev), 5), style = "deparse")
+
+    expect_error(predict.ss_reg_din_pm(mod))
+})
+
 test_that("Atualizacao de modelo S.S. RegDin Pseudo Multivar - regressao simples", {
 
     dados <- geradado()

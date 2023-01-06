@@ -138,6 +138,53 @@ expande_sist_mats <- function(serie_m, regdata, formula) {
 
 # METODOS ------------------------------------------------------------------------------------------
 
+#' \bold{Predict}:
+#' 
+#' A previsão destes modelos é feita com alguns argumetnos opcionais já passados por padrão que
+#' não podem ser modificados. Estes são: \code{se.fit = TRUE, filter = TRUE}. O primeiro retorna
+#' além do valor previsto o desvio padrão associado, o segundo garante que são retornados os valores
+#' advindos da distribuição preditiva e não de suavização. Considerando estes fatores, \code{...} 
+#' não pode conter \code{n.ahead} ou estes dois outros, ou então ocorrerá erro.
+#' 
+#' @param object objeto com classes \code{c("ss_reg_din_pm", "modprev")} contendo modelo
+#' @param newdata \code{data.frame}-like contendo variéveis explicativas fora da amostra
+#' @param n.ahead número de passos à frente para previsão. Este argumento não é necessario, caso não
+#'     seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}
+#' @param ... demais argumentos passados a \link[KFAS]{\code{predict.SSModel}}
+#' 
+#' @return \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
+#'     previsão \code{n.ahead} passos à frente;
+#' 
+#' @rdname modelos_ss_reg_din_pm
+#' 
+#' @export
+
+predict.ss_reg_din_pm <- function(object, newdata, n.ahead, ...) {
+    modelo <- object$modelo
+
+    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
+
+    if(!missing(n.ahead)) {
+        regobs <- min(n.ahead, nrow(newdata))
+        newdata <- newdata[seq(regobs), , drop = FALSE]
+    }
+
+    # Como extserie nao tem sazonalidade, update vai lancar um aviso que nao tem utilidade aqui
+    extserie <- ts(rep(NA_real_, nrow(newdata)), frequency = frequency(object$serie))
+    extmod   <- suppressWarnings(update.ss_reg_din_pm(object, extserie, newdata)$modelo)
+
+    prev <- predict(modelo, newdata = extmod, se.fit = TRUE, filtered = TRUE, ...)
+    prev <- lapply(seq_len(2), function(i) {
+        mm <- sapply(seq_along(prev), function(s) prev[[s]][, i, drop = FALSE])
+        ts(mm, start = start(prev[[1]]))
+    })
+    prev <- lapply(prev, multivar2univar)
+    prev <- cbind(prev[[1]], prev[[2]])
+    colnames(prev) <- c("prev", "sd")
+
+    return(prev)
+}
+
 #' \bold{Update}:
 #' 
 #' A atualização de modelos \code{ss_reg_din_pm} sempre vai checar se o modelo passado foi estimado
