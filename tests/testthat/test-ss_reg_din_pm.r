@@ -1,6 +1,6 @@
 
 # helper para gerar dados de regressao multipla
-geradado <- function(n = 250, f = 5, seed = 1234) {
+geradado_pm <- function(n = 250, f = 5, seed = 1234) {
     set.seed(seed)
     X <- data.frame(V1 = rnorm(n), V2 = rnorm(n, sd = .5), V3 = rnorm(n, sd = 2))
     y <- ts(2 * X$V1 + .7 * X$V2 - 1.1 * X$V3 + .8 * X$V2 * X$V3 + rnorm(n, sd = .25), frequency = f)
@@ -8,7 +8,7 @@ geradado <- function(n = 250, f = 5, seed = 1234) {
 }
 
 test_that("Estimacao de modelo S.S. RegDin Pseudo Multivar - regressao simples", {
-    dados <- geradado()
+    dados <- geradado_pm()
 
     varex <- dados[[1]]
     serie <- dados[[2]]
@@ -46,7 +46,7 @@ test_that("Estimacao de modelo S.S. RegDin Pseudo Multivar - regressao simples",
 })
 
 test_that("Previsao de modelo S.S. RegDin Pseudo Multivar - regressao simples", {
-    dados <- geradado()
+    dados <- geradado_pm()
     serie <- window(dados[[2]], c(1, 1), c(20, 5))
     varex <- dados[[1]][1:100, "V1", drop = FALSE]
     mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din_pm", formula = ~ V1)
@@ -71,7 +71,7 @@ test_that("Previsao de modelo S.S. RegDin Pseudo Multivar - regressao simples", 
 
 test_that("Atualizacao de modelo S.S. RegDin Pseudo Multivar - regressao simples", {
 
-    dados <- geradado()
+    dados <- geradado_pm()
 
     serie1 <- window(dados[[2]], c(1, 1), c(20, 5))
     varex1 <- dados[[1]][1:100, "V1", drop = FALSE]
@@ -109,7 +109,7 @@ test_that("Atualizacao de modelo S.S. RegDin Pseudo Multivar - regressao simples
 
 test_that("Estimacao de modelo S.S. RegDin Pseudo Multivar - regressao multipla", {
 
-    dados <- geradado()
+    dados <- geradado_pm()
 
     varex <- dados[[1]][1:150, ]
     serie <- window(dados[[2]], c(1, 1), c(30, 5))
@@ -130,7 +130,7 @@ test_that("Estimacao de modelo S.S. RegDin Pseudo Multivar - regressao multipla"
 
 test_that("Previsao de modelo S.S. RegDin Pseudo Multivar - regressao multipla", {
 
-    dados <- geradado()
+    dados <- geradado_pm()
 
     varex <- dados[[1]][1:150, ]
     serie <- window(dados[[2]], c(1, 1), c(30, 5))
@@ -157,7 +157,7 @@ test_that("Previsao de modelo S.S. RegDin Pseudo Multivar - regressao multipla",
 
 test_that("Atualizacao de modelo S.S. RegDin Pseudo Multivar - regressao multipla", {
 
-    dados <- geradado()
+    dados <- geradado_pm()
 
     varex <- dados[[1]][1:150, ]
     serie <- window(dados[[2]], c(1, 1), c(30, 5))
@@ -195,7 +195,7 @@ test_that("Atualizacao de modelo S.S. RegDin Pseudo Multivar - regressao multipl
 
 test_that("Geracao de matrizes do sistema", {
 
-    dados <- geradado()
+    dados <- geradado_pm()
     varex <- dados[[1]]
     formula <- ~ V1 + V2 + V3
     serie_m <- ts(matrix(dados[[2]], 50, 5))
