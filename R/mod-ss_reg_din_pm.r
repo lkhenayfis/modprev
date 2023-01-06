@@ -69,7 +69,7 @@ ss_reg_din_pm <- function(serie, regdata, formula, vardin = FALSE, estatica = FA
         stop("'serie' nao possui numero inteiro de periodos de sazonalidade")
     }
 
-    serie_m <- converte_serie(serie)
+    serie_m <- univar2multivar(serie)
     mats <- expande_sist_mats(serie_m, regdata, formula)
 
     mod <- SSModel(serie_m ~ SSMcustom(mats$Z, mats$T, mats$R, mats$Q) - 1, H = mats$H)
@@ -92,10 +92,16 @@ ss_reg_din_pm <- function(serie, regdata, formula, vardin = FALSE, estatica = FA
     return(out)
 }
 
-converte_serie <- function(serie) {
+univar2multivar <- function(serie) {
     serie_m <- matrix(serie, ncol = frequency(serie), byrow = TRUE)
     serie_m <- ts(serie_m, start = start(serie), frequency = 1)
     return(serie_m)
+}
+
+multivar2univar <- function(serie) {
+    serie_u <- c(t(serie))
+    serie_u <- ts(serie_u, start = c(start(serie), 1), frequency = ncol(serie))
+    return(serie_u)
 }
 
 expande_sist_mats <- function(serie_m, regdata, formula) {
@@ -169,7 +175,7 @@ update.ss_reg_din_pm <- function(object, newseries, newregdata, refit = FALSE, .
         Hmat <- modelo["H"]
         Qmat <- modelo["Q"]
 
-        newseries_m <- converte_serie(newseries)
+        newseries_m <- univar2multivar(newseries)
         mats <- expande_sist_mats(newseries_m, newregdata, mod_atrs$formula)
 
         modelo <- SSModel(newseries_m ~ SSMcustom(mats$Z, mats$T, mats$R, Qmat) - 1, H = Hmat)
