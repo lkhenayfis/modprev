@@ -4,17 +4,14 @@
 \alias{update_funs}
 \alias{updH_homoc}
 \alias{updH_heter_trig}
-\alias{updQ_stat}
-\alias{updQ_din}
+\alias{updQ}
 \title{Auxiliares Para Estimacao}
 \usage{
 updH_homoc(par, mod, ...)
 
 updH_heter_trig(par, mod, saz, ...)
 
-updQ_stat(par, mod, ...)
-
-updQ_din(par, mod, ...)
+updQ(par, mod, ...)
 }
 \arguments{
 \item{par}{vetor completo de hiperparametros. Ver Detalhes}

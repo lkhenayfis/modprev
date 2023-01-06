@@ -44,7 +44,6 @@ NULL
 #' @param vardin booleano ou inteiro indicando se deve ser estimado modelo com heterocedasticidade.
 #'     Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro assume este
 #'     valor como a sazonalidade
-#' @param estatica booleano indicando se a regressao deve ser de coeficientes estaticos
 #' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{ss_reg_din}, uma lista de dois 
@@ -52,7 +51,7 @@ NULL
 #' 
 #' @rdname modelos_ss_reg_din
 
-ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE, ...) {
+ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, ...) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
@@ -65,20 +64,18 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE
 
     saz <- ifelse(vardin == 0, 1, frequency(serie) * (vardin == 1) + vardin * (vardin > 1))
 
-    Qfill <- ifelse(estatica, 0, NA_real_)
-    mod   <- SSModel(serie ~ SSMregression(formula, regdata, Q = diag(Qfill, nvars)),
+    mod <- SSModel(serie ~ SSMregression(formula, regdata, Q = diag(NA_real_, nvars)),
         H = array(NA_real_, c(1, 1, saz)))
 
-    updQ <- ifelse(estatica, updQ_stat, updQ_din)
     updH <- ifelse(vardin == 0, updH_homoc, updH_heter_trig)
     upfunc <- function(par, mod) updH(par, updQ(par, mod), saz = saz)
 
-    start <- rep(0, nvars * is.na(Qfill) + 1 + (vardin != 0))
+    start <- rep(0, nvars + 1 + (vardin != 0))
     fit <- fitSSM(mod, start, upfunc, method = "BFGS")
 
     if(fit$optim.out$convergence < 0) fit$model$Z[] <- NA
 
-    mod_atrs <- list(formula = formula, vardin = vardin, saz = saz, estatica = estatica)
+    mod_atrs <- list(formula = formula, vardin = vardin, saz = saz)
     out <- new_modprevU(fit$model, serie, "ss_reg_din", mod_atrs)
 
     return(out)
@@ -211,6 +208,7 @@ updH_homoc <- function(par, mod, ...) {
     mod["H"][1, 1, 1] <- exp(par[1])
     return(mod)
 }
+
 #' @rdname update_funs
 
 updH_heter_trig <- function(par, mod, saz, ...) {
@@ -222,14 +220,10 @@ updH_heter_trig <- function(par, mod, saz, ...) {
 
     return(mod)
 }
+
 #' @rdname update_funs
 
-updQ_stat <- function(par, mod, ...) {
-    return(mod)
-}
-#' @rdname update_funs
-
-updQ_din <- function(par, mod, ...) {
+updQ <- function(par, mod, ...) {
     nQ <- dim(mod["Q"])[1]
 
     parQ <- tail(par, nQ)
