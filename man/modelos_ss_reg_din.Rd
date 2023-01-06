@@ -7,15 +7,7 @@
 \alias{update.ss_reg_din}
 \title{Modelos \code{ss_reg_din}}
 \usage{
-ss_reg_din(
-  serie,
-  regdata,
-  formula,
-  vardin = FALSE,
-  estatica = FALSE,
-  lambda = 0,
-  ...
-)
+ss_reg_din(serie, regdata, formula, vardin = FALSE, estatica = FALSE, ...)
 
 \method{predict}{ss_reg_din}(object, newdata, n.ahead, ...)
 
@@ -34,8 +26,6 @@ Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro
 valor como a sazonalidade}
 
 \item{estatica}{booleano indicando se a regressao deve ser de coeficientes estaticos}
-
-\item{lambda}{penalidade multiplicando o traco da matriz Q. Ver Detalhes}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
 

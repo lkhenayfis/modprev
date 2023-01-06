@@ -330,15 +330,3 @@ test_that("Identificacao de deslocamento de array", {
     s1 <- seq(99)
     expect_warning(expect_warning(expect_equal(parsedesloc(s1, s2, 10), -9)))
 })
-
-test_that("Validacao cruzada", {
-
-    serie <- window(datregdin$obs, 1, 150)
-    serie <- ts(c(serie), freq = 10)
-    varex <- datregdin$varex[1:150, ]
-
-    # passando control
-    suppressWarnings(out1 <- CV_regdin(serie, regdata = varex, formula = ~ V1 + V2 * V3, vardin = TRUE,
-        cv_control = list(obj.ahead = 2:5, lambda = c(0, 1, 2))))
-    expect_snapshot_value(out1, style = "deparse")
-})

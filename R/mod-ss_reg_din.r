@@ -45,7 +45,6 @@ NULL
 #'     Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro assume este
 #'     valor como a sazonalidade
 #' @param estatica booleano indicando se a regressao deve ser de coeficientes estaticos
-#' @param lambda penalidade multiplicando o traco da matriz Q. Ver Detalhes
 #' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{ss_reg_din}, uma lista de dois 
@@ -53,8 +52,7 @@ NULL
 #' 
 #' @rdname modelos_ss_reg_din
 
-ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE,
-    lambda = 0, ...) {
+ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE, ...) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
@@ -76,12 +74,11 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE
     upfunc <- function(par, mod) updH(par, updQ(par, mod), saz = saz)
 
     start <- rep(0, nvars * is.na(Qfill) + 1 + (vardin != 0))
-    fit <- fitSSM2(mod, start, upfunc, method = "BFGS", lambda = lambda)
+    fit <- fitSSM(mod, start, upfunc, method = "BFGS")
 
     if(fit$optim.out$convergence < 0) fit$model$Z[] <- NA
 
-    mod_atrs <- list(formula = formula, vardin = vardin, saz = saz, estatica = estatica,
-        lambda = lambda)
+    mod_atrs <- list(formula = formula, vardin = vardin, saz = saz, estatica = estatica)
     out <- new_modprevU(fit$model, serie, "ss_reg_din", mod_atrs)
 
     return(out)
@@ -158,9 +155,8 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
     if(refit) {
         formula <- mod_atrs$formula
         vardin  <- mod_atrs$vardin
-        lambda  <- mod_atrs$lambda
         object  <- estimamodelo(newseries, "ss_reg_din", regdata = newregdata, formula = formula,
-            vardin = vardin, lambda = lambda)
+            vardin = vardin)
     } else {
 
         modelo <- object$modelo
@@ -293,197 +289,4 @@ parsedesloc <- function(serie, newseries, saz) {
     desloc <- init_old - init_new
 
     return(desloc)
-}
-
-# CROSS VALIDATION ---------------------------------------------------------------------------------
-
-#' Estimacao De SSM Com lambda
-#' 
-#' Funcao que faz a estimacao de modelos em espaco de estado com penalizacao da matriz Q
-#' 
-#' \code{fitSSM2} e uma copia de \code{\link[KFAS]{fitSSM}}, com uma simples modificacao: a funcao 
-#' objetivo agora e uma ponderacao entre a verossimilhanca e uma penalizacao da variacao total da 
-#' matriz Q. Isto e feito no contexto de regressoes dinamicas com o intuito de controlar o quao 
-#' variaveis sao os regressores. 
-#' 
-#' Para maiores detalhes, ver \code{\link[KFAS]{fitSSM}}, pois todo o restante de interface e saidas
-#' e igual
-#' 
-#' @param inits Initial values for \code{\link{optim}}.
-#' @param model Model object of class \code{SSModel}.
-#' @param updatefn User defined function which updates the model given the
-#'   parameters. Must be of form \code{updatefn(pars, model, ...)},
-#'   where \code{...} correspond to optional additional arguments.
-#'   Function should return the original model with updated parameters.
-#'   See details for description of the default \code{updatefn}.
-#' @param checkfn Optional function of form \code{checkfn(model)} for checking
-#' the validity of the model. Should return \code{TRUE} if the model is valid,
-#' and \code{FALSE} otherwise. See details.
-#' @param update_args Optional list containing additional arguments to \code{updatefn}.
-#' @param lambda penality coefficient
-#' @param ... Further arguments for functions \code{optim} and
-#'  \code{logLik.SSModel}, such as \code{nsim = 1000}, \code{marginal = TRUE}, 
-#'   and \code{method = "BFGS"}.
-
-fitSSM2 <- function (model, inits, updatefn, checkfn, update_args = NULL, lambda = 0, ...) {
-    is_gaussian <- all(model$distribution == "gaussian")
-    if (missing(updatefn)) {
-        estH <- is_gaussian && any(is.na(model$H))
-        estQ <- any(is.na(model$Q))
-        if ((dim(model$H)[3] > 1 && estH || (dim(model$Q)[3] >
-            1) && estQ))
-            stop("No model updating function supplied, but cannot use default\n   
-          function as the covariance matrices are time varying.")
-        updatefn <- function(pars, model) {
-            if (estQ) {
-                Q <- as.matrix(model$Q[, , 1])
-                naQd <- which(is.na(diag(Q)))
-                naQnd <- which(upper.tri(Q[naQd, naQd]) & is.na(Q[naQd,
-                  naQd]))
-                Q[naQd, naQd][lower.tri(Q[naQd, naQd])] <- 0
-                diag(Q)[naQd] <- exp(0.5 * pars[1:length(naQd)])
-                Q[naQd, naQd][naQnd] <- pars[length(naQd) + 1:length(naQnd)]
-                model$Q[naQd, naQd, 1] <- crossprod(Q[naQd, naQd])
-            }
-            else naQnd <- naQd <- NULL
-            if (estH) {
-                H <- as.matrix(model$H[, , 1])
-                naHd <- which(is.na(diag(H)))
-                naHnd <- which(upper.tri(H[naHd, naHd]) & is.na(H[naHd,
-                  naHd]))
-                H[naHd, naHd][lower.tri(H[naHd, naHd])] <- 0
-                diag(H)[naHd] <- exp(0.5 * pars[length(naQd) +
-                  length(naQnd) + 1:length(naHd)])
-                H[naHd, naHd][naHnd] <- pars[length(naQd) + length(naQnd) +
-                  length(naHd) + 1:length(naHnd)]
-                model$H[naHd, naHd, 1] <- crossprod(H[naHd, naHd])
-            }
-            model
-        }
-    }
-    is.SSModel(do.call(updatefn, args = c(list(inits, model),
-        update_args)), na.check = TRUE, return.logical = FALSE)
-    if (!is_gaussian && is.null(list(...)$theta)) {
-        theta <- KFAS:::initTheta(model$y, model$u, model$distribution)
-    }
-    else theta <- NULL
-    if (missing(checkfn)) {
-        if (is_gaussian) {
-            checkfn <- function(model) {
-                all(sapply(c("H", "T", "R",
-                  "Q", "a1", "P1", "P1inf"),
-                  function(x) {
-                    all(is.finite(model[[x]]))
-                  })) && max(model$Q) <= 1e+07 && max(model$H) <=
-                  1e+07
-            }
-        }
-        else {
-            checkfn <- function(model) {
-                all(sapply(c("u", "T", "R",
-                  "Q", "a1", "P1", "P1inf"),
-                  function(x) {
-                    all(is.finite(model[[x]]))
-                  })) && max(model$Q) <= 1e+07
-            }
-        }
-    }
-    likfn <- function(pars, model, ...) {
-        model <- do.call(updatefn, args = c(list(pars, model),
-            update_args))
-        if (checkfn(model)) {
-            out <- -logLik(object = model, check.model = FALSE, theta = theta, ...)
-        }
-        else out <- .Machine$double.xmax^0.75
-
-        out <- out + lambda * sum(model["Q"])
-    }
-    out <- NULL
-    out$optim.out <- optim(par = inits, fn = likfn, model = model,
-        ...)
-    out$model <- do.call(updatefn, args = c(list(out$optim.out$par,
-        model), update_args))
-    is.SSModel(out$model, na.check = TRUE, return.logical = FALSE)
-    out
-}
-
-#' Validacao Cruzada De Regressao Dinamica
-#' 
-#' Realiza validacao cruzada de regressao dinamica por grid check
-#' 
-#' Esta funcao executa uma regressao dinamica em janela movel com diferentes valores de penalidade
-#' \code{lambda} buscando aquele que leva ao melhor modelo do ponto de vista de previsao.
-#' 
-#' A lista \code{cv_control} pode conter um ou mais dos seguintes elementos nomeados
-#' 
-#' \describe{
-#' \item{janela}{tamanho da janela para ajuste -- similar ao argumento homonimo em 
-#'     \code{\link{janelamovel}}}
-#' \item{passo}{salto entre uma janela e outra -- similar ao argumento homonimo em 
-#'     \code{\link{janelamovel}}}
-#' \item{refit.cada}{inteiro indicando de quantas em quantas janelas o modelo deve ser reajustado -- 
-#'     similar ao argumento homonimo em \code{\link{janelamovel}}}
-#' \item{obj.ahead}{vetor de inteiros indicando a janela de passos a frente de interesse para a 
-#'     previsao}
-#' \item{error_func}{funcao que recebe um vetor de erros de previsao e retorna um escalar como 
-#'     metrica de performance. Default function(x) sum(x^2)}
-#' \item{lambda}{vetor de lambdas a serem testados}
-#' } 
-#' 
-#' @param serie série para ajustar
-#' @param regdata \code{data.frame}-like contendo variáveis explicativas
-#' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
-#'     \code{regdata} serão utilizadas
-#' @param vardin booleano ou inteiro indicando se deve ser estimado modelo com heterocedasticidade.
-#'     Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro assume este
-#'     valor como a sazonalidade
-#' @param estatica booleano indicando se a regressao deve ser de coeficientes estaticos
-#' @param cv_control opcional, uma lista de controle da validacao cruzada. Ver Detalhes
-#' 
-#' @return valor otimo de \code{lambda}
-#' 
-#' @export
-
-CV_regdin <- function(serie, regdata, formula, vardin = FALSE, estatica = FALSE,
-    cv_control = list()) {
-
-    df_cv_ctrl <- list(
-        janela = floor(length(serie) / 10),
-        passo = 1L,
-        obj.ahead = 5:10,
-        refit.cada = NA,
-        error_func = function(x) sum(x^2),
-        lambda = c(0, exp(seq(0, 5, .5)))
-    )
-    df_cv_ctrl[names(cv_control)] <- cv_control
-
-    params_janela <- lapply(df_cv_ctrl$lambda, function(lambda) {
-        out <- df_cv_ctrl
-        out$lambda <- lambda
-        out$n.ahead <- max(df_cv_ctrl$obj.ahead)
-        out
-    })
-
-    jms <- match.call()
-    jms <- lapply(params_janela, function(params) {
-        jms[[1]] <- quote(janelamovel)
-        jms$cv_control <- NULL
-        jms <- c(as.list(jms), params)
-        jms$error_func <- NULL
-        jms$tipo <- "ss_reg_din"
-        as.call(jms)
-    })
-    for(i in seq(jms)) jms[[i]] <- eval(jms[[i]], parent.frame(), parent.frame())
-
-    erros <- sapply(jms, function(jm) {
-        out <- sapply(jm, function(prev) {
-            erro <- serie - prev[, 1]
-            df_cv_ctrl$error_func(erro[df_cv_ctrl$obj.ahead])
-        })
-        mean(out)
-    })
-
-    final_lambda <- df_cv_ctrl$lambda[which.min(erros)]
-
-    return(final_lambda)
 }
