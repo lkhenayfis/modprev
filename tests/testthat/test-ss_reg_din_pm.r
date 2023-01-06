@@ -61,6 +61,11 @@ test_that("Previsao de modelo S.S. RegDin Pseudo Multivar - regressao simples", 
 
     expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
+    # n.ahead maior que nrow(regdata)
+
+    prev_maior <- predict(mod, newdata = newdata, n.ahead = 100)
+    expect_equal(prev, prev_maior)
+
     # previsao "1 passo a frente" (no modo multivariado)
 
     prev <- predict(mod, newdata = newdata, n.ahead = 5)
@@ -71,6 +76,21 @@ test_that("Previsao de modelo S.S. RegDin Pseudo Multivar - regressao simples", 
     expect_equal(tsp(prev)[1], tsp(serie)[2] + 1 / tsp(serie)[3])
 
     expect_snapshot_value(round(c(prev), 5), style = "deparse")
+
+    # previsao de um horionte "quebrado" -- sem numero inteiro de periodos
+
+    prev_qbr1 <- predict(mod, newdata = newdata, n.ahead = 13)
+    expect_equal(dim(prev_qbr1), c(13, 2))
+    expect_equal(c(prev_qbr1), c(prev[seq_len(13), ]))
+
+    prev_qbr2 <- predict(mod, newdata = newdata[seq_len(13), , drop = FALSE])
+    expect_equal(prev_qbr1, prev_qbr2)
+
+    prev_qbr3 <- predict(mod, newdata = newdata, n.ahead = 3)
+    expect_equal(dim(prev_qbr3), c(3, 2))
+    expect_equal(c(prev_qbr3), c(prev[seq_len(3), ]))
+
+    # sem passar regdata
 
     expect_error(predict(mod))
 })

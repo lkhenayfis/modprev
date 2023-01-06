@@ -170,19 +170,27 @@ expande_sist_mats <- function(serie_m, regdata, formula) {
 #' 
 #' @export
 
-predict.ss_reg_din_pm <- function(object, newdata, n.ahead, ...) {
+predict.ss_reg_din_pm <- function(object, newdata, n.ahead = nrow(newdata), ...) {
     modelo <- object$modelo
 
     if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
 
-    if(!missing(n.ahead)) {
-        regobs <- min(n.ahead, nrow(newdata))
-        newdata <- newdata[seq(regobs), , drop = FALSE]
+    # caso n.ahead seja passado diretamente
+    n.ahead <- min(n.ahead, nrow(newdata))
+    newdata <- newdata[seq_len(n.ahead), , drop = FALSE]
+
+    # como esse tipo de modelo nao aceita updates com numero quebrado de periodos, e necessario
+    # prever mais um pouco, se for o caso, e cortar depois
+    freq      <- frequency(object$serie)
+    roundsize <- ceiling(n.ahead / freq) * freq
+
+    extserie <- ts(rep(NA_real_, roundsize), frequency = freq)
+    if(nrow(newdata) < roundsize) {
+        aux <- newdata[(nrow(newdata) + 1):roundsize, , drop = FALSE]
+        newdata <- rbind(newdata, aux)
     }
 
-    # Como extserie nao tem sazonalidade, update vai lancar um aviso que nao tem utilidade aqui
-    extserie <- ts(rep(NA_real_, nrow(newdata)), frequency = frequency(object$serie))
-    extmod   <- suppressWarnings(update.ss_reg_din_pm(object, extserie, newdata)$modelo)
+    extmod <- update(object, extserie, newdata)$modelo
 
     prev <- predict(modelo, newdata = extmod, se.fit = TRUE, filtered = TRUE, ...)
     prev <- lapply(seq_len(2), function(i) {
@@ -192,6 +200,9 @@ predict.ss_reg_din_pm <- function(object, newdata, n.ahead, ...) {
     })
     prev <- lapply(prev, multivar2univar)
     prev <- cbind(prev[[1]], prev[[2]])
+
+    # se nao mudar start ou end do original, window emite um warning inutil
+    prev <- suppressWarnings(window(prev, start(prev), tsp(prev)[1] + (n.ahead - 1) / freq))
     colnames(prev) <- c("prev", "sd")
 
     return(prev)

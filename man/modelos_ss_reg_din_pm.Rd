@@ -9,7 +9,7 @@
 \usage{
 ss_reg_din_pm(serie, regdata, formula, vardin = FALSE, ...)
 
-\method{predict}{ss_reg_din_pm}(object, newdata, n.ahead, ...)
+\method{predict}{ss_reg_din_pm}(object, newdata, n.ahead = nrow(newdata), ...)
 
 \method{update}{ss_reg_din_pm}(object, newseries, newregdata, refit = FALSE, ...)
 }
