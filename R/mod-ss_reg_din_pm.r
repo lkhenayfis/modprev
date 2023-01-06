@@ -264,17 +264,17 @@ update.ss_reg_din_pm <- function(object, newseries, newregdata, refit = FALSE, .
 #' 
 #' @return \code{mod} com a matriz modificada
 #' 
-#' @name update_funs
+#' @name update_funs_pm
 NULL
 
-#' @rdname update_funs
+#' @rdname update_funs_pm
 
 updH_homoc_pm <- function(par, mod, ...) {
     diag(mod["H"][, , 1]) <- exp(par[1])
     return(mod)
 }
 
-#' @rdname update_funs
+#' @rdname update_funs_pm
 
 updH_heter_trig_pm <- function(par, mod, freq, ...) {
     uH   <- cos((seq_len(freq) - 1) * 2 * pi / freq)
@@ -286,7 +286,7 @@ updH_heter_trig_pm <- function(par, mod, freq, ...) {
     return(mod)
 }
 
-#' @rdname update_funs
+#' @rdname update_funs_pm
 
 updQ_pm <- function(par, mod, ...) {
     nQ <- dim(mod["Q"])[1]
