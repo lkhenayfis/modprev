@@ -1,3 +1,20 @@
+# master
+
+## Bug fixes
+
+* Corrige implementacao de heterocedasticidade em modelos de regressao dinamica. Faltava um termo
+  constante nos harmonicos estimados
+
+## Misc
+
+* Diversas modificacoes na interface de `ss_reg_din`
+  * `vardin` agora so pode ser um booleano. Para que a serie seja estimada com heterocedasticidade
+    ela deve ter sazonalidade
+  * opcao `estatica` foi removida, pois ja existe o modelo de regressao linear simples 
+    implementado no pacote
+  * encolhimento de variancias na regressao dinamica foi removido, pois os resultados obtidos nao
+    foram satisfatorios.
+
 # modprev 1.8
 
 ## New features
