@@ -12,7 +12,7 @@
 #' @docType package
 #' @name modprev
 #' 
-#' @import forecast KFAS stats quantreg
+#' @import forecast KFAS stats quantreg DCS
 #' 
 #' @importFrom graphics grid lines title
 NULL
