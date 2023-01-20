@@ -7,9 +7,17 @@
 \alias{update.dcs_reg_din}
 \title{Modelos \code{dcs_reg_din}}
 \usage{
-dcs_reg_din(serie, regdata, formula, ...)
+dcs_reg_din(
+  serie,
+  regdata,
+  formula,
+  d = 1,
+  vardin = FALSE,
+  init.func = default_init_dcs,
+  ...
+)
 
-\method{predict}{dcs_reg_din}(object, newdata, n.ahead, ...)
+\method{predict}{dcs_reg_din}(object, newdata, n.ahead, S = 1000, ...)
 
 \method{update}{dcs_reg_din}(object, newseries, newregdata, refit = FALSE, ...)
 }
@@ -21,6 +29,12 @@ dcs_reg_din(serie, regdata, formula, ...)
 \item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
 \code{regdata} serão utilizadas}
 
+\item{d}{expoente da matrix de informação de Fisher no cálculo do score padronizado}
+
+\item{vardin}{booleano indicando se deve ser estimado modelo com heterocedasticidade.}
+
+\item{init.func}{uma funcao que retorne inicializacao dos hiperparametros. Ver Detalhes}
+
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
 
 \item{object}{objeto com classes \code{c("dcs_reg_din", "modprev")} contendo modelo}
@@ -30,19 +44,13 @@ dcs_reg_din(serie, regdata, formula, ...)
 \item{n.ahead}{número de passos à frente para previsão. Este argumento não é necessario, caso não
 seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}}
 
+\item{S}{inteiro indicando o numero de simulações a serem realizadas}
+
 \item{newseries}{nova série com a qual atualizar o modelo}
 
 \item{newregdata}{\code{data.frame}-like contendo variáveis explicativas na nova amostra}
 
 \item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
-
-\item{vardin}{booleano ou inteiro indicando se deve ser estimado modelo com heterocedasticidade.
-Caso \code{TRUE} tenta pegar a sazonalidade da série; se for um número inteiro assume este
-valor como a sazonalidade}
-
-\item{estatica}{booleano indicando se a regressao deve ser de coeficientes estaticos}
-
-\item{lambda}{penalidade multiplicando o traco da matriz Q. Ver Detalhes}
 }
 \value{
 Objeto da classe \code{modprev} e subclasse \code{dcs_reg_din}, uma lista de dois
@@ -61,11 +69,8 @@ Os modelos de regressão dinâmica estão entre os mais complexos deste pacote. 
 além de ser fornecido o arumento \code{serie} também deve ser necessariamente informado
 \code{regdata}, um \code{data.frame}-like contendo as variáveis explicativas necessárias.
 
-A previsão destes modelos é feita com alguns argumetnos opcionais já passados por padrão que
-não podem ser modificados. Estes são: \code{se.fit = TRUE, filter = TRUE}. O primeiro retorna
-além do valor previsto o desvio padrão associado, o segundo garante que são retornados os valores
-advindos da distribuição preditiva e não de suavização. Considerando estes fatores, \code{...}
-não pode conter \code{n.ahead} ou estes dois outros, ou então ocorrerá erro.
+A previsão destes modelos é feita por simulação, ou seja, é representada pela média de \code{S}
+cenários simulados \code{n.ahead} passos à frente
 }
 \details{
 Opcionalmente pode ser informado o argumento \code{formula} contendo a especificação da regressão
@@ -79,19 +84,15 @@ atributos de \code{serie} para heterocedasticidade e, por fim, se \code{vardin} 
 utiliza este número como sazonalidade.
 
 As variâncias variantes no tempo são modeladas como função de variáveis circulares determinadas
-a partir da sazonalidade. Isto garante que os valores sejam consistentes entre se e, mais
-importante, só possui um parâmetro a mais em relação aos modelos homocedásticos.
+a partir da sazonalidade. Isto garante que os valores sejam consistentes entre si e não aumenta
+muito o número de hiperparâmetros sendo estimados
 
-O argumento \code{lambda} permite que seja introduzida uma penalidade na estimacao do modelo. O
-valor passado por este argumento ser multiplicado pelo traco da matriz Q e somado a funcao
-objetivo. Isso permite que a regressao dinamica seja controlada para apresentar comportamento
-menos adaptativo. A funcao \code{\link{CV_regdin}} permite otimizar o coeficiente de penalidade
-por validacao cruzada.
+A função \code{init.func} deve ser da forma
+\code{function(coefs, serie, regdata, formula, vardin, ...)}, em que \code{...} são demais
+argumentos que ela possa precisar, passados por \code{...} em \code{dcs_reg_din}. Esta funcao
+deve sempre retornar uma lista de dois elementos: o primeiro deve ser o vetor de valores iniciais
+dos hiperparâmetros; o segundo um vetor indicando quais devem ser tratados como valores fixos.
+Por padrão é usada a função \code{\link{default_init_dcs}}.
 
-\bold{Update}:
 
-A atualização de modelos \code{dcs_reg_din} sempre vai checar se o modelo passado foi estimado
-corretamente. Como modelos em espaçoo de estados dependem bastante de inicialização, às vezes não
-dá para estimar direito. Nesses casos ele tenta reestimar o modelo independentemente de
-\code{refit}
 }

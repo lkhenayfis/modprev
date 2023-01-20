@@ -28,20 +28,24 @@ NULL
 #' utiliza este número como sazonalidade.
 #' 
 #' As variâncias variantes no tempo são modeladas como função de variáveis circulares determinadas
-#' a partir da sazonalidade. Isto garante que os valores sejam consistentes entre se e, mais 
-#' importante, só possui um parâmetro a mais em relação aos modelos homocedásticos.
+#' a partir da sazonalidade. Isto garante que os valores sejam consistentes entre si e não aumenta
+#' muito o número de hiperparâmetros sendo estimados
 #' 
-#' O argumento \code{lambda} permite que seja introduzida uma penalidade na estimacao do modelo. O 
-#' valor passado por este argumento ser multiplicado pelo traco da matriz Q e somado a funcao 
-#' objetivo. Isso permite que a regressao dinamica seja controlada para apresentar comportamento 
-#' menos adaptativo. A funcao \code{\link{CV_regdin}} permite otimizar o coeficiente de penalidade
-#' por validacao cruzada.
+#' A função \code{init.func} deve ser da forma 
+#' \code{function(coefs, serie, regdata, formula, vardin, ...)}, em que \code{...} são demais 
+#' argumentos que ela possa precisar, passados por \code{...} em \code{dcs_reg_din}. Esta funcao 
+#' deve sempre retornar uma lista de dois elementos: o primeiro deve ser o vetor de valores iniciais
+#' dos hiperparâmetros; o segundo um vetor indicando quais devem ser tratados como valores fixos. 
+#' Por padrão é usada a função \code{\link{default_init_dcs}}.
 #' 
 #' @param serie série para ajustar
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
 #'     \code{regdata} serão utilizadas
-#' @param ... nao possui uso, existe apenas para consistencia com a generica
+#' @param d expoente da matrix de informação de Fisher no cálculo do score padronizado
+#' @param vardin booleano indicando se deve ser estimado modelo com heterocedasticidade.
+#' @param init.func uma funcao que retorne inicializacao dos hiperparametros. Ver Detalhes
+#' @param ... argumentos extras passados para \code{init.func}
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{dcs_reg_din}, uma lista de dois 
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
@@ -87,6 +91,32 @@ dcs_reg_din <- function(serie, regdata, formula, d = 1, vardin = FALSE, init.fun
     return(out)
 }
 
+#' Inicializacao Padrao De \code{dcs_reg_din}
+#' 
+#' Funcao default para inicializacao dos hiperparametros em modelos \code{dcs_reg_din}
+#' 
+#' A funcao de inicializacao padrao implementa uma heuristica relativamente simples para 
+#' inicializacao dos hiperparametros. A partir das \code{num.obs} primeiras observacoes da serie e
+#' variaveis explicativas, estima uma regressao linear simples com a mesma especificacao da que sera
+#' modelada dinamicamente e usa estes coeficientes como valores iniciais para a otimizacao dos 
+#' hiperparametros em \code{dcs_reg_din}. Estes valores sao entao removidos da otimizacao, isto e,
+#' sao tratados como fixos (geralmente nao e um problema, ainda mais com series mais longas).
+#' 
+#' Se \code{vardin = TRUE}, tambem coloca os scores dos ciclos de variancia como valores fixos em 0,
+#' gerando assim heterocedasticidade deterministica.
+#' 
+#' @param coefs coeficientes do modelo como retornado por \code{\link[DCS]{coef.DCSmodel}}
+#' @param serie série para ajustar
+#' @param regdata \code{data.frame}-like contendo variáveis explicativas
+#' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
+#'     \code{regdata} serão utilizadas
+#' @param vardin booleano indicando se deve ser estimado modelo com heterocedasticidade.
+#' @param num.obs numero de observacoes iniciais para usar na heuristica. Se for menor do que 1, se
+#'     assume que e um percentual do tamanho da serie
+#' 
+#' @return lista de dois elementos: valores iniciais para otimizacao e vetor de hiperparametros 
+#'     fixos
+
 default_init_dcs <- function(coefs, serie, regdata, formula, vardin, num.obs = .2) {
 
     if(num.obs < 1) num.obs <- ceiling(num.obs * length(serie))
@@ -112,17 +142,15 @@ default_init_dcs <- function(coefs, serie, regdata, formula, vardin, num.obs = .
 
 #' \bold{Predict}:
 #' 
-#' A previsão destes modelos é feita com alguns argumetnos opcionais já passados por padrão que
-#' não podem ser modificados. Estes são: \code{se.fit = TRUE, filter = TRUE}. O primeiro retorna
-#' além do valor previsto o desvio padrão associado, o segundo garante que são retornados os valores
-#' advindos da distribuição preditiva e não de suavização. Considerando estes fatores, \code{...} 
-#' não pode conter \code{n.ahead} ou estes dois outros, ou então ocorrerá erro.
+#' A previsão destes modelos é feita por simulação, ou seja, é representada pela média de \code{S}
+#' cenários simulados \code{n.ahead} passos à frente
 #' 
 #' @param object objeto com classes \code{c("dcs_reg_din", "modprev")} contendo modelo
 #' @param newdata \code{data.frame}-like contendo variéveis explicativas fora da amostra
 #' @param n.ahead número de passos à frente para previsão. Este argumento não é necessario, caso não
 #'     seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}
-#' @param ... demais argumentos passados a \link[KFAS]{\code{predict.SSModel}}
+#' @param S inteiro indicando o numero de simulações a serem realizadas
+#' @param ... existe apenas para consistência com a genérica.
 #' 
 #' @return \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
 #'     previsão \code{n.ahead} passos à frente;
@@ -148,13 +176,6 @@ predict.dcs_reg_din <- function(object, newdata, n.ahead, S = 1000, ...) {
 }
 
 #' @details 
-#' 
-#' \bold{Update}:
-#' 
-#' A atualização de modelos \code{dcs_reg_din} sempre vai checar se o modelo passado foi estimado
-#' corretamente. Como modelos em espaçoo de estados dependem bastante de inicialização, às vezes não
-#' dá para estimar direito. Nesses casos ele tenta reestimar o modelo independentemente de 
-#' \code{refit}
 #' 
 #' @param newseries nova série com a qual atualizar o modelo
 #' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
