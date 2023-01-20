@@ -69,7 +69,7 @@ dcs_reg_din <- function(serie, regdata, formula, d = 1, vardin = FALSE, init.fun
 
     mod <- DCSmodel(serie, "t", spec, d)
 
-    start_fixed <- init.func(coef(mod), serie, regdata, formula, vardin)
+    start_fixed <- init.func(coef(mod), serie, regdata, formula, vardin, ...)
 
     if(is.list(start_fixed)) {
         start <- start_fixed[[1]]
@@ -87,15 +87,20 @@ dcs_reg_din <- function(serie, regdata, formula, d = 1, vardin = FALSE, init.fun
     return(out)
 }
 
-default_init_dcs <- function(coefs, serie, regdata, formula, vardin) {
+default_init_dcs <- function(coefs, serie, regdata, formula, vardin, num.obs = .2) {
+
+    if(num.obs < 1) num.obs <- ceiling(num.obs * length(serie))
 
     start <- coefs
     start[] <- 0
 
+    lmini <- lm(update(formula, Y ~ .), cbind.data.frame(Y = serie, regdata)[seq_len(num.obs), ])
+
+    start["mu_reg.*init"] <- coef(lmini)
+    fixed <- grep("mu_reg.*init", names(start))
+
     if(vardin) {
-        fixed <- grep("cycle.*score", names(start))
-    } else {
-        fixed <- rep(FALSE, length(start))
+        fixed <- c(fixed, grep("cycle.*score", names(start)))
     }
 
     out <- list(start, fixed)
