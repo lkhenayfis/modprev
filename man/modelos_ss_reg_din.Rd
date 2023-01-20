@@ -76,12 +76,6 @@ As variâncias variantes no tempo são modeladas como função de variáveis cir
 a partir da sazonalidade. Isto garante que os valores sejam consistentes entre se e, mais
 importante, só possui um parâmetro a mais em relação aos modelos homocedásticos.
 
-O argumento \code{lambda} permite que seja introduzida uma penalidade na estimacao do modelo. O
-valor passado por este argumento ser multiplicado pelo traco da matriz Q e somado a funcao
-objetivo. Isso permite que a regressao dinamica seja controlada para apresentar comportamento
-menos adaptativo. A funcao \code{\link{CV_regdin}} permite otimizar o coeficiente de penalidade
-por validacao cruzada.
-
 \bold{Update}:
 
 A atualização de modelos \code{ss_reg_din} sempre vai checar se o modelo passado foi estimado
