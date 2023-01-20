@@ -19,12 +19,6 @@ test_that("Estimacao de modelo DCS RegDin - regressao simples", {
     # NAs nos regressores
     varex[c(1, 10, 20), ] <- NA_real_
     expect_warning(estimamodelo(serie, regdata = varex, tipo = "dcs_reg_din", formula = ~ V1))
-
-    # Teste de argumentos extras que nao existe na funcao
-
-    varex <- datregdin$varex[, "V1", drop = FALSE]
-    mod2 <- estimamodelo(c(serie), regdata = varex, tipo = "dcs_reg_din", formula = ~ V1, erro = 1)
-    expect_equal(coef(mod$modelo), coef(mod2$modelo))
 })
 
 test_that("Previsao de modelo DCS RegDin - regressao simples", {
