@@ -47,8 +47,8 @@ test_that("Previsao de modelo DCS RegDin - regressao simples", {
 test_that("Atualizacao de modelo DCS RegDin - regressao simples", {
     serie1 <- window(datregdin$obs, 1, 50)
     varex1 <- datregdin$varex[1:50, "V1", drop = FALSE]
-    serie2 <- window(datregdin$obs, 51, 100)
-    varex2 <- datregdin$varex[51:100, "V1", drop = FALSE]
+    serie2 <- window(datregdin$obs, 41, 90)
+    varex2 <- datregdin$varex[41:90, "V1", drop = FALSE]
 
     mod <- estimamodelo(serie1, tipo = "dcs_reg_din", regdata = varex1, formula = ~ V1)
 
@@ -126,8 +126,8 @@ test_that("Atualizacao de modelo DCS RegDin - regressao multipla", {
 
     mod <- estimamodelo(serie, formula = ~ V1 + V2 * V3, regdata = varex, tipo = "dcs_reg_din")
 
-    newseries  <- window(datregdin$obs, 51, 100)
-    newregdata <- datregdin$varex[51:100, ]
+    newseries  <- window(datregdin$obs, 41, 90)
+    newregdata <- datregdin$varex[41:90, ]
     mod_upd   <- update(mod, newseries = newseries, newregdata = newregdata)
 
     expect_equal(coef(mod$modelo), coef(mod_upd$modelo))
@@ -201,8 +201,8 @@ test_that("Atualizacao de modelo DCS RegDin - regressao multipla heterocedastica
 
     mod <- estimamodelo(serie, formula = ~ V1 + V2 * V3, regdata = varex, tipo = "dcs_reg_din", vardin = TRUE)
 
-    newseries  <- window(datregdin$obs, 51, 100)
-    newregdata <- datregdin$varex[51:100, ]
+    newseries  <- window(datregdin$obs, 41, 90)
+    newregdata <- datregdin$varex[41:90, ]
     mod_upd   <- update(mod, newseries = newseries, newregdata = newregdata)
 
     expect_equal(coef(mod$modelo)[c(1:6, 9)], coef(mod_upd$modelo)[c(1:6, 9)])

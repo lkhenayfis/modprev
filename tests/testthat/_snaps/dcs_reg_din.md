@@ -6,16 +6,16 @@
 
 # Previsao de modelo DCS RegDin - regressao simples
 
-    c(prev = 1.55043)
+    c(prev = 1.44309)
 
 ---
 
-    c(prev = 1.55043)
+    c(prev = 1.44309)
 
 # Atualizacao de modelo DCS RegDin - regressao simples
 
-    structure(c("(mu_reg_b0) score_mu" = -0.00195, "(mu_reg_V1) score_mu" = -0.00744, 
-    "(sigma2_intercept) init" = 1.74798, "(nu_intercept) init" = 1.67053
+    structure(c("(mu_reg_b0) score_mu" = 0.00422, "(mu_reg_V1) score_mu" = -0.00811, 
+    "(sigma2_intercept) init" = 1.84864, "(nu_intercept) init" = 2.99472
     ), class = c("DCScoef", "numeric"))
 
 # Estimacao de modelo DCS RegDin - regressao multipla
@@ -28,11 +28,11 @@
 
 # Previsao de modelo DCS RegDin - regressao multipla
 
-    c(prev = -4.33048)
+    c(prev = -4.32691)
 
 ---
 
-    c(prev = -4.33048)
+    c(prev = -4.32691)
 
 # Atualizacao de modelo DCS RegDin - regressao multipla
 
@@ -44,27 +44,27 @@
 
 # Estimacao de modelo DCS RegDin - regressao multipla heterocedastica
 
-    structure(c("(mu_reg_b0) score_mu" = -0.07264, "(mu_reg_V1) score_mu" = -0.32021, 
-    "(mu_reg_V2) score_mu" = -0.99964, "(mu_reg_V3) score_mu" = 0.09136, 
-    "(mu_reg_V2:V3) score_mu" = 0.99987, "(sigma2_intercept) init" = -3.52347, 
-    "(sigma2_cycle) init" = 0.62371, "(sigma2_cycle*) init" = 0.77594, 
-    "(nu_intercept) init" = 0.67838), class = c("DCScoef", "numeric"
+    structure(c("(mu_reg_b0) score_mu" = -0.07228, "(mu_reg_V1) score_mu" = -0.32173, 
+    "(mu_reg_V2) score_mu" = -0.99967, "(mu_reg_V3) score_mu" = 0.09118, 
+    "(mu_reg_V2:V3) score_mu" = 0.99962, "(sigma2_intercept) init" = -3.52432, 
+    "(sigma2_cycle) init" = 0.62443, "(sigma2_cycle*) init" = 0.78124, 
+    "(nu_intercept) init" = 0.67653), class = c("DCScoef", "numeric"
     ))
 
 # Previsao de modelo DCS RegDin - regressao multipla - heterocedastica
 
-    c(prev = -4.26893)
+    c(prev = -4.27155)
 
 ---
 
-    c(prev = -4.26893)
+    c(prev = -4.27155)
 
 # Atualizacao de modelo DCS RegDin - regressao multipla heterocedastica
 
-    structure(c("(mu_reg_b0) score_mu" = -0.11894, "(mu_reg_V1) score_mu" = -0.1513, 
-    "(mu_reg_V2) score_mu" = -0.99966, "(mu_reg_V3) score_mu" = 0.2166, 
-    "(mu_reg_V2:V3) score_mu" = 0.83338, "(sigma2_intercept) init" = -1.77495, 
-    "(sigma2_cycle) init" = -1.77495, "(sigma2_cycle*) init" = 0, 
-    "(nu_intercept) init" = 0.60543), class = c("DCScoef", "numeric"
+    structure(c("(mu_reg_b0) score_mu" = -0.11898, "(mu_reg_V1) score_mu" = -0.15112, 
+    "(mu_reg_V2) score_mu" = -0.99966, "(mu_reg_V3) score_mu" = 0.2167, 
+    "(mu_reg_V2:V3) score_mu" = 0.8329, "(sigma2_intercept) init" = -1.77506, 
+    "(sigma2_cycle) init" = -1.77506, "(sigma2_cycle*) init" = 0, 
+    "(nu_intercept) init" = 0.6053), class = c("DCScoef", "numeric"
     ))
 
