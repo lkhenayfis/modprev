@@ -159,7 +159,7 @@ default_init_dcs <- function(coefs, serie, regdata, formula, vardin, num.obs = .
 #' 
 #' @export
 
-predict.dcs_reg_din <- function(object, newdata, n.ahead, S = 1000, ...) {
+predict.dcs_reg_din <- function(object, newdata, n.ahead, S = 5000, ...) {
     modelo <- object$modelo
 
     if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
@@ -204,7 +204,7 @@ update.dcs_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...
 
         if(missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
 
-        modelo <- update(modelo, newseries, newregdata, FALSE, TRUE)
+        modelo <- update(modelo, newseries, newregdata, FALSE)
         object <- new_modprevU(modelo, newseries, "dcs_reg_din", mod_atrs)
     }
 
