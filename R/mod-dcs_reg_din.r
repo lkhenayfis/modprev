@@ -204,7 +204,8 @@ update.dcs_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...
 
         if(missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
 
-        modelo <- update(modelo, newseries, newregdata, FALSE)
+        # tem um aviso inutil sobre subset de ts sem mudar o end
+        modelo <- suppressWarnings(update(modelo, newseries, newregdata, FALSE))
         object <- new_modprevU(modelo, newseries, "dcs_reg_din", mod_atrs)
     }
 
