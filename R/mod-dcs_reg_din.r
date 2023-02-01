@@ -193,6 +193,12 @@ update.dcs_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...
 
     mod_atrs <- attr(object, "mod_atrs")
 
+    # no primeiro update de janela movel ele troca pela propria serie. Isso gera erro pois nao existe
+    # um ultimo valor de score e parametros utilizaveis para a funcao resetstart.
+    # Como aquele update na verdade e desnecessario, so existe para reduzir o codigo, isso aqui e
+    # ate um ganho de eficiencia
+    if(identical(newseries, object$modelo$series)) return(object)
+
     if(refit) {
         formula   <- mod_atrs$formula
         vardin    <- mod_atrs$vardin
