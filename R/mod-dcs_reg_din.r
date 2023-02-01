@@ -85,7 +85,7 @@ dcs_reg_din <- function(serie, regdata, formula, d = 1, vardin = FALSE, init.fun
 
     fit <- DCSfit(mod, start, fixed, control = list(maxit = 500))
 
-    mod_atrs <- list(formula = formula, vardin = vardin)
+    mod_atrs <- list(formula = formula, vardin = vardin, init.func = init.func)
     out <- new_modprevU(fit$model, serie, "dcs_reg_din", mod_atrs)
 
     return(out)
@@ -194,10 +194,11 @@ update.dcs_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...
     mod_atrs <- attr(object, "mod_atrs")
 
     if(refit) {
-        formula <- mod_atrs$formula
-        vardin  <- mod_atrs$vardin
+        formula   <- mod_atrs$formula
+        vardin    <- mod_atrs$vardin
+        init.func <- mod_atrs$init.func
         object  <- estimamodelo(newseries, "dcs_reg_din", regdata = newregdata, formula = formula,
-            vardin = vardin)
+            vardin = vardin, init.func = init.func)
     } else {
 
         modelo <- object$modelo
