@@ -115,8 +115,8 @@ janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cad
 
     retfun <- whichreturn(full.output)
 
-    jm <- lapply(seq(janelas), function(i) {
-
+    jm <- vector("list", length(janelas))
+    for(i in seq_along(janelas)) {
         verb_func(janelas[[i]][[1]], janelas[[i]][[2]], v_refit[i])
 
         ij <- janelas[[i]]
@@ -128,10 +128,9 @@ janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cad
         inewdata <- regdata[window(aux, ijn[[1]], ijn[[2]]), , drop = FALSE]
         pred <- predict(mod, n.ahead, newdata = inewdata)
 
-        retfun(pred, mod, inewdata)
-    })
+        jm[[i]] <- retfun(pred, mod, inewdata)
+    }
 
-    # Retorna
     return(jm)
 }
 
