@@ -13,11 +13,11 @@ dcs_reg_din(
   formula,
   d = 1,
   vardin = FALSE,
-  init.func = default_init_dcs,
+  init.fun = default_init_dcs,
   ...
 )
 
-\method{predict}{dcs_reg_din}(object, newdata, n.ahead, S = 1000, ...)
+\method{predict}{dcs_reg_din}(object, newdata, n.ahead, S = 5000, ...)
 
 \method{update}{dcs_reg_din}(object, newseries, newregdata, refit = FALSE, ...)
 }
@@ -33,7 +33,7 @@ dcs_reg_din(
 
 \item{vardin}{booleano indicando se deve ser estimado modelo com heterocedasticidade.}
 
-\item{init.func}{uma funcao que retorne inicializacao dos hiperparametros. Ver Detalhes}
+\item{init.fun}{uma funcao que retorne inicializacao dos hiperparametros. Ver Detalhes}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
 
@@ -87,7 +87,7 @@ As variâncias variantes no tempo são modeladas como função de variáveis cir
 a partir da sazonalidade. Isto garante que os valores sejam consistentes entre si e não aumenta
 muito o número de hiperparâmetros sendo estimados
 
-A função \code{init.func} deve ser da forma
+A função \code{init.fun} deve ser da forma
 \code{function(coefs, serie, regdata, formula, vardin, ...)}, em que \code{...} são demais
 argumentos que ela possa precisar, passados por \code{...} em \code{dcs_reg_din}. Esta funcao
 deve sempre retornar uma lista de dois elementos: o primeiro deve ser o vetor de valores iniciais

@@ -31,7 +31,7 @@ NULL
 #' a partir da sazonalidade. Isto garante que os valores sejam consistentes entre si e não aumenta
 #' muito o número de hiperparâmetros sendo estimados
 #' 
-#' A função \code{init.func} deve ser da forma 
+#' A função \code{init.fun} deve ser da forma 
 #' \code{function(coefs, serie, regdata, formula, vardin, ...)}, em que \code{...} são demais 
 #' argumentos que ela possa precisar, passados por \code{...} em \code{dcs_reg_din}. Esta funcao 
 #' deve sempre retornar uma lista de dois elementos: o primeiro deve ser o vetor de valores iniciais
@@ -44,15 +44,15 @@ NULL
 #'     \code{regdata} serão utilizadas
 #' @param d expoente da matrix de informação de Fisher no cálculo do score padronizado
 #' @param vardin booleano indicando se deve ser estimado modelo com heterocedasticidade.
-#' @param init.func uma funcao que retorne inicializacao dos hiperparametros. Ver Detalhes
-#' @param ... argumentos extras passados para \code{init.func}
+#' @param init.fun uma funcao que retorne inicializacao dos hiperparametros. Ver Detalhes
+#' @param ... argumentos extras passados para \code{init.fun}
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{dcs_reg_din}, uma lista de dois 
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_dcs_reg_din
 
-dcs_reg_din <- function(serie, regdata, formula, d = 1, vardin = FALSE, init.func = default_init_dcs,
+dcs_reg_din <- function(serie, regdata, formula, d = 1, vardin = FALSE, init.fun = default_init_dcs,
     ...) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
@@ -73,7 +73,7 @@ dcs_reg_din <- function(serie, regdata, formula, d = 1, vardin = FALSE, init.fun
 
     mod <- DCSmodel(serie, "t", spec, d)
 
-    start_fixed <- init.func(coef(mod), serie, regdata, formula, vardin, ...)
+    start_fixed <- init.fun(coef(mod), serie, regdata, formula, vardin, ...)
 
     if(is.list(start_fixed)) {
         start <- start_fixed[[1]]
@@ -85,7 +85,7 @@ dcs_reg_din <- function(serie, regdata, formula, d = 1, vardin = FALSE, init.fun
 
     fit <- DCSfit(mod, start, fixed, control = list(maxit = 500))
 
-    mod_atrs <- list(formula = formula, vardin = vardin, init.func = init.func)
+    mod_atrs <- list(formula = formula, vardin = vardin, init.fun = init.fun)
     out <- new_modprevU(fit$model, serie, "dcs_reg_din", mod_atrs)
 
     return(out)
@@ -196,9 +196,9 @@ update.dcs_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...
     if(refit) {
         formula   <- mod_atrs$formula
         vardin    <- mod_atrs$vardin
-        init.func <- mod_atrs$init.func
+        init.fun <- mod_atrs$init.fun
         object  <- estimamodelo(newseries, "dcs_reg_din", regdata = newregdata, formula = formula,
-            vardin = vardin, init.func = init.func)
+            vardin = vardin, init.fun = init.fun)
     } else {
 
         modelo <- object$modelo
