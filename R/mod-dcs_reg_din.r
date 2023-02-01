@@ -57,6 +57,7 @@ dcs_reg_din <- function(serie, regdata, formula, d = 1, vardin = FALSE, init.fun
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
+    serie0 <- serie
     if(any(is.na(regdata))) {
         warning("Ha NAs na variavel explicativa")
         linna <- rowSums(is.na(regdata)) > 0
@@ -86,7 +87,7 @@ dcs_reg_din <- function(serie, regdata, formula, d = 1, vardin = FALSE, init.fun
     fit <- DCSfit(mod, start, fixed, control = list(maxit = 500))
 
     mod_atrs <- list(formula = formula, vardin = vardin, init.fun = init.fun)
-    out <- new_modprevU(fit$model, serie, "dcs_reg_din", mod_atrs)
+    out <- new_modprevU(fit$model, serie0, "dcs_reg_din", mod_atrs)
 
     return(out)
 }
@@ -197,7 +198,7 @@ update.dcs_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...
     # um ultimo valor de score e parametros utilizaveis para a funcao resetstart.
     # Como aquele update na verdade e desnecessario, so existe para reduzir o codigo, isso aqui e
     # ate um ganho de eficiencia
-    if(identical(newseries, object$modelo$series)) return(object)
+    if(identical(newseries, object$serie)) return(object)
 
     if(refit) {
         formula   <- mod_atrs$formula
