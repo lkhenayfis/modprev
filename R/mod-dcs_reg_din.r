@@ -83,7 +83,7 @@ dcs_reg_din <- function(serie, regdata, formula, d = 1, vardin = FALSE, init.fun
         fixed <- rep(FALSE, length(start))
     }
 
-    fit <- DCSfit(mod, start, fixed)
+    fit <- DCSfit(mod, start, fixed, control = list(maxit = 500))
 
     mod_atrs <- list(formula = formula, vardin = vardin)
     out <- new_modprevU(fit$model, serie, "dcs_reg_din", mod_atrs)
