@@ -1,3 +1,11 @@
+# dcs
+
+## New features
+
+* Introducao de modelos `dcs_reg_din`, regressoes dinamicas com distribuição condicional t de 
+  student pelo arcabouco DCS
+  Esta funcionalidade e experimental e depende de um pacote privado no github, lkhenayfis/dcs@dynreg
+
 # master
 
 ## Bug fixes
