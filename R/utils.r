@@ -90,3 +90,68 @@ expandeformula <- function(data) {
 
     return(formula)
 }
+
+# UTILITARIAS DE PAR(p) ----------------------------------------------------------------------------
+
+#' Calculo do desvio padrao normalizado por 1/n
+#'
+#' Funcao alternativa para calcular desvio padrao atraves do estimador "n"
+#' 
+#' @param vec [vetor numerico] serie cujo desvio padrao se deseja calcular
+#' 
+#' @return [escalar numerico] desvio padrao calculado
+
+sd2 <- function(...) {
+
+    pars <- list(...)
+    n <- length(pars[[1]])
+
+    sqrt((n - 1) / n) * sd(...)
+}
+
+#' Calculo da covariancia normalizada por 1/n
+#'
+#' Funcao alternativa para calcular covariancia atraves do estimador "n"
+#' 
+#' @param mat [matriz numerica] serie cuja covariancia se deseja calcular
+#' 
+#' @return [escalar numerico] covariancia calculada
+
+cov2 <- function(...) {
+
+    pars <- list(...)
+    n <- nrow(as.matrix(pars[[1]]))
+
+    (n - 1) / n * cov(...)
+}
+
+#' Normaliza historico
+#' 
+#' Funcao para normalizar um historico de enas
+#' 
+#' @param dat [matriz numerica] historico a ser normalizado
+#' @param est [escalar string] string indicando qual estimador utilizar para desvio padrao
+#'     - "n" estimador normalizando somatorios por n
+#'     - "n-1" estimador normalizando somatorios por (n - 1)
+#' @param truncdat [escalar numerico] numero de casas decimais para arredondamento do dado 
+#'     fornecido. Padrao FALSE = nao arredondar
+#' @param truncpar [escalar numerico] numero de casas decimais para arredondamento das medias e sd 
+#'     para normalizacao. Padrao FALSE = nao arredondar
+#' 
+#' @return [matriz numerica] matriz contendo dat normalizado
+
+normhist <- function(dat, est = "n", truncdat = FALSE, truncpar = FALSE) {
+
+    fstd <- ifelse(est == "n-1", sd, sd2)
+    STD  <- apply(dat, 2, fstd)
+    MED  <- colMeans(dat)
+    if(is.numeric(truncpar)) {
+        MED <- round(MED, truncpar)
+        STD <- round(STD, truncpar)
+    }
+    if(is.numeric(truncdat)) {
+        dat <- round(dat, truncdat)
+    }
+    out <- sapply(seq_len(ncol(dat)), function(i) (dat[, i] - MED[i]) / STD[i])
+    return(out)
+}
