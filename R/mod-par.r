@@ -41,7 +41,7 @@ NULL
 #' 
 #' @rdname modelos_parp
 
-parp <- function(serie, s = frequency(serie), p = "cepel", A12 = FALSE, max.p = 6, ...) {
+parp <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 6, ...) {
 
     if (s == 1) stop("'serie' nao possui sazonalidade -- informe uma serie sazonal ou um periodo 's'")
     if ((frequency(serie) == 1) && (s > 1)) serie <- ts(serie, frequency = s)
@@ -49,11 +49,15 @@ parp <- function(serie, s = frequency(serie), p = "cepel", A12 = FALSE, max.p = 
     if (length(p) < s) p <- rep(p, s)
     if (length(max.p) < s) max.p <- rep(max.p, s)
 
-    if (any(p == "auto")) {
+    anyauto <- any(p == "auto")
+
+    if (anyauto) {
         auto_p <- which(p == "auto")
         auto_p <- sapply(auto_p, idordem, serie = serie, max.p = max.p, A12 = A12)
         p[p == "auto"] <- auto_p
     }
+
+    mods <- lapply(seq_len(s), function(m) fitparp(serie, m, p[m], A12))
 }
 
 # AUXILIARES ---------------------------------------------------------------------------------------
@@ -62,7 +66,7 @@ parp <- function(serie, s = frequency(serie), p = "cepel", A12 = FALSE, max.p = 
 #' 
 #' Função interna para estimação de cada um dos modelos periódicos pelo método Yule-Walker
 
-fitparp <- function(serie, p, A12) {
+fitparp <- function(serie, m, p, A12) {
     NA
 }
 
