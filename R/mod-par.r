@@ -99,11 +99,64 @@ idordem_parp_a <- function(serie, m, max.p) {
 #' Calcula e opcionalmente plota a ACF parcial ou condicional de uma determinada série sazonal
 #' 
 #' @param serie serie temporal da qual calcular autocorrelações
-#' @param lag.max inteiro indicando o maior lag para o qual se calcular a autocorrelação
+#' @param lag.max inteiro indicando o maior lag para calcular a autocorrelação, limitado em 11
 #' @param plot booleano indicando se deve ser feito o plot das autocorrelações calculadas
 
-perpacf <- function(serie, lag.max = 6, plot = FALSE, ...) {
-    NA
+perpacf <- function(serie, lag.max = 6, plot = FALSE) {
+
+    serie <- matrix(serie, ncol = frequency(serie), byrow = TRUE)
+    serie <- normhist(serie, est = "n")
+
+    N   <- nrow(serie)
+    RHO <- diag(1, lag.max, lag.max)
+
+    for (i in 1:lag.max) {
+
+        # Identifica a coluna correspondente ao lag i do mes m
+        col1 <- ifelse((m - i) < 1, m - i + 12, m - i)
+
+        for (j in (i + 1):lag.max) {
+
+            # Identifica a serie lag
+            col2 <- ifelse((col1 - (j - i)) < 1, col1 - (j - i) + 12, col1 - (j - i))
+
+            if (col1 < col2) {
+                vec1 <- serie[2:N, col1]
+                vec2 <- serie[1:(N - 1), col2]
+                RHO[i, j] <- 1 / N * sum(vec1 * vec2) / (sd2(serie[, col1]) * sd2(serie[, col2]))
+                RHO[j, i] <- RHO[i, j]
+            } else {
+                vec1 <- serie[, col1]
+                vec2 <- serie[, col2]
+                RHO[i, j] <- mean(vec1 * vec2) / (sd2(vec1) * sd2(vec2))
+                RHO[j, i] <- RHO[i, j]
+            }
+        }
+    }
+
+    # Calcula o vetor de correlacoes lagged do mes m
+    rho <- double(lag.max)
+    for (i in 1:lag.max) {
+        col2 <- ifelse((m - i) < 1, m - i + 12, m - i)
+
+        if (m < col2) {
+            vec1 <- serie[2:N, m]
+            vec2 <- serie[1:(N - 1), col2]
+            rho[i] <- 1 / N * sum(vec1 * vec2) / (sd2(serie[, m]) * sd2(serie[, col2]))
+        } else {
+            vec1 <- serie[, m]
+            vec2 <- serie[, col2]
+            rho[i] <- mean(vec1 * vec2) / (sd2(vec1) * sd2(vec2))
+        }
+    }
+
+    phi <- sapply(lags, function(lag) solve(RHO[1:lag, 1:lag], rho[1:lag])[lag])
+    phi <- list(phi = phi, n.used = nrow(serie), lag = lags, rho = rho, RHO = RHO)
+    class(phi) <- c("parcial", "pacf")
+
+    if (plot) print(plot(phi))
+
+    return(phi)
 }
 
 percacf <- function(serie, lag.max = 6, plot = FALSE, ...) {
