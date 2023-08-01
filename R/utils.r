@@ -125,33 +125,39 @@ cov2 <- function(...) {
     (n - 1) / n * cov(...)
 }
 
-#' Normaliza historico
+#' Normaliza Serie Sazonalmente
 #' 
-#' Funcao para normalizar um historico de enas
+#' Funcao interna para padronizar uma serie por periodo de sazonalidade
 #' 
-#' @param dat [matriz numerica] historico a ser normalizado
-#' @param est [escalar string] string indicando qual estimador utilizar para desvio padrao
+#' @param serie serie temporal com sazonalidade para normalizar
+#' @param est string indicando qual estimador utilizar para desvio padrao
 #'     - "n" estimador normalizando somatorios por n
 #'     - "n-1" estimador normalizando somatorios por (n - 1)
-#' @param truncdat [escalar numerico] numero de casas decimais para arredondamento do dado 
-#'     fornecido. Padrao FALSE = nao arredondar
-#' @param truncpar [escalar numerico] numero de casas decimais para arredondamento das medias e sd 
-#'     para normalizacao. Padrao FALSE = nao arredondar
+#' @param truncdat inteiro indicando o numero de casas decimais para arredondamento do dado 
+#'     fornecido. Padrao -1 = nao arredondar
+#' @param truncpar inteiro indicando o numero de casas decimais para arredondamento das medias e sd 
+#'     para normalizacao. Padrao -1 = nao arredondar
 #' 
 #' @return [matriz numerica] matriz contendo dat normalizado
 
-normhist <- function(dat, est = "n", truncdat = FALSE, truncpar = FALSE) {
+scale_by_season <- function(serie, est = "n", truncdat = -1, truncpar = -1) {
+
+    attr0 <- attributes(serie)
+    dat <- matrix(as.numeric(serie), ncol = frequency(serie), byrow = TRUE)
 
     fstd <- ifelse(est == "n-1", sd, sd2)
     STD  <- apply(dat, 2, fstd)
     MED  <- colMeans(dat)
-    if(is.numeric(truncpar)) {
+    if (truncpar > 0) {
         MED <- round(MED, truncpar)
         STD <- round(STD, truncpar)
     }
-    if(is.numeric(truncdat)) {
+    if (truncdat > 0) {
         dat <- round(dat, truncdat)
     }
+
     out <- sapply(seq_len(ncol(dat)), function(i) (dat[, i] - MED[i]) / STD[i])
+    out <- c(t(out))
+    attributes(out) <- attr0
     return(out)
 }
