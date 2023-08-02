@@ -57,6 +57,8 @@ parp <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 6
         p[p == "auto"] <- auto_p
     }
 
+    serie <- scale_by_season(serie)
+
     mods <- lapply(seq_len(s), function(m) fitparp(serie, m, p[m], A12))
 }
 
@@ -99,23 +101,23 @@ idordem_parp_a <- function(serie, m, max.p) {
 #' Calcula e opcionalmente plota a ACF parcial ou condicional de uma determinada série sazonal
 #' 
 #' @param serie serie temporal da qual calcular autocorrelações
+#' @param m inteiro indicando o periodo da sazonalidade para o qual calcular autocorrelacoes
 #' @param lag.max inteiro indicando o maior lag para calcular a autocorrelação, limitado em 11
 #' @param plot booleano indicando se deve ser feito o plot das autocorrelações calculadas
 
-perpacf <- function(serie, lag.max = 6, plot = FALSE) {
+perpacf <- function(serie, m, lag.max = 6, plot = FALSE) {
 
     serie <- matrix(serie, ncol = frequency(serie), byrow = TRUE)
-    serie <- normhist(serie, est = "n")
 
     N   <- nrow(serie)
     RHO <- diag(1, lag.max, lag.max)
 
-    for (i in 1:lag.max) {
+    for (i in seq_len(lag.max)) {
 
         # Identifica a coluna correspondente ao lag i do mes m
         col1 <- ifelse((m - i) < 1, m - i + 12, m - i)
 
-        for (j in (i + 1):lag.max) {
+        for (j in seq_len(lag.max)[-seq_len(i)]) {
 
             # Identifica a serie lag
             col2 <- ifelse((col1 - (j - i)) < 1, col1 - (j - i) + 12, col1 - (j - i))
@@ -150,9 +152,9 @@ perpacf <- function(serie, lag.max = 6, plot = FALSE) {
         }
     }
 
-    phi <- sapply(lags, function(lag) solve(RHO[1:lag, 1:lag], rho[1:lag])[lag])
-    phi <- list(phi = phi, n.used = nrow(serie), lag = lags, rho = rho, RHO = RHO)
-    class(phi) <- c("parcial", "pacf")
+    phi <- sapply(seq_len(lag.max), function(lag) solve(RHO[1:lag, 1:lag], rho[1:lag])[lag])
+    phi <- list(phi = phi, n.used = nrow(serie), m = m, lag.max = lag.max, rho = rho, RHO = RHO)
+    class(phi) <- c("parcial", "modprev_acf")
 
     if (plot) print(plot(phi))
 
