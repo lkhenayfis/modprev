@@ -57,7 +57,9 @@ parp <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 6
         p[p == "auto"] <- auto_p
     }
 
-    serie <- scale_by_season(serie)
+    medias <- medias_sazo(serie)
+    medias <- scale_by_season(medias)
+    serie  <- scale_by_season(serie)
 
     mods <- lapply(seq_len(s), function(m) fitparp(serie, m, p[m], A12))
 }
@@ -161,6 +163,88 @@ perpacf <- function(serie, m, lag.max = 6, plot = FALSE) {
     return(phi)
 }
 
-percacf <- function(serie, lag.max = 6, plot = FALSE, ...) {
-    NA
+#' Correlacao condicionada
+#' 
+#' Funcao para calcular correlacao condicionada de processos periodicos
+#' 
+#' @param dat [matriz] o historico a partir do qual calcular correlacoes
+#' @param m [numerico] o mes base do qual se deseja calcular correlacoes parciais
+#' @param lags [vetor numerico] indicando lags do mes base com quais calcular a correlacao
+#' @param A12 [booleano] usar ou nao a media dos ultimos 12 meses
+#' 
+#' @return [objeto pacf] uma lista da classe "pacf" contendo
+#'     - autocorrelacoes calculadas
+#'     - numero de observacoes no dado
+#'     - lags das autocorrelacoes
+#'     - matriz e vetor para estimacao dos parametros por Yule-Walker
+
+percacf <- function(serie, medias, m, lag.max = 6, plot = FALSE) {
+
+    serie    <- matrix(serie, ncol = frequency(serie), byrow = TRUE)
+    medias_m <- matrix(medias, ncol = frequency(medias), byrow = TRUE)[-1, m]
+    N <- nrow(serie)
+
+    # Identifica coluna do lag do mes m e intermediarias
+    cols <- m - 1:lag.max
+    cols <- cols + 12 * (cols < 1)
+    cols <- c(m, cols)
+
+    SIGMA <- diag(1, lag.max + 2, lag.max + 2)
+
+    # Preenche o resto da matriz
+    for (i in seq_along(cols)) {
+
+        # Identifica a coluna correspondente ao lag i do mes m
+        col1 <- cols[i]
+
+        # Calcula as correlacoes para preencher a matriz SIGMA
+        for (j in seq_along(cols)[-seq_len(i)]) {
+
+            # Identifica a serie lag
+            col2 <- cols[j]
+
+            # Calcula a covariancia e salva na posicao adequada da matriz
+            vec1 <- serie[(1 + (col1 < col2)):N, col1]
+            vec2 <- serie[1:(N - (col1 < col2)), col2]
+            SIGMA[i, j] <- (N^-1) * sum(vec1 * vec2)
+            SIGMA[j, i] <- SIGMA[i, j]
+        }
+
+        # Calcula covariancia com medias
+        SIGMA[i, ncol(SIGMA)] <- (N^-1) * sum(serie[(1 + (i <= m)):(N - (i > m)), col1] * c(medias_m))
+        SIGMA[nrow(SIGMA), i] <- SIGMA[i, ncol(SIGMA)]
+    }
+
+    # Calcula correlacoes condicionais
+    phi <- double(lag.max)
+    for (lag in seq_len(lag.max)) {
+
+        # Indicies das submatrizes
+        ind11 <- c(1, lag + 1)
+        ind22 <- c((2:lag) * (lag > 1), ncol(SIGMA))
+
+        # Checa se existe algo para condicionar
+        if (all(ind22 == 0)) {
+            phi[lag] <- SIGMA[1, lag + 1] / sqrt(SIGMA[1, 1] * SIGMA[lag + 1, lag + 1])
+            next
+        }
+
+        # Calcula correlacoes condicionais
+        SIG11 <- SIGMA[ind11, ind11]
+        SIG12 <- SIGMA[ind11, ind22, drop = FALSE]
+        SIG22 <- SIGMA[ind22, ind22, drop = FALSE]
+        COND  <- SIG11 - SIG12 %*% solve(SIG22) %*% t(SIG12)
+
+        # Registra resultado
+        phi[lag] <- COND[1, 2] / sqrt(COND[1, 1] * COND[2, 2])
+    }
+
+    phi <- list(phi = phi, n.used = nrow(serie), m = m, lag.max = lag.max, SIGMA = SIGMA)
+    class(phi) <- c("condicional", "modprev_acf")
+
+    # Plota lags pedidos
+    if (plot) print(plot(phi))
+
+    # Retorna vetor de autocorrelacoes condicionadas
+    return(phi)
 }
