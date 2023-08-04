@@ -163,3 +163,29 @@ scale_by_season <- function(serie, est = "n", truncdat = -1, truncpar = -1) {
     attr(out, "desvpads") <- STD
     return(out)
 }
+
+#' Médias Móveis Sazonais
+#' 
+#' Calcula a médias móveis rolantes para uso nos modelos PAR(p) com parcela anual
+#' 
+#' As médias móveis aqui calculadas são realizadas com largura de janela igual ao período de 
+#' sazonalidade da série. As observações na série de média correspondem às médias dos \code{s} meses
+#' anteriores à observação correspondente em \code{serie}
+#' 
+#' @param serie a serie da qual calcular media movel
+#' 
+#' @return serie temporal com mesmos atributos que \code{serie} contendo as médias
+
+medias_sazo <- function(serie) {
+
+    attr0 <- attributes(serie)
+    N <- length(serie)
+
+    out <- double(N)
+    ini <- frequency(serie) + 1
+    for (t in seq(ini, N)) out[t] <- mean(serie[(t - 12):(t - 1)])
+
+    attributes(out) <- attr0
+
+    return(out)
+}
