@@ -159,5 +159,7 @@ scale_by_season <- function(serie, est = "n", truncdat = -1, truncpar = -1) {
     out <- sapply(seq_len(ncol(dat)), function(i) (dat[, i] - MED[i]) / STD[i])
     out <- c(t(out))
     attributes(out) <- attr0
+    attr(out, "medias") <- MED
+    attr(out, "desvpads") <- STD
     return(out)
 }
