@@ -4,7 +4,7 @@
 \alias{fitparp}
 \title{Estima PAR(p)s Individuais}
 \usage{
-fitparp(serie, m, p, A12)
+fitparp(serie, medias, m, p, A12)
 }
 \description{
 Função interna para estimação de cada um dos modelos periódicos pelo método Yule-Walker
