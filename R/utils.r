@@ -146,8 +146,8 @@ scale_by_season <- function(serie, est = "n", truncdat = -1, truncpar = -1) {
     dat <- matrix(as.numeric(serie), ncol = frequency(serie), byrow = TRUE)
 
     fstd <- ifelse(est == "n-1", sd, sd2)
-    STD  <- apply(dat, 2, fstd)
-    MED  <- colMeans(dat)
+    STD  <- apply(dat, 2, fstd, na.rm = TRUE)
+    MED  <- colMeans(dat, na.rm = TRUE)
     if (truncpar > 0) {
         MED <- round(MED, truncpar)
         STD <- round(STD, truncpar)
@@ -181,7 +181,7 @@ medias_sazo <- function(serie) {
     attr0 <- attributes(serie)
     N <- length(serie)
 
-    out <- double(N)
+    out <- rep(NA_real_, N)
     ini <- frequency(serie) + 1
     for (t in seq(ini, N)) out[t] <- mean(serie[(t - 12):(t - 1)])
 
