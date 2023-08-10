@@ -41,25 +41,25 @@ NULL
 #' 
 #' @rdname modelos_parp
 
-parp <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 6, ...) {
+parp <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 11, ...) {
 
     if (s == 1) stop("'serie' nao possui sazonalidade -- informe uma serie sazonal ou um periodo 's'")
     if ((frequency(serie) == 1) && (s > 1)) serie <- ts(serie, frequency = s)
 
-    if (length(p) < s) p <- rep(p, s)
-    if (length(max.p) < s) max.p <- rep(max.p, s)
+    if (length(p) < s) p <- rep(p, lenght.out = s)
+    if (length(max.p) < s) max.p <- rep(max.p, lenght.out = s)
 
     anyauto <- any(p == "auto")
-
-    if (anyauto) {
-        auto_p <- which(p == "auto")
-        auto_p <- sapply(auto_p, idordem, serie = serie, max.p = max.p, A12 = A12)
-        p[p == "auto"] <- auto_p
-    }
 
     medias <- medias_sazo(serie)
     medias <- scale_by_season(medias)
     serie  <- scale_by_season(serie)
+
+    if (anyauto) {
+        auto_p <- which(p == "auto")
+        auto_p <- sapply(auto_p, idordem, serie = serie, medias = medias, max.p = max.p, A12 = A12)
+        p[p == "auto"] <- auto_p
+    }
 
     mods <- lapply(seq_len(s), function(m) fitparp(serie, m, p[m], A12))
 }
@@ -80,22 +80,23 @@ fitparp <- function(serie, m, p, A12) {
 #' 
 #' @param serie serie temporal
 #' @param m o mes para o qual identificar a ordem
-#' @param A12 booleano indicando o uso de parcela A
+#' @param max.p maxima ordem para testar na identificacao
+#' @param A12 booleano indicando o uso de parcela de medias moveis
+#' @param medias opcional, serie temporal de medias moveis. So tem uso caso \code{A12 = TRUE}
 #' 
 #' @return escalar inteiro correspondendo à ordem identificada
 
-idordem <- function(serie, m, max.p, A12) {
-    idfun <- if (A12) idordem_parp_a else idordem_parp
-    p <- idfun(serie, m, max.p)
-    return(p)
-}
-
-idordem_parp <- function(serie, m, max.p) {
-    NA_integer_
-}
-
-idordem_parp_a <- function(serie, m, max.p) {
-    NA_integer_
+idordem <- function(serie, m, max.p, A12 = FALSE, medias = NULL) {
+    if (A12) {
+        phis <- percacf(serie, medias, m, max.p, FALSE)
+    } else {
+        phis <- perpacf(serie, m, max.p, FALSE)
+    }
+    conf <- qnorm((1 + .95) / 2) / sqrt(phis$n.used)
+    ordem <- phis$phi >= conf
+    ordem <- max(which(ordem))
+    if (length(ordem) == 0) ordem <- 1
+    return(ordem)
 }
 
 #' Autocorrelação Parcial/Condicional Periódica
@@ -103,6 +104,7 @@ idordem_parp_a <- function(serie, m, max.p) {
 #' Calcula e opcionalmente plota a ACF parcial ou condicional de uma determinada série sazonal
 #' 
 #' @param serie serie temporal da qual calcular autocorrelações
+#' @param medias serie temporal com mesmas características de \code{serie} contendo as medias moveis
 #' @param m inteiro indicando o periodo da sazonalidade para o qual calcular autocorrelacoes
 #' @param lag.max inteiro indicando o maior lag para calcular a autocorrelação, limitado em 11
 #' @param plot booleano indicando se deve ser feito o plot das autocorrelações calculadas
@@ -163,20 +165,7 @@ perpacf <- function(serie, m, lag.max = 6, plot = FALSE) {
     return(phi)
 }
 
-#' Correlacao condicionada
-#' 
-#' Funcao para calcular correlacao condicionada de processos periodicos
-#' 
-#' @param dat [matriz] o historico a partir do qual calcular correlacoes
-#' @param m [numerico] o mes base do qual se deseja calcular correlacoes parciais
-#' @param lags [vetor numerico] indicando lags do mes base com quais calcular a correlacao
-#' @param A12 [booleano] usar ou nao a media dos ultimos 12 meses
-#' 
-#' @return [objeto pacf] uma lista da classe "pacf" contendo
-#'     - autocorrelacoes calculadas
-#'     - numero de observacoes no dado
-#'     - lags das autocorrelacoes
-#'     - matriz e vetor para estimacao dos parametros por Yule-Walker
+#' @rdname perpacf
 
 percacf <- function(serie, medias, m, lag.max = 6, plot = FALSE) {
 
