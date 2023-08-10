@@ -1,3 +1,11 @@
+# parp
+
+## New features
+
+* Introduz modelos `PAR`, com possibilidade de uso da parcela anual semelhante ao PAR(p)-A
+  * como auxiliares aos modelos `PAR`, funcoes para calculo das autocorrelacoes parciais e 
+    condicionais periodicas, com opcao de visualizacao
+
 # master
 
 ## Bug fixes
