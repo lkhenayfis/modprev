@@ -46,8 +46,10 @@ parp <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 1
     if (s == 1) stop("'serie' nao possui sazonalidade -- informe uma serie sazonal ou um periodo 's'")
     if ((frequency(serie) == 1) && (s > 1)) serie <- ts(serie, frequency = s)
 
-    if (length(p) < s) p <- rep(p, lenght.out = s)
-    if (length(max.p) < s) max.p <- rep(max.p, lenght.out = s)
+    if (length(p) < s) p <- rep(p, length.out = s)
+    if (length(max.p) < s) max.p <- rep(max.p, length.out = s)
+
+    serie0 <- serie
 
     anyauto <- any(p == "auto")
 
@@ -57,11 +59,13 @@ parp <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 1
 
     if (anyauto) {
         auto_p <- which(p == "auto")
-        auto_p <- sapply(auto_p, idordem, serie = serie, medias = medias, max.p = max.p, A12 = A12)
+        auto_p <- sapply(auto_p, function(ap) idordem(serie, ap, max.p[ap], A12, medias))
         p[p == "auto"] <- auto_p
+        p <- as.numeric(p)
     }
 
-    mods <- lapply(seq_len(s), function(m) fitparp(serie, m, p[m], A12))
+    coefs <- lapply(seq_len(s), function(m) fitparp(serie, medias, m, p[m], A12))
+    new_modprevU(list(coefs = coefs), serie0, "parp", attributes(serie)[c("medias", "desvpads")])
 }
 
 # AUXILIARES ---------------------------------------------------------------------------------------
@@ -70,8 +74,20 @@ parp <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 1
 #' 
 #' Função interna para estimação de cada um dos modelos periódicos pelo método Yule-Walker
 
-fitparp <- function(serie, m, p, A12) {
-    NA
+fitparp <- function(serie, medias, m, p, A12) {
+    if (A12) {
+        fit <- percacf(serie, medias, m, p)
+        SIGMA <- fit$SIGMA
+        ind <- c(2:(p + 1), nrow(SIGMA))
+        rho <- SIGMA[ind, 1]
+        RHO <- SIGMA[ind, ind]
+        phi <- solve(RHO, rho)
+    } else {
+        fit <- perpacf(serie, m, p)
+        phi <- solve(fit$RHO[1:p, 1:p], fit$rho[1:p])
+    }
+
+    return(phi)
 }
 
 #' Identificação De Ordem Automática
