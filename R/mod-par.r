@@ -72,6 +72,97 @@ par <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 11
     new_modprevU(list(coefs = coefs), serie0, classe, attrs)
 }
 
+# METODOS ------------------------------------------------------------------------------------------
+
+#' @param object objeto com classes \code{c("par"|"parA", "modprev")} contendo modelo
+#' @param n.ahead número de passos à frente para previsão
+#' @param ... nao possui uso, existe apenas para consistencia com a generica
+#' 
+#' @return \code{predict} retorna uma série temporal multivariada contendo valor esperado e desvio 
+#'     padrão da previsão \code{n.ahead} passos à frente;
+#' 
+#' @rdname modelos_par
+#' 
+#' @export
+
+predict.par <- function(object, n.ahead, ...) {
+
+    mod_atrs <- attr(object, "mod_atrs")
+
+    pred  <- double(n.ahead)
+    coefs <- object$modelo$coefs
+    ords  <- sapply(coefs, length)
+    serie <- scale_by_season(object$serie)
+
+    meds <- mod_atrs$medias
+    sds  <- mod_atrs$desvpads
+
+    inds <- rep(seq_along(coefs), length.out = n.ahead)
+    for (t in seq_len(n.ahead)) {
+        m <- inds[t]
+        coef_m <- coefs[[m]]
+        ord_m  <- ords[m]
+        ultval <- tail(serie, ord_m)
+
+        tp1   <- sum(coef_m * ultval)
+        serie <- c(serie, tp1)
+
+        tp1 <- tp1 * sds[m] + meds[m]
+        pred[t] <- tp1
+    }
+    pred <- cbind("pred" = pred, "sd" = rep(NA_real_, n.ahead))
+
+    tsp <- tsp(object$serie)
+    tsp[1] <- tsp[2] + 1 / tsp[3]
+    pred <- ts(pred, start = tsp[1], frequency = tsp[3])
+
+    return(pred)
+}
+
+#' @rdname modelos_par
+#' 
+#' @export
+
+predict.parA <- function(object, n.ahead, ...) {
+
+    mod_atrs <- attr(object, "mod_atrs")
+
+    serie <- object$serie
+    serie_s <- scale_by_season(serie)
+    freq    <- frequency(serie)
+
+    pred  <- double(n.ahead)
+    coefs <- object$modelo$coefs
+    ords  <- sapply(coefs, length)
+
+    meds <- mod_atrs$medias
+    sds  <- mod_atrs$desvpads
+
+    inds <- rep(seq_along(coefs), length.out = n.ahead)
+    for (t in seq_len(n.ahead)) {
+        m <- inds[t]
+        ord_m  <- ords[m] - 1 # menos a parcela A
+        coef_m <- coefs[[m]]
+
+        ultmed <- (mean(tail(serie, freq)) - meds[m]) / sds[m]
+        ultval <- c(tail(serie_s, ord_m), ultmed)
+
+        tp1 <- sum(coef_m * ultval)
+        serie_s <- c(serie_s, tp1)
+
+        tp1 <- tp1 * sds[m] + meds[m]
+        serie   <- c(serie, tp1)
+        pred[t] <- tp1
+    }
+    pred <- cbind("pred" = pred, "sd" = rep(NA_real_, n.ahead))
+
+    tsp <- tsp(object$serie)
+    tsp[1] <- tsp[2] + 1 / tsp[3]
+    pred <- ts(pred, start = tsp[1], frequency = tsp[3])
+
+    return(pred)
+}
+
 # AUXILIARES ---------------------------------------------------------------------------------------
 
 #' Estima PAR(p)s Individuais
