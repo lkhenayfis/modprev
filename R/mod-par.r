@@ -43,6 +43,8 @@ NULL
 
 parp <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 11, ...) {
 
+    attrs <- list(p = p, A12 = A12, max.p = max.p)
+
     if (s == 1) stop("'serie' nao possui sazonalidade -- informe uma serie sazonal ou um periodo 's'")
     if ((frequency(serie) == 1) && (s > 1)) serie <- ts(serie, frequency = s)
 
@@ -64,8 +66,10 @@ parp <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 1
         p <- as.numeric(p)
     }
 
-    coefs <- lapply(seq_len(s), function(m) fitparp(serie, medias, m, p[m], A12))
-    new_modprevU(list(coefs = coefs), serie0, "parp", attributes(serie)[c("medias", "desvpads")])
+    coefs  <- lapply(seq_len(s), function(m) fitparp(serie, medias, m, p[m], A12))
+    classe <- ifelse(A12, "parpa", "parp")
+    attrs  <- c(attrs, attributes(serie)[c("medias", "desvpads")])
+    new_modprevU(list(coefs = coefs), serie0, classe, attrs)
 }
 
 # AUXILIARES ---------------------------------------------------------------------------------------
@@ -82,9 +86,12 @@ fitparp <- function(serie, medias, m, p, A12) {
         rho <- SIGMA[ind, 1]
         RHO <- SIGMA[ind, ind]
         phi <- solve(RHO, rho)
+        names(phi) <- paste0("phi_", seq_along(phi))
+        names(phi)[length(phi)] <- "phi_A"
     } else {
         fit <- perpacf(serie, m, p)
         phi <- solve(fit$RHO[1:p, 1:p], fit$rho[1:p])
+        names(phi) <- paste0("phi_", seq_along(phi))
     }
 
     return(phi)
