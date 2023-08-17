@@ -2,13 +2,13 @@
 # MODELO PAR(p)[-A]
 ####################################################################################################
 
-#' Modelos \code{parp}
+#' Modelos \code{par}
 #' 
-#' Estimação e métodos de modelos da classe \code{parp}
+#' Estimação e métodos de modelos da classe \code{par}
 #' 
 #' Modelos periódicos autorregressivos, possivelmente com parcela anual, similares aos do GEVAZP
 #' 
-#' @name modelos_parp
+#' @name modelos_par
 NULL
 
 # ESTIMACAO ----------------------------------------------------------------------------------------
@@ -36,12 +36,12 @@ NULL
 #' @param A12 booleano indicando se a parcela anual deve ser incorporada à estimação
 #' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
-#' @return Objeto da classe \code{modprev} e subclasse \code{parp}, uma lista de dois 
+#' @return Objeto da classe \code{modprev} e subclasse \code{par}, uma lista de dois 
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
-#' @rdname modelos_parp
+#' @rdname modelos_par
 
-parp <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 11, ...) {
+par <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 11, ...) {
 
     attrs <- list(p = p, A12 = A12, max.p = max.p)
 
@@ -66,8 +66,8 @@ parp <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 1
         p <- as.numeric(p)
     }
 
-    coefs  <- lapply(seq_len(s), function(m) fitparp(serie, medias, m, p[m], A12))
-    classe <- ifelse(A12, "parpa", "parp")
+    coefs  <- lapply(seq_len(s), function(m) fitpar(serie, medias, m, p[m], A12))
+    classe <- ifelse(A12, "parA", "par")
     attrs  <- c(attrs, attributes(serie)[c("medias", "desvpads")])
     new_modprevU(list(coefs = coefs), serie0, classe, attrs)
 }
@@ -78,7 +78,7 @@ parp <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 1
 #' 
 #' Função interna para estimação de cada um dos modelos periódicos pelo método Yule-Walker
 
-fitparp <- function(serie, medias, m, p, A12) {
+fitpar <- function(serie, medias, m, p, A12) {
     if (A12) {
         fit <- percacf(serie, medias, m, p)
         SIGMA <- fit$SIGMA
