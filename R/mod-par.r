@@ -68,7 +68,8 @@ par <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 11
 
     coefs  <- lapply(seq_len(s), function(m) fitpar(serie, medias, m, p[m], A12))
     classe <- ifelse(A12, "parA", "par")
-    attrs  <- c(attrs, attributes(serie)[c("medias", "desvpads")])
+    attrs  <- c(attrs, list(scale_serie = attributes(serie)[c("medias", "desvpads")]))
+    if (A12) attrs <- c(attrs, list(scale_A12 = attributes(medias)[c("medias", "desvpads")]))
     new_modprevU(list(coefs = coefs), serie0, classe, attrs)
 }
 
@@ -135,8 +136,11 @@ predict.parA <- function(object, n.ahead, ...) {
     coefs <- object$modelo$coefs
     ords  <- sapply(coefs, length)
 
-    meds <- mod_atrs$medias
-    sds  <- mod_atrs$desvpads
+    meds <- mod_atrs$scale_serie$medias
+    sds  <- mod_atrs$scale_serie$desvpads
+
+    meds_a <- mod_atrs$scale_A12$medias
+    sds_a  <- mod_atrs$scale_A12$desvpads
 
     inds <- rep(seq_along(coefs), length.out = n.ahead)
     for (t in seq_len(n.ahead)) {
@@ -144,7 +148,7 @@ predict.parA <- function(object, n.ahead, ...) {
         ord_m  <- ords[m] - 1 # menos a parcela A
         coef_m <- coefs[[m]]
 
-        ultmed <- (mean(tail(serie, freq)) - meds[m]) / sds[m]
+        ultmed <- (mean(tail(serie, freq)) - meds_a[m]) / sds_a[m]
         ultval <- c(tail(serie_s, ord_m), ultmed)
 
         tp1 <- sum(coef_m * ultval)
