@@ -167,6 +167,51 @@ predict.parA <- function(object, n.ahead, ...) {
     return(pred)
 }
 
+#' @param newseries nova série com a qual atualizar o modelo
+#' @param refit booleano indicando se o modelo deve ou não ser reajustado
+#' @param ... para \code{update} nao tem uso, existe apenas para consistência com a genérica
+#' 
+#' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
+#'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
+#' 
+#' @rdname modelos_par
+#' 
+#' @export
+
+update.par <- function(object, newseries, refit = FALSE, ...) {
+    mod_atrs <- attr(object, "mod_atrs")
+    if (refit) {
+        object <- estimamodelo(newseries, "par", periodico = FALSE, p = mod_atrs$p,
+            A12 = mod_atrs$A12, max.p = mod_atrs$max.p)
+    } else {
+        newseries_s <- scale_by_season(newseries)
+        mod_atrs$scale_serie <- attributes(newseries_s)[c("medias", "desvpads")]
+
+        object$serie <- newseries
+        attr(object, "mod_atrs") <- mod_atrs
+    }
+    return(object)
+}
+
+#' @rdname modelos_par
+#' 
+#' @export
+
+update.parA <- function(object, newseries, refit = FALSE, ...) {
+    object <- update.par(object, newseries, refit, ...)
+
+    # sem refit tambem precisa atualizar os parametros de scale da serie media movel
+    if (!refit) {
+        mod_atrs <- attr(object, "mod_atrs")
+        newmedias   <- medias_sazo(newseries)
+        newmedias   <- scale_by_season(newmedias)
+        mod_atrs$scale_A12 <- attributes(newmedias)[c("medias", "desvpads")]
+        attr(object, "mod_atrs") <- mod_atrs
+    }
+
+    return(object)
+}
+
 # AUXILIARES ---------------------------------------------------------------------------------------
 
 #' Estima PAR(p)s Individuais
