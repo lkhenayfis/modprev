@@ -56,6 +56,8 @@ NULL
 
 vpar <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 11, diag = FALSE, ...) {
 
+    attrs <- list(p = p, A12 = A12, max.p = max.p, diag = diag)
+
     M <- ncol(serie)
 
     if (!is.list(p)) p <- lapply(seq_len(M), function(i) p)
@@ -65,7 +67,16 @@ vpar <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 1
     vpar_fun <- ifelse(diag, vpar_diag, vpar_full)
     coefs    <- vpar_fun(serie, s, p, A12, max.p, ...)
 
-    NA
+    scale_serie <- attributes(scale_by_season(serie))[c("medias", "desvpads")]
+    attrs <- c(attrs, list(scale_serie = scale_serie))
+
+    if (any(unlist(A12))) {
+        scale_medias <- attributes(scale_by_season(medias_sazo(serie)))[c("medias", "desvpads")]
+        attrs <- c(attrs, list(scale_A12 = scale_serie))
+    }
+
+    classe <- ifelse(any(unlist(A12)), "vparA", "vpar")
+    new_modprevU(list(coefs = coefs), serie, classe, attrs)
 }
 
 vpar_diag <- function(serie, s, p, A12, max.p, ...) {
