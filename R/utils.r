@@ -140,7 +140,9 @@ cov2 <- function(...) {
 #' 
 #' @return [matriz numerica] matriz contendo dat normalizado
 
-scale_by_season <- function(serie, est = "n", truncdat = -1, truncpar = -1) {
+scale_by_season <- function(serie, est = "n", truncdat = -1, truncpar = -1) UseMethod("scale_by_season")
+
+scale_by_season.ts <- function(serie, est = "n", truncdat = -1, truncpar = -1) {
 
     attr0 <- attributes(serie)
     dat <- matrix(as.numeric(serie), ncol = frequency(serie), byrow = TRUE)
@@ -161,6 +163,23 @@ scale_by_season <- function(serie, est = "n", truncdat = -1, truncpar = -1) {
     attributes(out) <- attr0
     attr(out, "medias") <- MED
     attr(out, "desvpads") <- STD
+    return(out)
+}
+
+scale_by_season.mts <- function(serie, est = "n", truncdat = -1, truncpar = -1) {
+
+    M <- ncol(serie)
+    scales <- lapply(seq_len(M), function(m) scale_by_season(serie[, m], est, truncdat, truncpar))
+    names(scales) <- colnames(serie)
+
+    out <- do.call(cbind, scales)
+
+    medias   <- sapply(scales, attr, "medias")
+    desvpads <- sapply(scales, attr, "desvpads")
+
+    attr(out, "medias") <- medias
+    attr(out, "desvpads") <- desvpads
+
     return(out)
 }
 
