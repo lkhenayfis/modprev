@@ -58,10 +58,33 @@ vpar <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 1
 
     M <- ncol(serie)
 
-    if(!is.list(p)) p <- lapply(seq_len(M), function(i) p)
-    if(!is.list(A12)) A12 <- lapply(seq_len(M), function(i) A12)
-    if(!is.list(max.p)) max.p <- lapply(seq_len(M), function(i) max.p)
+    if (!is.list(p)) p <- lapply(seq_len(M), function(i) p)
+    if (!is.list(A12)) A12 <- lapply(seq_len(M), function(i) A12)
+    if (!is.list(max.p)) max.p <- lapply(seq_len(M), function(i) max.p)
 
     vpar_fun <- ifelse(diag, vpar_diag, vpar_full)
-    vpar_fun(serie, s, p, A12, max.p, ...)
+    coefs    <- vpar_fun(serie, s, p, A12, max.p, ...)
+
+    NA
+}
+
+vpar_diag <- function(serie, s, p, A12, max.p, ...) {
+    M <- ncol(serie)
+    mods <- lapply(seq_len(M), function(m) {
+        par(serie[, m], p = p[[m]], A12 = A12[[m]], max.p = max.p[[m]])$modelo$coefs
+    })
+    mods <- lapply(seq_len(s), function(i) lapply(mods, function(mod) mod[[i]]))
+    mods <- lapply(seq_along(mods), function(i) {
+        mod <- mods[[i]]
+        outer <- lapply(seq_along(mod), function(j) {
+            coef <- mod[[j]]
+            n <- length(coef)
+            inner <- matrix(0, M, n)
+            inner[j, ] <- coef
+            dimnames(inner) <- list(colnames(serie), paste0(colnames(serie)[j], "_", seq_len(n)))
+            inner
+        })
+        do.call(cbind, outer)
+    })
+    return(mods)
 }
