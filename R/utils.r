@@ -195,7 +195,9 @@ scale_by_season.mts <- function(serie, est = "n", truncdat = -1, truncpar = -1) 
 #' 
 #' @return serie temporal com mesmos atributos que \code{serie} contendo as médias
 
-medias_sazo <- function(serie) {
+medias_sazo <- function(serie) UseMethod("medias_sazo")
+
+medias_sazo.ts <- function(serie) {
 
     attr0 <- attributes(serie)
     N <- length(serie)
@@ -207,4 +209,13 @@ medias_sazo <- function(serie) {
     attributes(out) <- attr0
 
     return(out)
+}
+
+medias_sazo.mts <- function(serie) {
+    M <- ncol(serie)
+    medias <- lapply(seq_len(M), function(m) medias_sazo(serie[, m]))
+    names(medias) <- colnames(serie)
+
+    medias <- do.call(cbind, medias)
+    return(medias)
 }
