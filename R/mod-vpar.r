@@ -135,3 +135,33 @@ build_reg_mat <- function(serie, m, max.p) {
 
     return(list(ymat, xmat))
 }
+
+prep_msglasso <- function(M, max.p) {
+
+    P <- sum(max.p) # dimensao da matriz de variaveis explicativas
+    Q <- M          # dimensao da matriz de variaveis dependentes
+    G <- M          # numero de grupos de VARIAVEIS EXPLICATIVAS
+    R <- 1          # numero de grupos de VARIAVEIS DEPENDENTES
+
+    gmax <- 1          # maximo numero de grupos que uma mesma variavel faz parte
+    cmax <- max(max.p) # maximo numero de variaveis num grupo
+
+    # variaveis nas quais comecao e terminam cada grupo de regressores
+    refs <- cumsum(c(1, max.p)) - 1
+    xgrpstart <- refs[-(M + 1)]
+    xgrpend   <- refs[-1] - 1
+
+    # matrizes auxiliares do pacote
+    PQgrps <- FindingPQGrps(P, Q, G, R, gmax, xgrpstart, xgrpend, 0, M - 1)$PQgrps
+    GRgrps <- FindingGRGrps(P, Q, G, R, cmax, xgrpstart, xgrpend, 0, M - 1)$GRgrps
+    grpWTs <- Cal_grpWTs(P, Q, G, R, gmax, PQgrps)$grpWTs
+
+    Pen_L <- matrix(rep(1, P * Q), P, Q, byrow = TRUE)
+    Pen_G <- matrix(rep(1, G * R), G, R, byrow = TRUE)
+    grp_Norm0 <- matrix(rep(0, G * R), nrow = G, byrow = TRUE)
+
+    out <- list(PQgrps = PQgrps, GRgrps = GRgrps, grpWTs = grpWTs, Pen_L = Pen_L, Pen_G = Pen_G,
+        grp_Norm0 = grp_Norm0)
+
+    return(out)
+}
