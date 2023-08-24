@@ -102,6 +102,23 @@ vpar_diag <- function(serie, s, p, A12, max.p, ...) {
     return(mods)
 }
 
+vpar_full <- function(serie, s, p, A12, max.p, ...) {
+
+    M <- ncol(serie)
+    sysmats <- lapply(seq_len(s), function(m) {
+        lmats <- lapply(seq_len(M), function(i) build_reg_mat(serie[, i], m, max.p[i]))
+        ymat <- Reduce(cbind, lapply(lmats, "[[", 1))
+        xmat <- Reduce(cbind, lapply(lmats, "[[", 2))
+
+        fulllin <- complete.cases(xmat) & complete.cases(ymat)
+        ymat <- scale(ymat[fulllin, ])
+        xmat <- scale(xmat[fulllin, ])
+
+        list(ymat, xmat)
+    })
+}
+
+
 # AUXILIARES ---------------------------------------------------------------------------------------
 
 build_reg_mat <- function(serie, m, max.p) {
