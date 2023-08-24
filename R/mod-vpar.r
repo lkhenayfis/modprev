@@ -101,3 +101,20 @@ vpar_diag <- function(serie, s, p, A12, max.p, ...) {
     })
     return(mods)
 }
+
+# AUXILIARES ---------------------------------------------------------------------------------------
+
+build_reg_mat <- function(serie, m, max.p) {
+    N <- length(serie)
+    s <- frequency(serie)
+
+    serie <- shift(c(serie), s - m)
+    serie[seq_len(s - m)] <- NA
+
+    sysmat <- matrix(serie, ncol = s, byrow = TRUE)
+
+    ymat <- sysmat[, s, drop = FALSE]
+    xmat <- sysmat[, (s - 1):(s - max.p), drop = FALSE]
+
+    return(list(ymat, xmat))
+}
