@@ -58,10 +58,13 @@ vpar <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 1
 
     attrs <- list(p = p, A12 = A12, max.p = max.p, diag = diag)
 
-    M <- ncol(serie)
+    if (s == 1) stop("'serie' nao possui sazonalidade -- informe uma serie sazonal ou um periodo 's'")
+    if ((frequency(serie) == 1) && (s > 1)) serie <- ts(serie, frequency = s)
 
     if (!is.list(p)) p <- lapply(seq_len(M), function(i) p)
     if (!is.list(max.p)) max.p <- sapply(seq_len(M), function(i) max.p)
+
+    M <- ncol(serie)
 
     vpar_fun <- ifelse(diag, vpar_diag, vpar_full)
     coefs    <- vpar_fun(serie, s, p, A12, max.p, ...)
