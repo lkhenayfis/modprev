@@ -104,7 +104,9 @@ vpar_diag <- function(serie, s, p, A12, max.p, ...) {
 
 vpar_full <- function(serie, s, p, A12, max.p, ...) {
 
-    M <- ncol(serie)
+    M    <- ncol(serie)
+    prep <- prep_msglasso(M, max.p)
+
     sysmats <- lapply(seq_len(s), function(m) {
         lmats <- lapply(seq_len(M), function(i) build_reg_mat(serie[, i], m, max.p[i]))
         ymat <- Reduce(cbind, lapply(lmats, "[[", 1))
@@ -116,8 +118,34 @@ vpar_full <- function(serie, s, p, A12, max.p, ...) {
 
         list(ymat, xmat)
     })
-}
 
+    lambda1s <- exp(seq(log(.001), log(1), length.out = 20))
+    lambdaGs <- exp(seq(log(.001), log(1), length.out = 20))
+
+    ncores <- max(length(sysmats), detectCores() - 2)
+    clst <- parallel::makeCluster(ncores, "FORK")
+
+    CVs <- parLapply(clst, sysmats, function(sms) {
+        Y  <- sms[[1]]
+        X  <- sms[[2]]
+        cv <- with(prep, MSGLasso.cv(X, Y, grpWTs, Pen_L, Pen_G, PQgrps, GRgrps, lambda1s, lambdaGs))
+        lambda1 <- cv$lams.c[which.min(as.vector(cv$rss.cv))][[1]]$lam1
+        lambdaG <- cv$lams.c[which.min(as.vector(cv$rss.cv))][[1]]$lam3
+        return(list(lambda1, lambdaG))
+    })
+
+    mods <- parLapply(clst, seq_along(sysmats), function(i) {
+        lam1 <- CVs[[i]][1]
+        lamG <- CVs[[i]][2]
+        Y    <- sysmats[[i]][[1]]
+        X    <- sysmats[[i]][[2]]
+        with(prep, MSGLasso(X, Y, grpWTs, Pen_L, Pen_G, PQgrps, GRgrps, grp_Norm0, lam1, lamG))$Beta
+    })
+
+    stopCluster(clst)
+
+    return(mods)
+}
 
 # AUXILIARES ---------------------------------------------------------------------------------------
 
