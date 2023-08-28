@@ -175,18 +175,18 @@ build_reg_mat <- function(serie, m, max.p, medias = NULL) {
     return(list(ymat, xmat))
 }
 
-prep_msglasso <- function(M, max.p) {
+prep_msglasso <- function(M, max.p, A12) {
 
-    P <- sum(max.p) # dimensao da matriz de variaveis explicativas
-    Q <- M          # dimensao da matriz de variaveis dependentes
-    G <- M          # numero de grupos de VARIAVEIS EXPLICATIVAS
-    R <- 1          # numero de grupos de VARIAVEIS DEPENDENTES
+    P <- sum(max.p) + A12 * M # dimensao da matriz de variaveis explicativas
+    Q <- M                    # dimensao da matriz de variaveis dependentes
+    G <- M                    # numero de grupos de VARIAVEIS EXPLICATIVAS
+    R <- 1                    # numero de grupos de VARIAVEIS DEPENDENTES
 
-    gmax <- 1          # maximo numero de grupos que uma mesma variavel faz parte
-    cmax <- max(max.p) # maximo numero de variaveis num grupo
+    gmax <- 1                # maximo numero de grupos que uma mesma variavel faz parte
+    cmax <- max(max.p) + A12 # maximo numero de variaveis num grupo
 
-    # variaveis nas quais comecao e terminam cada grupo de regressores
-    refs <- cumsum(c(1, max.p)) - 1
+    # variaveis nas quais comecam e terminam cada grupo de regressores
+    refs <- cumsum(c(1, max.p) + c(0, rep(A12, M))) - 1
     xgrpstart <- refs[-(M + 1)]
     xgrpend   <- refs[-1] - 1
 
