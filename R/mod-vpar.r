@@ -61,10 +61,10 @@ vpar <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 1
     if (s == 1) stop("'serie' nao possui sazonalidade -- informe uma serie sazonal ou um periodo 's'")
     if ((frequency(serie) == 1) && (s > 1)) serie <- ts(serie, frequency = s)
 
+    M <- ncol(serie)
+
     if (!is.list(p)) p <- lapply(seq_len(M), function(i) p)
     if (!is.list(max.p)) max.p <- sapply(seq_len(M), function(i) max.p)
-
-    M <- ncol(serie)
 
     vpar_fun <- ifelse(diag, vpar_diag, vpar_full)
     coefs    <- vpar_fun(serie, s, p, A12, max.p, ...)
@@ -105,17 +105,15 @@ vpar_diag <- function(serie, s, p, A12, max.p, ...) {
 vpar_full <- function(serie, s, p, A12, max.p, ...) {
 
     M    <- ncol(serie)
-    prep <- prep_msglasso(M, max.p)
+    prep <- prep_msglasso(M, max.p, A12)
+
+    serie  <- scale_by_season(serie)
+    medias <- if (A12) scale_by_season(medias_sazo(serie)) else NULL
 
     sysmats <- lapply(seq_len(s), function(m) {
-        lmats <- lapply(seq_len(M), function(i) build_reg_mat(serie[, i], m, max.p[i]))
+        lmats <- lapply(seq_len(M), function(i) build_reg_mat(serie[, i], m, max.p[i], medias[, i]))
         ymat <- Reduce(cbind, lapply(lmats, "[[", 1))
         xmat <- Reduce(cbind, lapply(lmats, "[[", 2))
-
-        fulllin <- complete.cases(xmat) & complete.cases(ymat)
-        ymat <- scale(ymat[fulllin, ])
-        xmat <- scale(xmat[fulllin, ])
-
         list(ymat, xmat)
     })
 
