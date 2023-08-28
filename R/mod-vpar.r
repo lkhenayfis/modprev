@@ -142,6 +142,8 @@ vpar_full <- function(serie, s, p, A12, max.p, ...) {
 
     stopCluster(clst)
 
+    mods <- lapply(mods, t)
+
     return(mods)
 }
 
