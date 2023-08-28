@@ -257,8 +257,7 @@ idordem <- function(serie, m, max.p, A12 = FALSE, medias = NULL) {
     }
     conf <- qnorm((1 + .95) / 2) / sqrt(phis$n.used)
     ordem <- phis$phi >= conf
-    ordem <- max(which(ordem))
-    if (length(ordem) == 0) ordem <- 1
+    ordem <- ifelse(any(ordem), max(which(ordem)), 1)
     return(ordem)
 }
 
