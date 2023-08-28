@@ -149,7 +149,7 @@ vpar_full <- function(serie, s, p, A12, max.p, ...) {
 
 # AUXILIARES ---------------------------------------------------------------------------------------
 
-build_reg_mat <- function(serie, m, max.p) {
+build_reg_mat <- function(serie, m, max.p, medias = NULL) {
     N <- length(serie)
     s <- frequency(serie)
 
@@ -160,6 +160,17 @@ build_reg_mat <- function(serie, m, max.p) {
 
     ymat <- sysmat[, s, drop = FALSE]
     xmat <- sysmat[, (s - 1):(s - max.p), drop = FALSE]
+
+    if (!is.null(medias)) {
+        valmes <- rep(FALSE, s)
+        valmes[m] <- TRUE
+        medias <- medias[valmes]
+        xmat <- unname(cbind(xmat, medias))
+    }
+
+    fulllin <- complete.cases(xmat) & complete.cases(ymat)
+    ymat <- scale(ymat[fulllin, ])
+    xmat <- scale(xmat[fulllin, ])
 
     return(list(ymat, xmat))
 }
