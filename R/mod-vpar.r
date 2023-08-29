@@ -141,6 +141,18 @@ vpar_full <- function(serie, s, p, A12, max.p, ...) {
 
 # METODOS ------------------------------------------------------------------------------------------
 
+#' @param object objeto com classes \code{c("vpar"|"vparA", "modprev")} contendo modelo
+#' @param n.ahead número de passos à frente para previsão
+#' @param ... nao possui uso, existe apenas para consistencia com a generica
+#' 
+#' @return \code{predict} retorna uma lista de séries temporais multivariadas contendo valor
+#'     esperado e desvio padrão da previsão \code{n.ahead} passos à frente;
+#'     
+#' 
+#' @rdname modelos_vpar
+#' 
+#' @export
+
 predict.vpar <- function(object, n.ahead, ...) {
 
     mod_atrs <- attr(object, "mod_atrs")
@@ -178,6 +190,10 @@ predict.vpar <- function(object, n.ahead, ...) {
 
     return(pred)
 }
+
+#' @rdname modelos_vpar
+#' 
+#' @export
 
 predict.vparA <- function(object, n.ahead, ...) {
 

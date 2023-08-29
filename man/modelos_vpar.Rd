@@ -3,6 +3,8 @@
 \name{modelos_vpar}
 \alias{modelos_vpar}
 \alias{vpar}
+\alias{predict.vpar}
+\alias{predict.vparA}
 \title{Modelos \code{vpar}}
 \usage{
 vpar(
@@ -14,6 +16,10 @@ vpar(
   diag = FALSE,
   ...
 )
+
+\method{predict}{vpar}(object, n.ahead, ...)
+
+\method{predict}{vparA}(object, n.ahead, ...)
 }
 \arguments{
 \item{serie}{série para ajustar}
@@ -31,10 +37,17 @@ identificação automática; será reciclado se necessário. Ignorado se \code{p
 \item{diag}{booleano indicando o tipo de modelo a ser ajustado. Ver Detalhes}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
+
+\item{object}{objeto com classes \code{c("vpar"|"vparA", "modprev")} contendo modelo}
+
+\item{n.ahead}{número de passos à frente para previsão}
 }
 \value{
 Objeto da classe \code{modprev} e subclasse \code{vpar}, uma lista de dois
 elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
+
+\code{predict} retorna uma lista de séries temporais multivariadas contendo valor
+esperado e desvio padrão da previsão \code{n.ahead} passos à frente;
 }
 \description{
 Estimação e métodos de modelos da classe \code{vpar}
