@@ -82,22 +82,25 @@ vpar <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 1
 }
 
 vpar_diag <- function(serie, s, p, A12, max.p, ...) {
+
     M <- ncol(serie)
     mods <- lapply(seq_len(M), function(m) {
         par(serie[, m], p = p[[m]], A12 = A12, max.p = max.p[m])$modelo$coefs
     })
     mods <- lapply(seq_len(s), function(i) lapply(mods, function(mod) mod[[i]]))
+
     mods <- lapply(seq_along(mods), function(i) {
         mod <- mods[[i]]
-        outer <- lapply(seq_along(mod), function(j) {
-            coef <- mod[[j]]
-            n <- length(coef)
-            inner <- matrix(0, M, n)
-            inner[j, ] <- coef
-            dimnames(inner) <- list(colnames(serie), paste0(colnames(serie)[j], "_", seq_len(n)))
-            inner
+        maxord <- max(sapply(mod, length))
+        mod <- lapply(mod, function(x) c(x, rep(0, maxord - length(x))))
+        mod <- lapply(seq_len(maxord), function(p) {
+            inner <- sapply(mod, "[[", p)
+            diag(inner)
         })
-        do.call(cbind, outer)
+        mod <- do.call(cbind, mod)
+        rownames(mod) <- colnames(serie)
+        colnames(mod) <- c(outer(colnames(serie), seq_len(maxord), function(a, b) paste0(a, "_", b)))
+        return(mod)
     })
     return(mods)
 }
