@@ -89,19 +89,8 @@ vpar_diag <- function(serie, s, p, A12, max.p, ...) {
     })
     mods <- lapply(seq_len(s), function(i) lapply(mods, function(mod) mod[[i]]))
 
-    mods <- lapply(seq_along(mods), function(i) {
-        mod <- mods[[i]]
-        maxord <- max(sapply(mod, length))
-        mod <- lapply(mod, function(x) c(x, rep(0, maxord - length(x))))
-        mod <- lapply(seq_len(maxord), function(p) {
-            inner <- sapply(mod, "[[", p)
-            diag(inner)
-        })
-        mod <- do.call(cbind, mod)
-        rownames(mod) <- colnames(serie)
-        colnames(mod) <- c(outer(colnames(serie), seq_len(maxord), function(a, b) paste0(a, "_", b)))
-        return(mod)
-    })
+    mods <- parsecoef_diag(mods, A12, serie)
+
     return(mods)
 }
 
@@ -145,20 +134,7 @@ vpar_full <- function(serie, s, p, A12, max.p, ...) {
 
     stopCluster(clst)
 
-    sup.p <- max(max.p)
-    refs  <- cumsum(c(1, max.p) + c(0, rep(A12, M)))
-    start <- refs[-(M + 1)]
-    end   <- refs[-1] - 1
-    mods <- lapply(mods, function(mod) {
-        mod <- t(mod)
-        mod <- lapply(seq_len(M), function(i) mod[, start[i]:end[i]])
-        mod <- lapply(mod, function(mat) cbind(mat, matrix(0, M, sup.p - ncol(mat))))
-        mod <- lapply(seq_len(sup.p), function(i) sapply(mod, function(mat) mat[, i]))
-        mod <- do.call(cbind, mod)
-        rownames(mod) <- colnames(serie)
-        colnames(mod) <- c(outer(colnames(serie), seq_len(sup.p), function(a, b) paste0(a, "_", b)))
-        mod
-    })
+    mods <- parsecoef_full(mods, max.p, A12, serie)
 
     return(mods)
 }
@@ -219,4 +195,48 @@ prep_msglasso <- function(M, max.p, A12) {
         grp_Norm0 = grp_Norm0)
 
     return(out)
+}
+
+parsecoef_diag <- function(mods, A12, serie) {
+    mods <- lapply(mods, function(mod) {
+        sup.p <- max(sapply(mod, length)) - A12
+        ords <- sapply(mod, length) - A12
+        mod <- lapply(seq_along(mod), function(j) {
+            x <- mod[[j]][seq_len(ords[j])]
+            x <- c(x, rep(0, sup.p - length(x)))
+            if (A12) c(x, tail(mod[[j]], 1)) else x
+        })
+        mod <- lapply(seq_len(sup.p + A12), function(p) {
+            inner <- sapply(mod, "[[", p)
+            diag(inner)
+        })
+        mod <- do.call(cbind, mod)
+        rownames(mod) <- colnames(serie)
+        cnames <- c(seq_len(sup.p), ifelse(A12, "A", NA))
+        cnames <- cnames[!is.na(cnames)]
+        colnames(mod) <- c(outer(colnames(serie), cnames, function(a, b) paste0(a, "_", b)))
+        return(mod)
+    })
+    return(mods)
+}
+
+parsecoef_full <- function(mods, max.p, A12, serie) {
+    M <- ncol(serie)
+    sup.p <- max(max.p) + A12
+    refs  <- cumsum(c(1, max.p + A12))
+    start <- refs[-(M + 1)]
+    end   <- refs[-1] - 1
+    mods <- lapply(mods, function(mod) {
+        mod <- t(mod)
+        mod <- lapply(seq_len(M), function(i) mod[, start[i]:end[i]])
+        mod <- lapply(mod, function(mat) cbind(mat, matrix(0, M, sup.p - ncol(mat))))
+        mod <- lapply(seq_len(sup.p), function(i) sapply(mod, function(mat) mat[, i]))
+        mod <- do.call(cbind, mod)
+        rownames(mod) <- colnames(serie)
+        cnames <- c(seq_len(sup.p - A12), ifelse(A12, "A", NA))
+        cnames <- cnames[!is.na(cnames)]
+        colnames(mod) <- c(outer(colnames(serie), cnames, function(a, b) paste0(a, "_", b)))
+        mod
+    })
+    return(mods)
 }
