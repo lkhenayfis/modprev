@@ -20,7 +20,8 @@ Depends:
 Imports: 
     forecast (>= 8.12),
     KFAS (>= 1.4.4),
-    quantreg (>= 5.9)
+    quantreg (>= 5.9),
+    MSGLasso (>= 2.0)
 Suggests: 
     knitr,
     rmarkdown,
@@ -28,6 +29,8 @@ Suggests:
 VignetteBuilder: 
     knitr,
     rmarkdown
+Remotes:
+    lkhenayfis/MSGLasso
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
