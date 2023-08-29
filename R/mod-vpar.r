@@ -145,7 +145,20 @@ vpar_full <- function(serie, s, p, A12, max.p, ...) {
 
     stopCluster(clst)
 
-    mods <- lapply(mods, t)
+    sup.p <- max(max.p)
+    refs  <- cumsum(c(1, max.p) + c(0, rep(A12, M)))
+    start <- refs[-(M + 1)]
+    end   <- refs[-1] - 1
+    mods <- lapply(mods, function(mod) {
+        mod <- t(mod)
+        mod <- lapply(seq_len(M), function(i) mod[, start[i]:end[i]])
+        mod <- lapply(mod, function(mat) cbind(mat, matrix(0, M, sup.p - ncol(mat))))
+        mod <- lapply(seq_len(sup.p), function(i) sapply(mod, function(mat) mat[, i]))
+        mod <- do.call(cbind, mod)
+        rownames(mod) <- colnames(serie)
+        colnames(mod) <- c(outer(colnames(serie), seq_len(sup.p), function(a, b) paste0(a, "_", b)))
+        mod
+    })
 
     return(mods)
 }
