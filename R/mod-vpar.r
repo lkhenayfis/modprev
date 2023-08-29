@@ -139,6 +139,46 @@ vpar_full <- function(serie, s, p, A12, max.p, ...) {
     return(mods)
 }
 
+# METODOS ------------------------------------------------------------------------------------------
+
+predict.vpar <- function(object, n.ahead, ...) {
+
+    mod_atrs <- attr(object, "mod_atrs")
+
+    M <- ncol(object$serie)
+
+    pred  <- matrix(0, n.ahead, M, dimnames = list(NULL, colnames(serie)))
+    coefs <- object$modelo$coefs
+    ords  <- sapply(coefs, ncol) / M
+    serie <- scale_by_season(object$serie)
+
+    meds <- mod_atrs$scale_serie$medias
+    sds  <- mod_atrs$scale_serie$desvpads
+
+    inds <- rep(seq_along(coefs), length.out = n.ahead)
+    for (t in seq_len(n.ahead)) {
+        m <- inds[t]
+        coef_m <- coefs[[m]]
+        ord_m  <- ords[m]
+
+        ultval <- tail(serie, ord_m)
+        ultval <- matrix(t(ultval[ord_m:1, ]))
+
+        tp1   <- coef_m %*% ultval
+        serie <- rbind(serie, t(tp1))
+
+        tp1 <- tp1 * sds[m, ] + meds[m, ]
+        pred[t, ] <- t(tp1)
+    }
+    pred <- list("pred" = pred, "sd" = matrix(NA_real_, n.ahead, M, dimnames = list(NULL, colnames(serie))))
+
+    tsp <- tsp(object$serie)
+    tsp[1] <- tsp[2] + 1 / tsp[3]
+    pred <- lapply(pred, function(m) ts(m, start = tsp[1], frequency = tsp[3]))
+
+    return(pred)
+}
+
 # AUXILIARES ---------------------------------------------------------------------------------------
 
 build_reg_mat <- function(serie, m, max.p, medias = NULL) {
