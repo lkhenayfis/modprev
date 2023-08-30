@@ -144,6 +144,7 @@ scale_by_season <- function(serie, est = "n", truncdat = -1, truncpar = -1) {
 
     attr0 <- attributes(serie)
     dat <- as.padmatrix(serie)
+    deltas <- attr(dat, "deltas")
 
     fstd <- ifelse(est == "n-1", sd, sd2)
     STD  <- apply(dat, 2, fstd, na.rm = TRUE)
@@ -158,7 +159,7 @@ scale_by_season <- function(serie, est = "n", truncdat = -1, truncpar = -1) {
 
     out <- sapply(seq_len(ncol(dat)), function(i) (dat[, i] - MED[i]) / STD[i])
     out <- c(t(out))
-    out <- out[!is.na(out)]
+    out <- out[(deltas[1] + 1):(length(out) - deltas[2])]
     attributes(out) <- attr0
     attr(out, "medias") <- MED
     attr(out, "desvpads") <- STD

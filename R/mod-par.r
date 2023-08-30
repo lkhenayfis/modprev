@@ -420,8 +420,9 @@ as.padmatrix <- function(serie) {
     padini <- rep(NA, deltaini)
     padfim <- rep(NA, deltafim)
 
-    serie <- ts(c(padini, serie, padfim), start = tsp[1] - (deltaini) / tsp[3], freq = tsp[3])
-    serie <- matrix(serie, ncol = frequency(serie), byrow = TRUE)
+    out <- ts(c(padini, serie, padfim), start = tsp[1] - (deltaini) / tsp[3], freq = tsp[3])
+    out <- matrix(out, ncol = frequency(serie), byrow = TRUE)
+    attr(out, "deltas") <- c(deltaini, deltafim)
 
-    return(serie)
+    return(out)
 }
