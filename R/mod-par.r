@@ -48,8 +48,13 @@ par <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 11
     if (s == 1) stop("'serie' nao possui sazonalidade -- informe uma serie sazonal ou um periodo 's'")
     if ((frequency(serie) == 1) && (s > 1)) serie <- ts(serie, frequency = s)
 
+    order_m <- as.numeric(head(cycle(serie), s))
+
     if (length(p) < s) p <- rep(p, length.out = s)
     if (length(max.p) < s) max.p <- rep(max.p, length.out = s)
+
+    p     <- p[order_m]
+    max.p <- max.p[order_m]
 
     serie0 <- serie
 
@@ -61,7 +66,7 @@ par <- function(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 11
 
     if (anyauto) {
         auto_p <- which(p == "auto")
-        auto_p <- sapply(auto_p, function(ap) idordem(serie, ap, max.p[ap], A12, medias))
+        auto_p <- sapply(auto_p, function(ap) idordem(serie, order_m[ap], max.p[ap], A12, medias))
         p[p == "auto"] <- auto_p
         p <- as.numeric(p)
     }
@@ -273,7 +278,7 @@ idordem <- function(serie, m, max.p, A12 = FALSE, medias = NULL) {
 
 perpacf <- function(serie, m, lag.max = 6, plot = FALSE) {
 
-    serie <- matrix(serie, ncol = frequency(serie), byrow = TRUE)
+    serie <- as.padmatrix(serie)
 
     N   <- nrow(serie)
     RHO <- diag(1, lag.max, lag.max)
@@ -291,12 +296,14 @@ perpacf <- function(serie, m, lag.max = 6, plot = FALSE) {
             if (col1 < col2) {
                 vec1 <- serie[2:N, col1]
                 vec2 <- serie[1:(N - 1), col2]
-                RHO[i, j] <- 1 / N * sum(vec1 * vec2) / (sd2(serie[, col1]) * sd2(serie[, col2]))
+                RHO[i, j] <- 1 / N * sum(vec1 * vec2, na.rm = TRUE) /
+                    (sd2(serie[, col1], na.rm = TRUE) * sd2(serie[, col2], na.rm = TRUE))
                 RHO[j, i] <- RHO[i, j]
             } else {
                 vec1 <- serie[, col1]
                 vec2 <- serie[, col2]
-                RHO[i, j] <- mean(vec1 * vec2) / (sd2(vec1) * sd2(vec2))
+                RHO[i, j] <- mean(vec1 * vec2, na.rm = TRUE) /
+                    (sd2(vec1, na.rm = TRUE) * sd2(vec2, na.rm = TRUE))
                 RHO[j, i] <- RHO[i, j]
             }
         }
@@ -310,11 +317,13 @@ perpacf <- function(serie, m, lag.max = 6, plot = FALSE) {
         if (m < col2) {
             vec1 <- serie[2:N, m]
             vec2 <- serie[1:(N - 1), col2]
-            rho[i] <- 1 / N * sum(vec1 * vec2) / (sd2(serie[, m]) * sd2(serie[, col2]))
+            rho[i] <- 1 / N * sum(vec1 * vec2, na.rm = TRUE) /
+                (sd2(serie[, m], na.rm = TRUE) * sd2(serie[, col2], na.rm = TRUE))
         } else {
             vec1 <- serie[, m]
             vec2 <- serie[, col2]
-            rho[i] <- mean(vec1 * vec2) / (sd2(vec1) * sd2(vec2))
+            rho[i] <- mean(vec1 * vec2, na.rm = TRUE) /
+                (sd2(vec1, na.rm = TRUE) * sd2(vec2, na.rm = TRUE))
         }
     }
 
