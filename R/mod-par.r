@@ -340,8 +340,8 @@ perpacf <- function(serie, m, lag.max = 6, plot = FALSE) {
 
 percacf <- function(serie, medias, m, lag.max = 6, plot = FALSE) {
 
-    serie    <- matrix(serie, ncol = frequency(serie), byrow = TRUE)
-    medias_m <- matrix(medias, ncol = frequency(medias), byrow = TRUE)[-1, m]
+    serie    <- as.padmatrix(serie)
+    medias_m <- as.padmatrix(medias)[-1, m]
     N <- nrow(serie)
 
     # Identifica coluna do lag do mes m e intermediarias
@@ -366,12 +366,12 @@ percacf <- function(serie, medias, m, lag.max = 6, plot = FALSE) {
             # Calcula a covariancia e salva na posicao adequada da matriz
             vec1 <- serie[(1 + (col1 < col2)):N, col1]
             vec2 <- serie[1:(N - (col1 < col2)), col2]
-            SIGMA[i, j] <- (N^-1) * sum(vec1 * vec2)
+            SIGMA[i, j] <- (N^-1) * sum(vec1 * vec2, na.rm = TRUE)
             SIGMA[j, i] <- SIGMA[i, j]
         }
 
         # Calcula covariancia com medias
-        SIGMA[i, ncol(SIGMA)] <- (N^-1) * sum(serie[(1 + (i <= m)):(N - (i > m)), col1] * c(medias_m))
+        SIGMA[i, ncol(SIGMA)] <- (N^-1) * sum(serie[(1 + (i <= m)):(N - (i > m)), col1] * c(medias_m), na.rm = TRUE)
         SIGMA[nrow(SIGMA), i] <- SIGMA[i, ncol(SIGMA)]
     }
 
@@ -385,7 +385,7 @@ percacf <- function(serie, medias, m, lag.max = 6, plot = FALSE) {
 
         # Checa se existe algo para condicionar
         if (all(ind22 == 0)) {
-            phi[lag] <- SIGMA[1, lag + 1] / sqrt(SIGMA[1, 1] * SIGMA[lag + 1, lag + 1])
+            phi[lag] <- SIGMA[1, lag + 1] / sqrt(SIGMA[1, 1] * SIGMA[lag + 1, lag + 1], na.rm = TRUE)
             next
         }
 
