@@ -399,3 +399,20 @@ percacf <- function(serie, medias, m, lag.max = 6, plot = FALSE) {
     # Retorna vetor de autocorrelacoes condicionadas
     return(phi)
 }
+
+as.padmatrix <- function(serie) {
+    tsp   <- tsp(serie)
+    freq  <- frequency(serie)
+    season <- cycle(serie)
+
+    deltaini <- head(season, 1) - 1
+    deltafim <- freq - tail(season, 1)
+
+    padini <- rep(NA, deltaini)
+    padfim <- rep(NA, deltafim)
+
+    serie <- ts(c(padini, serie, padfim), start = tsp[1] - (deltaini) / tsp[3], freq = tsp[3])
+    serie <- matrix(serie, ncol = frequency(serie), byrow = TRUE)
+
+    return(serie)
+}
