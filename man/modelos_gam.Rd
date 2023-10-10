@@ -3,9 +3,15 @@
 \name{modelos_gam}
 \alias{modelos_gam}
 \alias{GAM}
+\alias{predict.GAM}
+\alias{update.GAM}
 \title{Modelos \code{gam}}
 \usage{
 GAM(serie, regdata, formula, pesos = rep(1, length(serie)), ...)
+
+\method{predict}{GAM}(object, newdata, n.ahead, ...)
+
+\method{update}{GAM}(object, newseries, newregdata, refit = FALSE, ...)
 }
 \arguments{
 \item{serie}{série para ajustar}
@@ -19,10 +25,29 @@ GAM(serie, regdata, formula, pesos = rep(1, length(serie)), ...)
 internamente}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
+
+\item{object}{objeto com classes \code{c("GAM", "modprev")} contendo modelo}
+
+\item{newdata}{\code{data.frame}-like contendo variéveis explicativas fora da amostra}
+
+\item{n.ahead}{número de passos à frente para previsão. Este argumento não é necessario, caso não
+seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}}
+
+\item{newseries}{nova série com a qual atualizar o modelo}
+
+\item{newregdata}{\code{data.frame}-like contendo variáveis explicativas na nova amostra}
+
+\item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
 }
 \value{
-Objeto da classe \code{modprev} e subclasse \code{gam}, uma lista de dois
+Objeto da classe \code{modprev} e subclasse \code{GAM}, uma lista de dois
 elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
+
+\code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
+previsão \code{n.ahead} passos à frente;
+
+\code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado.
+Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
 }
 \description{
 Estimação e métodos de modelos da classe \code{gam}
