@@ -1,3 +1,9 @@
+# gam
+
+## New features
+
+* Adiciona Modelos Aditivos Generalizados através do tipo de modelo `GAM` 
+
 # master
 
 ## Bug fixes
