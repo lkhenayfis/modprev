@@ -31,6 +31,7 @@ através de \code{serie} é selecionado através do argumento \code{tipo}, poden
 \describe{
 \item{\code{reg_lin}}{Regressao linear comum}
 \item{\code{reg_quant}}{Regressao linear quantílica}
+\item{\code{GAM}}{Modelos Aditivos Generalizados}
 \item{\code{sarima}}{SARIMA(p, d, q)(P, D, Q)}
 \item{\code{sarimax}}{SARIMAX(p, d, q)(P, D, Q)}
 \item{\code{ss_ar1_saz}}{Espaço de estados composto por processo AR(1) + Sazonalidade}

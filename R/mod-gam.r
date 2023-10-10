@@ -2,11 +2,12 @@
 # MODELO REGRESSAO ESTATICA SIMPLES
 ####################################################################################################
 
-#' Modelos \code{gam}
+#' Modelos \code{GAM}
 #' 
-#' Estimação e métodos de modelos da classe \code{gam}
+#' Estimação e métodos de modelos da classe \code{GAM}
 #' 
-#' Modelos de regressao linear estaticas comuns, estimados atraves da funcao \code{\link[stats]{lm}}
+#' Modelos Aditivos Generalizados, estimados atraves da funcao \code{\link[mgcv]{gam}}. Para mais
+#' detalhes a respeito desta modelagem e seu uso, veja a documentacao oficial do pacote.
 #' 
 #' @name modelos_gam
 #' 
@@ -101,8 +102,6 @@ predict.GAM <- function(object, newdata, n.ahead, ...) {
     return(prev)
 }
 
-#' @details 
-#' 
 #' @param newseries nova série com a qual atualizar o modelo
 #' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
 #' @param refit booleano indicando se o modelo deve ou nao ser reajustado

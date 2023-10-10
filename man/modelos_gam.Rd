@@ -5,7 +5,7 @@
 \alias{GAM}
 \alias{predict.GAM}
 \alias{update.GAM}
-\title{Modelos \code{gam}}
+\title{Modelos \code{GAM}}
 \usage{
 GAM(serie, regdata, formula, pesos = rep(1, length(serie)), ...)
 
@@ -50,14 +50,15 @@ previsão \code{n.ahead} passos à frente;
 Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
 }
 \description{
-Estimação e métodos de modelos da classe \code{gam}
+Estimação e métodos de modelos da classe \code{GAM}
 
 Para estimação deste tipo de modelo, além de ser fornecido o arumento \code{serie} também deve
 ser necessariamente informado \code{regdata}, um \code{data.frame}-like contendo as variáveis
 explicativas necessárias.
 }
 \details{
-Modelos de regressao linear estaticas comuns, estimados atraves da funcao \code{\link[stats]{lm}}
+Modelos Aditivos Generalizados, estimados atraves da funcao \code{\link[mgcv]{gam}}. Para mais
+detalhes a respeito desta modelagem e seu uso, veja a documentacao oficial do pacote.
 
 Opcionalmente pode ser informado o argumento \code{formula} contendo a especificação do modelo
 aditivo no formato compativel (veja \code{\link[mgcv]{gam}}), porem sem o LHS. Caso
