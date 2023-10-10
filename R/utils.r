@@ -81,10 +81,18 @@ deltats <- function(ini, delta, freq) {
 
 # AUXILIAR PARA MODELOS COM VARIAVEL EXPLICATIVA ---------------------------------------------------
 
-expandeformula <- function(data) {
+expandeformula <- function(data, modo = c("ls", "gam")) {
     warning("'formula' nao foi passado -- usando todas as variaveis de forma aditiva")
+
+    modo <- match.arg(modo)
+
     formula <- colnames(data)
-    formula <- paste0(colnames(data), collapse = " + ")
+    if (modo == "gam") {
+        formula <- paste0(colnames(data), collapse = ", ")
+        formula <- paste0("s(", formula, ")")
+    } else {
+        formula <- paste0(colnames(data), collapse = " + ")
+    }
     formula <- paste0(" ~ ", formula)
     formula <- as.formula(formula)
 
