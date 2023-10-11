@@ -137,8 +137,14 @@ estimamodelo.numeric <- function(serie, tipo, periodico = FALSE, ...) estimamode
 
 estimamodelo.ts <- function(serie, tipo, periodico = FALSE, ...) {
 
-    fitfunc <- ifelse(periodico, estimamodelo_P, estimamodelo_U)
-    out <- fitfunc(serie, tipo, ...)
+    # primeiro idendifica se e modelo hierarquico ou nao (se for nao funciona com periodico ainda)
+    if (grepl("\\+", tipo)) {
+        tipos <- strsplit(tipo, "\\+")[[1]]
+        out <- estimamodelo_H(serie, tipos[1], tipos[2], ...)
+    } else {
+        fitfunc <- ifelse(periodico, estimamodelo_P, estimamodelo_U)
+        out <- fitfunc(serie, tipo, ...)
+    }
 
     return(out)
 }
