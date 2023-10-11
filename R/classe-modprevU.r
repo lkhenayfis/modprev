@@ -104,3 +104,18 @@ predict.modprevU <- function(object, n.ahead, ...) {
 update.modprevU <- function(object, newseries, refit = FALSE, ...) {
     stop(paste0("Modelo do tipo ", class(object)[1], " nao possui metodo 'update'"))
 }
+
+#' @family Metodos modprevU
+#' 
+#' @export
+
+residuals.modprevU <- function(object, ...) {
+    # muitos modelos tem metodos de 'residuals' complexos, variando o tipo de residuo, que nao
+    # necessariamente funcionam corretamente depois de um update. Fazer o update manter esses
+    # metodos coerentes tambem nem sempre e trivial, entao sempre sao calculados os residuos de
+    # forma simples e manual por um metodo generico da classe
+    res <- unname(as.numeric(object$serie) - fitted(object$modelo))
+    res <- ts(res, start = start(object$serie), frequency = frequency(object$serie))
+
+    return(res)
+}
