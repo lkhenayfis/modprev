@@ -35,6 +35,8 @@ NULL
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
 #'     \code{regdata} serão utilizadas
+#' @param tipo um de \code{c("gam", "bam")}, indicando a funcao de estimacao a ser utilizada. Veja
+#'     \code{\link[mgcv]{bam}} para maiores detalhes
 #' @param pesos opcional, vetor de pesos para cada observacao no ajuste. Sera normalizado 
 #'     internamente
 #' @param ... nao possui uso, existe apenas para consistencia com a generica
@@ -44,12 +46,14 @@ NULL
 #' 
 #' @rdname modelos_gam
 
-GAM <- function(serie, regdata, formula, pesos = rep(1, length(serie)), ...) {
+GAM <- function(serie, regdata, formula, fit_fun = c("gam", "bam"), pesos = rep(1, length(serie)), ...) {
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
     if (missing(formula)) formula <- expandeformula(regdata, "gam")
     formula <- update(formula, Y ~ .)
+
+    fit_fun <- match.arg(fit_fun)
 
     if (!is.ts(serie)) serie <- ts(serie)
     aux_tsp <- tsp(serie)
@@ -57,9 +61,14 @@ GAM <- function(serie, regdata, formula, pesos = rep(1, length(serie)), ...) {
     pesos <- pesos / sum(pesos)
 
     regdata <- cbind(Y = as.numeric(serie), regdata)
-    fit <- mgcv::gam(formula, data = regdata)
 
-    mod_atrs <- list(formula = formula, tsp = aux_tsp, pesos = pesos)
+    if (fit_fun == "gam") {
+        fit <- mgcv::gam(formula, data = regdata)
+    } else {
+        fit <- mgcv::bam(formula, data = regdata)
+    }
+
+    mod_atrs <- list(formula = formula, tsp = aux_tsp, pesos = pesos, fit_fun = fit_fun)
 
     new_modprevU(fit, serie, "GAM", mod_atrs)
 }
@@ -120,9 +129,10 @@ update.GAM <- function(object, newseries, newregdata, refit = FALSE, ...) {
 
     if (refit) {
         pesos   <- mod_atrs$pesos[seq_along(newseries)]
+        fit_fun <- mod_atrs$fit_fun
         formula <- mod_atrs$formula
         object  <- estimamodelo(newseries, "GAM", regdata = newregdata, formula = formula,
-            pesos = pesos)
+            pesos = pesos, fit_fun = fit_fun)
     } else {
 
         modelo <- object$modelo
