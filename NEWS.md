@@ -10,6 +10,8 @@
 
 * Corrige implementacao de heterocedasticidade em modelos de regressao dinamica. Faltava um termo
   constante nos harmonicos estimados
+* `janelamovel` tinha um erro quando `refit.cada > 1`. Como rodava o loop em `lapply`, `update`s sem
+  reajuste estavam sempre usando o modelo inicial
 
 ## Misc
 
