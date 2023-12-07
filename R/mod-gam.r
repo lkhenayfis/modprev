@@ -135,15 +135,22 @@ update.GAM <- function(object, newseries, newregdata, refit = FALSE, ...) {
             pesos = pesos, fit_fun = fit_fun)
     } else {
 
+        # atualizar objetos gam tem um problema quando ha NAs na serie e/ou regdata. A funcao do
+        # mgcv nao funciona com 'na.pass' nestes casos, dando erro por causa do NA, que precisam
+        # ser retirados
+        # Ele faz isso automaticamente, encurtando dataframes onde necessario, o que torna dificil
+        # atualizar os regressores e outros valores por fora.
+        # Como e um modelo de regressao e nao depende do dado recente, da pra so atualizar o slot
+        # 'serie' para nao quebrar a previsao depois
+
+        #if (missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
+
+        #modelo$y <- as.numeric(newseries)
+        #modelo$model <- cbind.data.frame(Y = as.numeric(newseries), newregdata)
+        #modelo$fitted.values <- predict(modelo)
+        #modelo$residuals <- as.numeric(newseries) - fitted(modelo)
+
         modelo <- object$modelo
-
-        if (missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
-
-        modelo$y <- as.numeric(newseries)
-        modelo$model <- cbind.data.frame(Y = as.numeric(newseries), newregdata)
-        modelo$fitted.values <- predict(modelo)
-        modelo$residuals <- as.numeric(newseries) - fitted(modelo)
-
         mod_atrs$tsp <- tsp(newseries)
 
         object <- new_modprevU(modelo, newseries, "GAM", mod_atrs)
