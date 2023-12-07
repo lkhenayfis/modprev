@@ -7,7 +7,14 @@
 \alias{update.GAM}
 \title{Modelos \code{GAM}}
 \usage{
-GAM(serie, regdata, formula, pesos = rep(1, length(serie)), ...)
+GAM(
+  serie,
+  regdata,
+  formula,
+  fit_fun = c("gam", "bam"),
+  pesos = rep(1, length(serie)),
+  ...
+)
 
 \method{predict}{GAM}(object, newdata, n.ahead, ...)
 
@@ -38,6 +45,9 @@ seja informado a previsão sera feita tantos passos à frente quanto amostras em
 \item{newregdata}{\code{data.frame}-like contendo variáveis explicativas na nova amostra}
 
 \item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
+
+\item{tipo}{um de \code{c("gam", "bam")}, indicando a funcao de estimacao a ser utilizada. Veja
+\code{\link[mgcv]{bam}} para maiores detalhes}
 }
 \value{
 Objeto da classe \code{modprev} e subclasse \code{GAM}, uma lista de dois
