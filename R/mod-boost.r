@@ -43,7 +43,7 @@ NULL
 #' @rdname modelos_boost
 
 BOOST <- function(serie, regdata, formula, tipo_cv = "kfold",
-    B = floor(nrow(regdata) * .8), nthreads = 1, ...) {
+    B = floor(nrow(regdata) * .8), nthreads = 1, mc.preschedule = FALSE, ...) {
 
     if (nthreads == -1) nthreads <- parallel::detectCores() - 1
 
@@ -59,7 +59,7 @@ BOOST <- function(serie, regdata, formula, tipo_cv = "kfold",
 
     cv_folds <- cv(model.weights(fit), type = tipo_cv, B = B)
     if (nthreads > 1) {
-        cv <- cvrisk(fit, cv_folds, mc.cores = nthreads, mc.preschedule = TRUE)
+        cv <- cvrisk(fit, cv_folds, mc.cores = nthreads, mc.preschedule = mc.preschedule)
     } else {
         cv <- cvrisk(fit, cv_folds, papply = lapply)
     }
