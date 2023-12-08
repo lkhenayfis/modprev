@@ -43,7 +43,9 @@ NULL
 #' @rdname modelos_boost
 
 BOOST <- function(serie, regdata, formula, tipo_cv = "kfold",
-    B = floor(nrow(regdata) * .8), ...) {
+    B = floor(nrow(regdata) * .8), nthreads = 1, ...) {
+
+    if (nthreads == -1) nthreads <- parallel::detectCores() - 1
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
@@ -56,7 +58,11 @@ BOOST <- function(serie, regdata, formula, tipo_cv = "kfold",
     fit <- mboost(formula, data = regdata, ...)
 
     cv_folds <- cv(model.weights(fit), type = tipo_cv, B = B)
-    cv <- cvrisk(fit, cv_folds)
+    if (nthreads > 1) {
+        cv <- cvrisk(fit, cv_folds, mc.cores = nthreads, mc.preschedule = TRUE)
+    } else {
+        cv <- cvrisk(fit, cv_folds, papply = lapply)
+    }
     fit <- fit[mstop(cv)]
 
     mod_atrs <- list(call = match.call(), tsp = aux_tsp)
