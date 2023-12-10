@@ -42,8 +42,16 @@ NULL
 #' 
 #' @rdname modelos_boost
 
-BOOST <- function(serie, regdata, formula, tipo_cv = "kfold",
+BOOST <- function(serie, regdata, formula, family = "Gaussian", tipo_cv = "kfold",
     B = floor(nrow(regdata) * .8), nthreads = 1, mc.preschedule = FALSE, ...) {
+
+    # algumas familias tem chamadas de 'risk' e 'loss' inacreditavelmente porcas, que envolvem
+    # avaliacao de nomes em outros environments, nao controlados, que sao atualizados por fora
+    # Isso cria um problema enorme na execucao em janela movel, pois pode ter efeitos colaterais
+    # de modificacoes numa janela anterior na janela atual
+    # Passando esse parametro como string e avaliando toda vez evita esse problema
+    # por outro lado, e ruim ter que ficar expondo certos argumentos de 'mboost' pela wrapper
+    family <- eval(parse(text = paste0("mboost:::", family, "()")))
 
     if (nthreads == -1) nthreads <- parallel::detectCores() - 1
 
@@ -55,7 +63,7 @@ BOOST <- function(serie, regdata, formula, tipo_cv = "kfold",
     aux_tsp <- tsp(serie)
 
     regdata <- cbind(Y = as.numeric(serie), regdata)
-    fit <- mboost(formula, data = regdata, ...)
+    fit <- mboost(formula, data = regdata, family = family, ...)
 
     cv_folds <- cv(model.weights(fit), type = tipo_cv, B = B)
     if (nthreads > 1) {
