@@ -42,8 +42,8 @@ NULL
 #' 
 #' @rdname modelos_boost
 
-BOOST <- function(serie, regdata, formula, family = "Gaussian", tipo_cv = "kfold",
-    B = floor(nrow(regdata) * .8), nthreads = 1, mc.preschedule = FALSE, ...) {
+BOOST <- function(serie, regdata, formula, family = "Gaussian",
+    cv_control = list(tipo = "kfold", B = floor(nrow(regdata) * .8), nthreads = 1, async = TRUE), ...) {
 
     # algumas familias tem chamadas de 'risk' e 'loss' inacreditavelmente porcas, que envolvem
     # avaliacao de nomes em outros environments, nao controlados, que sao atualizados por fora
@@ -53,7 +53,7 @@ BOOST <- function(serie, regdata, formula, family = "Gaussian", tipo_cv = "kfold
     # por outro lado, e ruim ter que ficar expondo certos argumentos de 'mboost' pela wrapper
     family <- eval(parse(text = paste0("mboost:::", family, "()")))
 
-    if (nthreads == -1) nthreads <- parallel::detectCores() - 1
+    if (cv_control$nthreads == -1) cv_control$nthreads <- parallel::detectCores() - 1
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
@@ -65,9 +65,9 @@ BOOST <- function(serie, regdata, formula, family = "Gaussian", tipo_cv = "kfold
     regdata <- cbind(Y = as.numeric(serie), regdata)
     fit <- mboost(formula, data = regdata, family = family, ...)
 
-    cv_folds <- cv(model.weights(fit), type = tipo_cv, B = B)
-    if (nthreads > 1) {
-        cv <- cvrisk(fit, cv_folds, mc.cores = nthreads, mc.preschedule = mc.preschedule)
+    cv_folds <- cv(model.weights(fit), type = cv_control$tipo, B = cv_control$B)
+    if (cv_control$nthreads > 1) {
+        cv <- cvrisk(fit, cv_folds, mc.cores = cv_control$nthreads, mc.preschedule = cv_control$async)
     } else {
         cv <- cvrisk(fit, cv_folds, papply = lapply)
     }
