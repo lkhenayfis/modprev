@@ -6,12 +6,12 @@
 #' 
 #' Estimação e métodos de modelos da classe \code{BOOST}
 #' 
-#' Modelos Aditivos Generalizados, estimados atraves da funcao \code{\link[mgcv]{boost}}. Para mais
+#' Modelos Aditivos Generalizados, estimados atraves da funcao \code{\link[mboost]{boost}}. Para mais
 #' detalhes a respeito desta modelagem e seu uso, veja a documentacao oficial do pacote.
 #' 
 #' @name modelos_boost
 #' 
-#' @import mgcv
+#' @import mboost
 NULL
 
 # ESTIMACAO ----------------------------------------------------------------------------------------
@@ -23,7 +23,7 @@ NULL
 #' explicativas necessárias. 
 #' 
 #' Opcionalmente pode ser informado o argumento \code{formula} contendo a especificação do modelo 
-#' aditivo no formato compativel (veja \code{\link[mgcv]{boost}}), porem sem o LHS. Caso 
+#' aditivo no formato compativel (veja \code{\link[mboost]{boost}}), porem sem o LHS. Caso 
 #' \code{formula} seja omitido, todas as variaveis serao utilizadas conjuntamente numa thin plate
 #' regression spline com as configurações padrão do pacote, i.e. se existem as colunas
 #' \code{c("V1", "V2", "V3")}, formula sera \code{~ s(V1, V2, V3)}.
@@ -57,7 +57,7 @@ BOOST <- function(serie, regdata, formula, family = "Gaussian", tipo_cv = "kfold
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
-    if (missing(formula)) formula <- Y ~ .
+    if (missing(formula)) formula <- Y ~ . else formula <- update(formula, Y ~ .)
 
     if (!is.ts(serie)) serie <- ts(serie)
     aux_tsp <- tsp(serie)
