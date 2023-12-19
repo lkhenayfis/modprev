@@ -7,15 +7,7 @@
 \alias{update.BOOST}
 \title{Modelos \code{BOOST}}
 \usage{
-BOOST(
-  serie,
-  regdata,
-  formula,
-  family = "Gaussian",
-  cv_control = list(tipo = "kfold", B = floor(nrow(regdata) * 0.8), nthreads = 1, async =
-    TRUE),
-  ...
-)
+BOOST(serie, regdata, formula, family = "Gaussian", cv_control = list(), ...)
 
 \method{predict}{BOOST}(object, newdata, n.ahead, ...)
 
@@ -31,6 +23,8 @@ BOOST(
 
 \item{family}{string indicando uma familia para funcao perda. Veja \code{\link[mboost]{mboost}}
 para mais detalhes}
+
+\item{cv_control}{uma lista nomeada contendo quaisquer argumentos}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
 

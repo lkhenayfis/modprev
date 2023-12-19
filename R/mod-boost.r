@@ -35,6 +35,7 @@ NULL
 #'     \code{regdata} serão utilizadas
 #' @param family string indicando uma familia para funcao perda. Veja \code{\link[mboost]{mboost}}
 #'     para mais detalhes
+#' @param cv_control uma lista nomeada contendo quaisquer argumentos 
 #' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{BOOST}, uma lista de dois 
@@ -42,8 +43,7 @@ NULL
 #' 
 #' @rdname modelos_boost
 
-BOOST <- function(serie, regdata, formula, family = "Gaussian",
-    cv_control = list(tipo = "kfold", B = floor(nrow(regdata) * .8), nthreads = 1, async = TRUE), ...) {
+BOOST <- function(serie, regdata, formula, family = "Gaussian", cv_control = list(), ...) {
 
     # algumas familias tem chamadas de 'risk' e 'loss' inacreditavelmente porcas, que envolvem
     # avaliacao de nomes em outros environments, nao controlados, que sao atualizados por fora
@@ -52,8 +52,6 @@ BOOST <- function(serie, regdata, formula, family = "Gaussian",
     # Passando esse parametro como string e avaliando toda vez evita esse problema
     # por outro lado, e ruim ter que ficar expondo certos argumentos de 'mboost' pela wrapper
     family <- eval(parse(text = paste0("mboost:::", family, "()")))
-
-    if (cv_control$nthreads == -1) cv_control$nthreads <- parallel::detectCores() - 1
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
@@ -65,12 +63,17 @@ BOOST <- function(serie, regdata, formula, family = "Gaussian",
     regdata <- cbind(Y = as.numeric(serie), regdata)
     fit <- mboost(formula, data = regdata, family = family, ...)
 
-    cv_folds <- cv(model.weights(fit), type = cv_control$tipo, B = cv_control$B)
-    if (cv_control$nthreads > 1) {
-        cv <- cvrisk(fit, cv_folds, mc.cores = cv_control$nthreads, mc.preschedule = cv_control$async)
-    } else {
-        cv <- cvrisk(fit, cv_folds, papply = lapply)
-    }
+    cv_spec <- c(list(quote(cv), model.weights(fit)), match_fun_args(cv_control, mboost::cv))
+    cv_spec <- eval(as.call(cv_spec))
+
+    args_cvrisk  <- match_fun_args(cv_control, mboost:::cvrisk.mboost)
+    args_mcapply <- match_fun_args(cv_control, parallel::mclapply)
+    cv <- c(
+        list(quote(cvrisk), quote(fit), quote(cv_spec)),
+        args_cvrisk,
+        args_mcapply[!grepl("mc\\.preschedule", names(args_mcapply))]
+    )
+    cv <- eval(as.call(cv))
     fit <- fit[mstop(cv)]
 
     mod_atrs <- list(call = match.call(), tsp = aux_tsp)
