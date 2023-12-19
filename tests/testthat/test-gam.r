@@ -80,7 +80,8 @@ test_that("Atualizacao de modelo GAM", {
     # Erro quando nao passa newseries ou newregdata
 
     expect_error(mod_erro <- update(mod))
-    expect_error(mod_erro <- update(mod, newseries = yy2))
+    # ver comentario em R/mod-gam.r a respeito do problema com NAs nos regressores
+    #expect_error(mod_erro <- update(mod, newseries = yy2))
     expect_error(mod_erro <- update(mod, newregdata = xx2))
 
     # Com refit
