@@ -6,7 +6,7 @@
 #' 
 #' Estimação e métodos de modelos da classe \code{BOOST}
 #' 
-#' Modelos Aditivos Generalizados, estimados atraves da funcao \code{\link[mboost]{boost}}. Para mais
+#' Boosting de modelos, estimados atraves da funcao \code{\link[mboost]{mboost}}. Para mais
 #' detalhes a respeito desta modelagem e seu uso, veja a documentacao oficial do pacote.
 #' 
 #' @name modelos_boost
@@ -23,10 +23,8 @@ NULL
 #' explicativas necessárias. 
 #' 
 #' Opcionalmente pode ser informado o argumento \code{formula} contendo a especificação do modelo 
-#' aditivo no formato compativel (veja \code{\link[mboost]{boost}}), porem sem o LHS. Caso 
-#' \code{formula} seja omitido, todas as variaveis serao utilizadas conjuntamente numa thin plate
-#' regression spline com as configurações padrão do pacote, i.e. se existem as colunas
-#' \code{c("V1", "V2", "V3")}, formula sera \code{~ s(V1, V2, V3)}.
+#' aditivo no formato compativel (veja \code{\link[mboost]{mboost}}), porem sem o LHS. Caso 
+#' \code{formula} seja omitido, todas as variaveis serao utilizadas.
 #' 
 #' Na execucao em janela movel, o vetor de pesos deve ser passado com o tamanho igual ao da janela.
 #' O mesmo vetor sera aplicado em todas as janelas avaliadas.
@@ -35,6 +33,8 @@ NULL
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
 #'     \code{regdata} serão utilizadas
+#' @param family string indicando uma familia para funcao perda. Veja \code{\link[mboost]{mboost}}
+#'     para mais detalhes
 #' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{BOOST}, uma lista de dois 

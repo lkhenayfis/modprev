@@ -7,7 +7,15 @@
 \alias{update.BOOST}
 \title{Modelos \code{BOOST}}
 \usage{
-BOOST(serie, regdata, formula, ...)
+BOOST(
+  serie,
+  regdata,
+  formula,
+  family = "Gaussian",
+  cv_control = list(tipo = "kfold", B = floor(nrow(regdata) * 0.8), nthreads = 1, async =
+    TRUE),
+  ...
+)
 
 \method{predict}{BOOST}(object, newdata, n.ahead, ...)
 
@@ -20,6 +28,9 @@ BOOST(serie, regdata, formula, ...)
 
 \item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
 \code{regdata} serão utilizadas}
+
+\item{family}{string indicando uma familia para funcao perda. Veja \code{\link[mboost]{mboost}}
+para mais detalhes}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
 
@@ -54,14 +65,12 @@ ser necessariamente informado \code{regdata}, um \code{data.frame}-like contendo
 explicativas necessárias.
 }
 \details{
-Modelos Aditivos Generalizados, estimados atraves da funcao \code{\link[mgcv]{boost}}. Para mais
+Boosting de modelos, estimados atraves da funcao \code{\link[mboost]{mboost}}. Para mais
 detalhes a respeito desta modelagem e seu uso, veja a documentacao oficial do pacote.
 
 Opcionalmente pode ser informado o argumento \code{formula} contendo a especificação do modelo
-aditivo no formato compativel (veja \code{\link[mgcv]{boost}}), porem sem o LHS. Caso
-\code{formula} seja omitido, todas as variaveis serao utilizadas conjuntamente numa thin plate
-regression spline com as configurações padrão do pacote, i.e. se existem as colunas
-\code{c("V1", "V2", "V3")}, formula sera \code{~ s(V1, V2, V3)}.
+aditivo no formato compativel (veja \code{\link[mboost]{mboost}}), porem sem o LHS. Caso
+\code{formula} seja omitido, todas as variaveis serao utilizadas.
 
 Na execucao em janela movel, o vetor de pesos deve ser passado com o tamanho igual ao da janela.
 O mesmo vetor sera aplicado em todas as janelas avaliadas.
