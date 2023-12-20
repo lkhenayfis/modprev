@@ -138,10 +138,12 @@ estimamodelo.numeric <- function(serie, tipo, periodico = FALSE, ...) estimamode
 
 estimamodelo.ts <- function(serie, tipo, periodico = FALSE, ...) {
 
-    fitfunc <- ifelse(periodico, estimamodelo_P, estimamodelo_U)
-    out <- fitfunc(serie, tipo, ...)
+    fitfun <- ifelse(periodico, estimamodelo_P, estimamodelo_U)
+    mc <- match.call()
+    mc[[1]] <- fitfun
+    mc$periodico <- NULL
 
-    return(out)
+    eval(mc, parent.frame())
 }
 
 # METODOS -----------------------------------------------------------------------------------------
