@@ -16,8 +16,6 @@
 #' vec_1 <- modprev:::shift(vec, 2)  # c(9, 10, 1, 2, 3, 4, 5, 6, 7, 8)
 #' 
 #' @return Vetor \code{v} com elementos deslocados \code{i} posições
-#' 
-#' @importFrom utils head tail
 
 shift <- function(v, i) {
 

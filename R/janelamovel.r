@@ -199,8 +199,6 @@ verbose_fun <- function(verbose) {
 #' @return lista na qual cada elemento e uma lista de dois elementos, contendo o instante inicial e
 #'     final de \code{serie} a considerar em cada janela, no sistema de tempo \code{ts}. Deve ser 
 #'     notado que os instantes definem uma janela fechada no inicio e aberta no final
-#' 
-#' @importFrom utils tail
 
 expandejanelas <- function(serie, janela, passo) {
 
