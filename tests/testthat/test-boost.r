@@ -80,7 +80,7 @@ test_that("Estimacao de BOOSTs - argumentos de validacao cruzada", {
     expect_equal(compmod$xselect(), mod$model$xselect())
 })
 
-test_that("Previsao de modelo GAM", {
+test_that("Previsao de BOOST", {
     yy <- window(datregdin$obs, 1, 150)
     xx <- head(datregdin$varex, 150)
 
@@ -123,7 +123,7 @@ test_that("Previsao de modelo GAM", {
     expect_equal(end(prev), c(16, 10))
 })
 
-test_that("Atualizacao de modelo GAM", {
+test_that("Atualizacao de BOOST", {
     yy <- window(datregdin$obs, 1, 100)
     xx <- head(datregdin$varex, 100)
 
