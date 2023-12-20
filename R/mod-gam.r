@@ -37,16 +37,14 @@ NULL
 #'     \code{regdata} serão utilizadas
 #' @param fit_fun um de \code{c("gam", "bam")}, indicando a funcao de estimacao a ser utilizada. Veja
 #'     \code{\link[mgcv]{bam}} para maiores detalhes
-#' @param pesos opcional, vetor de pesos para cada observacao no ajuste. Sera normalizado 
-#'     internamente
-#' @param ... nao possui uso, existe apenas para consistencia com a generica
+#' @param ... demais argumentos passados a \code{\link[mgcv]{gam|bam}}
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{GAM}, uma lista de dois 
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_gam
 
-GAM <- function(serie, regdata, formula, fit_fun = c("gam", "bam"), pesos = rep(1, length(serie)), ...) {
+GAM <- function(serie, regdata, formula, fit_fun = c("gam", "bam"), ...) {
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
@@ -58,17 +56,13 @@ GAM <- function(serie, regdata, formula, fit_fun = c("gam", "bam"), pesos = rep(
     if (!is.ts(serie)) serie <- ts(serie)
     aux_tsp <- tsp(serie)
 
-    pesos <- pesos / sum(pesos)
-
     regdata <- cbind(Y = as.numeric(serie), regdata)
 
-    if (fit_fun == "gam") {
-        fit <- mgcv::gam(formula, data = regdata)
-    } else {
-        fit <- mgcv::bam(formula, data = regdata)
-    }
+    cc <- list(str2lang(fit_fun), formula, data = regdata)
+    cc <- c(cc, list(...))
+    fit <- eval(as.call(cc))
 
-    mod_atrs <- list(formula = formula, tsp = aux_tsp, pesos = pesos, fit_fun = fit_fun)
+    mod_atrs <- list(formula = formula, tsp = aux_tsp, fit_fun = fit_fun)
 
     new_modprevU(fit, serie, "GAM", mod_atrs)
 }
@@ -128,11 +122,10 @@ update.GAM <- function(object, newseries, newregdata, refit = FALSE, ...) {
     mod_atrs <- attr(object, "mod_atrs")
 
     if (refit) {
-        pesos   <- mod_atrs$pesos[seq_along(newseries)]
         fit_fun <- mod_atrs$fit_fun
         formula <- mod_atrs$formula
         object  <- estimamodelo(newseries, "GAM", regdata = newregdata, formula = formula,
-            pesos = pesos, fit_fun = fit_fun)
+            fit_fun = fit_fun)
     } else {
 
         # atualizar objetos gam tem um problema quando ha NAs na serie e/ou regdata. A funcao do

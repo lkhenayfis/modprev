@@ -1,5 +1,5 @@
 
-test_that("Estimacao de modelo GAM", {
+test_that("Estimacao de modelo GAM - simples", {
     compmod <- with(datregdin,
         gam(as.numeric(obs) ~ s(varex$V1, varex$V2, varex$V3))
     )
@@ -13,6 +13,14 @@ test_that("Estimacao de modelo GAM", {
     expect_warning(mod2 <- estimamodelo(datregdin$obs, "GAM", regdata = datregdin$varex))
     expect_equal(unname(mod2$model$coefficients), unname(mod$model$coefficients))
 
+    # Formula com coisas mais complicadas
+    SP <- 3
+    K  <- 15
+    mod <- estimamodelo(datregdin$obs, "GAM", regdata = datregdin$varex,
+        formula = ~ s(V1, V2, V3, sp = SP, k = K))
+    expect_equal(unname(mod$model$smooth[[1]]$sp), SP)
+    expect_equal(unname(mod$model$smooth[[1]]$bs.dim), K)
+
     # Sem passar regdata
     expect_error(mod2 <- estimamodelo(datregdin$obs, "GAM"))
 
@@ -24,6 +32,62 @@ test_that("Estimacao de modelo GAM", {
     mod <- estimamodelo(ss, "GAM", regdata = datregdin$varex, formula = ~ s(V1, V2, V3))
 
     expect_equal(attr(mod, "mod_atrs")$tsp, c(1, 20.9, 10))
+})
+
+test_that("Estimacao de modelo GAM - funcao 'bam'", {
+    compmod <- with(datregdin,
+        bam(as.numeric(obs) ~ s(varex$V1, varex$V2, varex$V3))
+    )
+    mod <- estimamodelo(datregdin$obs, "GAM", regdata = datregdin$varex, formula = ~ s(V1, V2, V3),
+        fit_fun = "bam")
+
+    expect_equal(class(mod)[1], "GAM")
+    expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
+    expect_equal(attr(mod, "mod_atrs")$formula, Y ~ s(V1, V2, V3))
+
+    # Sem passar a formula
+    expect_warning(
+        mod2 <- estimamodelo(datregdin$obs, "GAM", regdata = datregdin$varex, fit_fun = "bam")
+    )
+    expect_equal(unname(mod2$model$coefficients), unname(mod$model$coefficients))
+
+    # Formula com coisas mais complicadas
+    SP <- 3
+    K  <- 15
+    mod <- estimamodelo(datregdin$obs, "GAM", regdata = datregdin$varex,
+        formula = ~ s(V1, V2, V3, sp = SP, k = K), fit_fun = "bam")
+    expect_equal(unname(mod$model$smooth[[1]]$sp), SP)
+    expect_equal(unname(mod$model$smooth[[1]]$bs.dim), K)
+
+    # Sem passar regdata
+    expect_error(mod2 <- estimamodelo(datregdin$obs, "GAM", fit_fun = "bam"))
+
+    # Atributo tsp de saida ----------------------------------------------------
+
+    expect_equal(attr(mod, "mod_atrs")$tsp, c(1, 200, 1))
+
+    ss <- ts(datregdin$obs, frequency = 10)
+    mod <- estimamodelo(ss, "GAM", regdata = datregdin$varex, formula = ~ s(V1, V2, V3),
+        fit_fun = "bam")
+
+    expect_equal(attr(mod, "mod_atrs")$tsp, c(1, 20.9, 10))
+})
+
+test_that("Estimacao de modelo GAM - argumentos opcionais de gam", {
+
+    # passando pesos
+    set.seed(12)
+    mod <- estimamodelo(datregdin$obs, "GAM", regdata = datregdin$varex, formula = ~ s(V1, V2, V3),
+        weights = runif(200))
+
+    set.seed(12)
+    compmod <- with(datregdin,
+        gam(as.numeric(obs) ~ s(varex$V1, varex$V2, varex$V3), weights = runif(200))
+    )
+
+    expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
+    expect_equal(attr(mod, "mod_atrs")$formula, Y ~ s(V1, V2, V3))
+    expect_equal(mod$model$weights, compmod$weights)
 })
 
 test_that("Previsao de modelo GAM", {
