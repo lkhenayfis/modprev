@@ -16,7 +16,9 @@ License: MIT + file LICENSE
 Depends:
     graphics (>= 3.6),
     R (>= 4.0),
-    stats (>= 4.0)
+    stats (>= 4.0),
+    utils (>= 4.0),
+    methods (>= 4.0),
 Imports: 
     forecast (>= 8.12),
     KFAS (>= 1.4.4),
