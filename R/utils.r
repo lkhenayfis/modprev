@@ -39,6 +39,8 @@ shift <- function(v, i) {
 #' @param args lista nomeada contendo candidatos a argumentos de uma funcao
 #' @param fun funcao cujos arugmentos procurar em \code{args}
 #' 
+#' @importFrom methods formalArgs
+#' 
 #' @return \code{args} reduzida aos elementos que correspondem a argumentos de \code{fun}
 
 match_fun_args <- function(args, fun) {
