@@ -33,8 +33,6 @@ NULL
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
 #'     \code{regdata} serão utilizadas
-#' @param family string indicando uma familia para funcao perda. Veja \code{\link[mboost]{mboost}}
-#'     para mais detalhes
 #' @param cv_control uma lista nomeada contendo quaisquer argumentos das funcoes
 #'     \code{\link[mboost]{cv}} e \code{\link[mboost]{cvrisk}}
 #' @param ... demais argumentos passados a funcao \code{\link[mboost]{mboost}}
@@ -44,16 +42,7 @@ NULL
 #' 
 #' @rdname modelos_boost
 
-BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"),
-    family = "Gaussian", cv_control = list(), ...) {
-
-    # algumas familias tem chamadas de 'risk' e 'loss' inacreditavelmente porcas, que envolvem
-    # avaliacao de nomes em outros environments, nao controlados, que sao atualizados por fora
-    # Isso cria um problema enorme na execucao em janela movel, pois pode ter efeitos colaterais
-    # de modificacoes numa janela anterior na janela atual
-    # Passando esse parametro como string e avaliando toda vez evita esse problema
-    # por outro lado, e ruim ter que ficar expondo certos argumentos de 'mboost' pela wrapper
-    family <- eval(parse(text = paste0("mboost:::", family, "()")))
+BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"), cv_control = list(), ...) {
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
@@ -63,7 +52,7 @@ BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"),
     aux_tsp <- tsp(serie)
 
     regdata <- cbind(Y = as.numeric(serie), regdata)
-    fit <- mboost(formula, data = regdata, family = family, ...)
+    fit <- mboost(formula, data = regdata, ...)
 
     cv_spec <- c(list(quote(cv), model.weights(fit)), match_fun_args(cv_control, mboost::cv))
     cv_spec <- eval(as.call(cv_spec))

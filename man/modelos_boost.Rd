@@ -11,7 +11,6 @@ BOOST(
   serie,
   regdata,
   formula = expandeformula(regdata, "ls"),
-  family = "Gaussian",
   cv_control = list(),
   ...
 )
@@ -27,9 +26,6 @@ BOOST(
 
 \item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
 \code{regdata} serão utilizadas}
-
-\item{family}{string indicando uma familia para funcao perda. Veja \code{\link[mboost]{mboost}}
-para mais detalhes}
 
 \item{cv_control}{uma lista nomeada contendo quaisquer argumentos das funcoes
 \code{\link[mboost]{cv}} e \code{\link[mboost]{cvrisk}}}

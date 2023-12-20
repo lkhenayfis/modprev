@@ -49,7 +49,7 @@ test_that("Estimacao de BOOSTs - argumentos opcionais de mboost", {
     # mudando funcao perda
     set.seed(12)
     mod <- estimamodelo(datregdin$obs, "BOOST", regdata = datregdin$varex, formula = ~ V1 + V2 + V3,
-        family = "Laplace", baselearner = "bols", cv_control = list(B = 1))
+        family = Laplace(), baselearner = "bols", cv_control = list(B = 1))
 
     set.seed(12)
     compmod <- mboost(obs ~ V1 + V2 + V3,
