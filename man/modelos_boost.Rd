@@ -7,7 +7,14 @@
 \alias{update.BOOST}
 \title{Modelos \code{BOOST}}
 \usage{
-BOOST(serie, regdata, formula, family = "Gaussian", cv_control = list(), ...)
+BOOST(
+  serie,
+  regdata,
+  formula = expandeformula(regdata, "ls"),
+  family = "Gaussian",
+  cv_control = list(),
+  ...
+)
 
 \method{predict}{BOOST}(object, newdata, n.ahead, ...)
 

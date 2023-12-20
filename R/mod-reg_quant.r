@@ -103,8 +103,6 @@ predict.reg_quant <- function(object, newdata, n.ahead, ...) {
     return(prev)
 }
 
-#' @details 
-#' 
 #' @param newseries nova série com a qual atualizar o modelo
 #' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
 #' @param refit booleano indicando se o modelo deve ou nao ser reajustado

@@ -71,6 +71,4 @@ as colunas \code{c("V1", "V2", "V3")}, formula sera \code{~ V1 + V2 + V3}.
 
 Na execucao em janela movel, o vetor de pesos deve ser passado com o tamanho igual ao da janela.
 O mesmo vetor sera aplicado em todas as janelas avaliadas.
-
-
 }
