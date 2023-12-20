@@ -15,8 +15,8 @@ Description: Arcabouco unificado para estimacao, previsao, simulacao e etc
 License: MIT + file LICENSE
 Depends:
     graphics (>= 3.6),
-    R (>= 3.6),
-    stats (>= 3.6)
+    R (>= 4.0),
+    stats (>= 4.0)
 Imports: 
     forecast (>= 8.12),
     KFAS (>= 1.4.4),
