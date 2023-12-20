@@ -35,7 +35,8 @@ NULL
 #'     \code{regdata} serão utilizadas
 #' @param family string indicando uma familia para funcao perda. Veja \code{\link[mboost]{mboost}}
 #'     para mais detalhes
-#' @param cv_control uma lista nomeada contendo quaisquer argumentos 
+#' @param cv_control uma lista nomeada contendo quaisquer argumentos das funcoes
+#'     \code{\link[mboost]{cv}} e \code{\link[mboost]{cvrisk}}
 #' @param ... demais argumentos passados a funcao \code{\link[mboost]{mboost}}
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{BOOST}, uma lista de dois 

@@ -24,7 +24,8 @@ BOOST(serie, regdata, formula, family = "Gaussian", cv_control = list(), ...)
 \item{family}{string indicando uma familia para funcao perda. Veja \code{\link[mboost]{mboost}}
 para mais detalhes}
 
-\item{cv_control}{uma lista nomeada contendo quaisquer argumentos}
+\item{cv_control}{uma lista nomeada contendo quaisquer argumentos das funcoes
+\code{\link[mboost]{cv}} e \code{\link[mboost]{cvrisk}}}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
 
