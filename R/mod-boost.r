@@ -44,7 +44,8 @@ NULL
 #' 
 #' @rdname modelos_boost
 
-BOOST <- function(serie, regdata, formula, family = "Gaussian", cv_control = list(), ...) {
+BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"),
+    family = "Gaussian", cv_control = list(), ...) {
 
     # algumas familias tem chamadas de 'risk' e 'loss' inacreditavelmente porcas, que envolvem
     # avaliacao de nomes em outros environments, nao controlados, que sao atualizados por fora
@@ -56,7 +57,7 @@ BOOST <- function(serie, regdata, formula, family = "Gaussian", cv_control = lis
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
-    if (missing(formula)) formula <- Y ~ . else formula <- update(formula, Y ~ .)
+    formula <- update(formula, Y ~ .)
 
     if (!is.ts(serie)) serie <- ts(serie)
     aux_tsp <- tsp(serie)
