@@ -25,18 +25,18 @@ NULL
 
 ss_ar1_saz <- function(serie, ...) {
 
-    Z <- matrix(c(1, 1), 1)
-    T <- matrix(c(1, 0, 0, 0), 2)
-    R <- matrix(c(0, 1), 2)
+    arrZ <- matrix(c(1, 1), 1)
+    arrT <- matrix(c(1, 0, 0, 0), 2)
+    arrR <- matrix(c(0, 1), 2)
 
     if(frequency(serie) == 1) {
         mod <- SSModel(serie ~ -1 +
-            SSMcustom(Z = Z, T = T, R = R, a1 = c(1, 0), Q = NA),
+                SSMcustom(Z = arrZ, T = arrT, R = arrR, a1 = c(1, 0), Q = NA),
             H = 0)
     } else {
         mod <- SSModel(serie ~ -1 +
-            SSMcustom(Z = Z, T = T, R = R, a1 = c(1, 0), Q = NA) +
-            SSMseasonal(period = frequency(serie), sea.type = "dummy", Q = NA),
+                SSMcustom(Z = arrZ, T = arrT, R = arrR, a1 = c(1, 0), Q = NA) +
+                SSMseasonal(period = frequency(serie), sea.type = "dummy", Q = NA),
             H = 0)
     }
     upfunc <- function(par, model) {

@@ -51,7 +51,7 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, ...) {
 
     nvars  <- ncol(model.matrix(formula, data = regdata)) - 1 # model.matrix inclui intercept
 
-    if(vardin & (frequency(serie) == 1)) {
+    if(vardin && (frequency(serie) == 1)) {
         warning("'vardin' e TRUE mas 'serie' nao possui sazonalidade -- ignorando 'vardin'")
         vardin <- FALSE
     }
@@ -62,10 +62,11 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, ...) {
     updH <- ifelse(!vardin, updH_homoc, updH_heter_trig)
     upfunc <- function(par, mod) updH(par, updQ(par, mod), freq = frequency(serie))
 
-    start <- rep(0,
+    start <- rep(
+        0,
         1 +          # variancia de epsilon se vardin = FALSE; intercept da funcao de variancia c.c.
-        2 * vardin + # coeficientes harmonicos caso vardin = TRUE
-        nvars        # coeficientes de regressao
+            2 * vardin + # coeficientes harmonicos caso vardin = TRUE
+            nvars        # coeficientes de regressao
     )
     fit <- fitSSM(mod, start, upfunc, method = "BFGS")
 

@@ -133,15 +133,15 @@ predict.modprevP <- function(object, n.ahead, ...) {
     has_newdata <- "newdata" %in% ...names()
     newdata_list <- has_newdata && class(args$newdata) == "list"
 
-    if(has_newdata & !newdata_list) {
+    if(has_newdata && !newdata_list) {
 
         # assumindo que newdata e uma continuacao cronologica da serie
-        aux_split <- ts(seq(nrow(args$newdata)), start = tp1, frequency = aux_tsp[3])
+        aux_split <- ts(seq_len(nrow(args$newdata)), start = tp1, frequency = aux_tsp[3])
 
         newdata <- split(args$newdata, cycle(aux_split))
         args$newdata <- NULL
 
-    } else if(has_newdata & newdata_list) {
+    } else if(has_newdata && newdata_list) {
         names(newdata) <- seq_along(newdata)
     } else if(!has_newdata) {
         newdata <- structure(vector("list", nmods), names = seq_len(nmods))
@@ -204,12 +204,12 @@ update.modprevP <- function(object, newseries, refit = FALSE, ...) {
     has_newregdata <- "newregdata" %in% ...names()
     newregdata_list <- has_newregdata && class(args$newregdata) == "list"
 
-    if(has_newregdata & !newregdata_list) {
+    if(has_newregdata && !newregdata_list) {
 
         newregdata <- split(args$newregdata, seasons)
         args$newregdata <- NULL
 
-    } else if(has_newregdata & newregdata_list) {
+    } else if(has_newregdata && newregdata_list) {
         names(newregdata) <- seq_along(newregdata)
     } else if(!has_newregdata) {
         newregdata <- structure(vector("list", nmods), names = seq_len(nmods))

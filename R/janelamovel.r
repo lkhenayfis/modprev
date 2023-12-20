@@ -165,10 +165,12 @@ verbose_fun <- function(verbose) {
     verb_func <- switch(as.character(verbose),
         "0" = function(...) NULL,
         "1" = function(i, f, r) if(r) cat("\t Prevendo serie [", i, "] -> [", f, "]\n") else NULL,
-        "2" = function(i, f, r) if(r) {
-            cat("REFIT -- Prevendo serie [", i, "] -> [", f, "]\n")
-        } else {
-            cat("\t Prevendo serie [", i, "] -> [", f, "]\n")
+        "2" = function(i, f, r) {
+            if(r) {
+                cat("REFIT -- Prevendo serie [", i, "] -> [", f, "]\n")
+            } else {
+                cat("\t Prevendo serie [", i, "] -> [", f, "]\n")
+            }
         }
     )
 
