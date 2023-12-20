@@ -1,5 +1,5 @@
 
-test_that("Estimacao de modelo Reg Lin", {
+test_that("Estimacao de modelo Reg Lin - simples", {
     compmod <- lm(as.numeric(datregdin$obs) ~ data.matrix(datregdin$varex))
     mod <- estimamodelo(datregdin$obs, "reg_lin", regdata = datregdin$varex, formula = ~ V1 + V2 + V3)
 
@@ -22,6 +22,21 @@ test_that("Estimacao de modelo Reg Lin", {
     mod <- estimamodelo(ss, "reg_lin", regdata = datregdin$varex, formula = ~ V1 + V2 + V3)
 
     expect_equal(attr(mod, "mod_atrs")$tsp, c(1, 20.9, 10))
+})
+
+test_that("Estimacao de modelo GAM - argumentos opcionais de lm", {
+
+    # passando pesos
+    set.seed(12)
+    mod <- estimamodelo(datregdin$obs, "reg_lin", regdata = datregdin$varex, formula = ~ V1 + V2 + V3,
+        weights = runif(200))
+
+    set.seed(12)
+    compmod <- lm(as.numeric(datregdin$obs) ~ data.matrix(datregdin$varex), weights = runif(200))
+
+    expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
+    expect_equal(attr(mod, "mod_atrs")$formula, Y ~ V1 + V2 + V3)
+    expect_equal(mod$model$weights, compmod$weights)
 })
 
 test_that("Previsao de modelo Reg Lin", {
