@@ -7,7 +7,7 @@
 \alias{update.reg_lin}
 \title{Modelos \code{reg_lin}}
 \usage{
-reg_lin(serie, regdata, formula, pesos = rep(1, length(serie)), ...)
+reg_lin(serie, regdata, formula = expandeformula(regdata, "ls"), ...)
 
 \method{predict}{reg_lin}(object, newdata, n.ahead, ...)
 
@@ -20,9 +20,6 @@ reg_lin(serie, regdata, formula, pesos = rep(1, length(serie)), ...)
 
 \item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
 \code{regdata} serão utilizadas}
-
-\item{pesos}{opcional, vetor de pesos para cada observacao no ajuste. Sera normalizado
-internamente}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
 

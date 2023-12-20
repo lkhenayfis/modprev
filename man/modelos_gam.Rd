@@ -10,9 +10,8 @@
 GAM(
   serie,
   regdata,
-  formula,
+  formula = expandeformula(regdata, "gam"),
   fit_fun = c("gam", "bam"),
-  pesos = rep(1, length(serie)),
   ...
 )
 
@@ -30,9 +29,6 @@ GAM(
 
 \item{fit_fun}{um de \code{c("gam", "bam")}, indicando a funcao de estimacao a ser utilizada. Veja
 \code{\link[mgcv]{bam}} para maiores detalhes}
-
-\item{pesos}{opcional, vetor de pesos para cada observacao no ajuste. Sera normalizado
-internamente}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
 
