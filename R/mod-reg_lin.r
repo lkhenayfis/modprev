@@ -38,11 +38,10 @@ NULL
 #' 
 #' @rdname modelos_reg_lin
 
-reg_lin <- function(serie, regdata, formula, ...) {
+reg_lin <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...) {
 
     if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
-    if(missing(formula)) formula <- expandeformula(regdata)
     formula <- update(formula, Y ~ .)
 
     if(!is.ts(serie)) serie <- ts(serie)

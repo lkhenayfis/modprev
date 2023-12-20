@@ -44,11 +44,10 @@ NULL
 #' 
 #' @rdname modelos_gam
 
-GAM <- function(serie, regdata, formula, fit_fun = c("gam", "bam"), ...) {
+GAM <- function(serie, regdata, formula = expandeformula(regdata, "gam"), fit_fun = c("gam", "bam"), ...) {
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
-    if (missing(formula)) formula <- expandeformula(regdata, "gam")
     formula <- update(formula, Y ~ .)
 
     fit_fun <- match.arg(fit_fun)

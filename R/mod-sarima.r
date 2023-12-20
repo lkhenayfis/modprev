@@ -45,7 +45,7 @@ NULL
 #' 
 #' @rdname modelos_sarima
 
-sarima <- function(serie, regdata, formula, ...) {
+sarima <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...) {
 
     # o is.null e necessario para garantir que nao entre no sarimax errado durante janelamovel
     if(!missing(regdata) && !is.null(regdata)) return(sarimax(serie, regdata, formula, ...))
