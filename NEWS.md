@@ -28,6 +28,10 @@
     implementado no pacote
   * encolhimento de variancias na regressao dinamica foi removido, pois os resultados obtidos nao
     foram satisfatorios.
+* A forma como chamadas de cada modelo especifico sao realizadas foi modificada. Anteriormente era
+  necessario expor todos os argumentos de funcoes internas que se desejava dar acesso, o que tornava
+  o codigo poluido e sobrecarregado (como, por exemplo, o argumento `pesos`). Na nova formulacao
+  qualquer argumento opcional das funcoes subjacentes de estimacao pode ser utilizado livremente
 
 # modprev 1.8
 
