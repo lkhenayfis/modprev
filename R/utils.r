@@ -34,6 +34,27 @@ shift <- function(v, i) {
     }
 }
 
+#' Match De Argumentos Com Lista
+#' 
+#' Identifica numa lista \code{args} quais elementos sao arugmentos de uma funcao \code{fun}
+#' 
+#' @param args lista nomeada contendo candidatos a argumentos de uma funcao
+#' @param fun funcao cujos arugmentos procurar em \code{args}
+#' 
+#' @return \code{args} reduzida aos elementos que correspondem a argumentos de \code{fun}
+
+match_fun_args <- function(args, fun) {
+    if (is.primitive(fun)) {
+        fun_args <- formalArgs(args(fun))
+    } else {
+        fun_args <- formalArgs(fun)
+    }
+    fun_args <- fun_args[!grepl("\\.\\.\\.", fun_args)]
+    args <- args[fun_args]
+    args <- args[!sapply(args, is.null)]
+    return(args)
+}
+
 # MANIPULACAO DE INDICE TEMPORAL -------------------------------------------------------------------
 
 #' Índice De Tempo Por Delta Em Série Temporal

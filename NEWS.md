@@ -1,3 +1,9 @@
+# boost
+
+## New features
+
+* Adiciona modelagem por boosting de modelos simples
+
 # gam
 
 ## New features
