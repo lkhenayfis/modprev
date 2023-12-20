@@ -33,6 +33,16 @@ test_that("Estimacao de modelo SARIMAX", {
     mod <- estimamodelo(serie, tipo = "sarima", regdata = regdata, formula = ~ V1 + V2 + V3,
         order = c(1, 0, 0), seasonal = c(1, 0, 0))
     expect_equal(length(coef(mod$modelo)), 6)
+
+    # Testando argumentos de Arima por ... -------------------------------------
+
+    set.seed(1234)
+    serie <- datregdin$obs + arima.sim(model = list(ar = c(.5, .2), ma = c(.4, .6)), 200)
+    regdata <- datregdin$varex
+
+    mod     <- estimamodelo(serie, tipo = "sarima", regdata = regdata, formula = ~ V1, max.q = 0)
+    compmod <- auto.arima(serie, xreg = data.matrix(regdata)[, 1, drop = FALSE], max.q = 0)
+    expect_equal(mod$modelo$coef, compmod$coef)
 })
 
 test_that("Previsao de modelo SARIMAX", {

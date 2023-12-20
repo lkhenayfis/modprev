@@ -9,6 +9,12 @@ test_that("Estimacao de modelo SARIMA", {
     serie <- c(AirPassengers)
     mod   <- estimamodelo(serie, "sarima")
 
+    # Testando argumentos de Arima por ... -------------------------------------
+
+    mod     <- estimamodelo(AirPassengers, tipo = "sarima", max.d = 0)
+    compmod <- auto.arima(AirPassengers, max.d = 0, allowdrift = FALSE)
+    expect_equal(mod$modelo$coef, compmod$coef)
+
     # Estimando um modelo pre especificado -------------------------------------
 
     mod <- estimamodelo(AirPassengers, "sarima", order = c(1, 0, 0))
