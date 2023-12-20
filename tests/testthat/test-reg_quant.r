@@ -1,5 +1,5 @@
 
-test_that("Estimacao de modelo Reg Quant", {
+test_that("Estimacao de modelo Reg Quant - simples", {
     compmod <- rq(as.numeric(datregdin$obs) ~ data.matrix(datregdin$varex))
     mod <- estimamodelo(datregdin$obs, "reg_quant", regdata = datregdin$varex, formula = ~ V1 + V2 + V3)
 
@@ -22,6 +22,30 @@ test_that("Estimacao de modelo Reg Quant", {
     mod <- estimamodelo(ss, "reg_quant", regdata = datregdin$varex, formula = ~ V1 + V2 + V3)
 
     expect_equal(attr(mod, "mod_atrs")$tsp, c(1, 20.9, 10))
+})
+
+test_that("Estimacao de modelo GAM - argumentos opcionais de rq", {
+
+    # passando pesos
+    set.seed(12)
+    mod <- estimamodelo(datregdin$obs, "reg_quant", regdata = datregdin$varex, formula = ~ V1 + V2 + V3,
+        weights = runif(200))
+
+    set.seed(12)
+    compmod <- rq(as.numeric(datregdin$obs) ~ data.matrix(datregdin$varex), weights = runif(200))
+
+    expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
+    expect_equal(attr(mod, "mod_atrs")$formula, Y ~ V1 + V2 + V3)
+    expect_equal(mod$model$weights, compmod$weights)
+
+    # passando pesos
+    mod <- estimamodelo(datregdin$obs, "reg_quant", regdata = datregdin$varex, formula = ~ V1 + V2 + V3,
+        tau = .8)
+    compmod <- rq(as.numeric(datregdin$obs) ~ data.matrix(datregdin$varex), tau = .8)
+
+    expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
+    expect_equal(attr(mod, "mod_atrs")$formula, Y ~ V1 + V2 + V3)
+    expect_equal(mod$model$tau, compmod$tau)
 })
 
 test_that("Previsao de modelo Reg Quant", {
