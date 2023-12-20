@@ -21,7 +21,8 @@ Imports:
     forecast (>= 8.12),
     KFAS (>= 1.4.4),
     quantreg (>= 5.9),
-    mgcv (>= 1.8-42)
+    mgcv (>= 1.8-42),
+    mboost (>= 2.9-9)
 Suggests: 
     knitr,
     rmarkdown,
