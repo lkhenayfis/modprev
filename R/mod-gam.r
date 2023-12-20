@@ -35,7 +35,7 @@ NULL
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
 #'     \code{regdata} serão utilizadas
-#' @param tipo um de \code{c("gam", "bam")}, indicando a funcao de estimacao a ser utilizada. Veja
+#' @param fit_fun um de \code{c("gam", "bam")}, indicando a funcao de estimacao a ser utilizada. Veja
 #'     \code{\link[mgcv]{bam}} para maiores detalhes
 #' @param pesos opcional, vetor de pesos para cada observacao no ajuste. Sera normalizado 
 #'     internamente

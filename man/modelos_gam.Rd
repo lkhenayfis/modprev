@@ -28,6 +28,9 @@ GAM(
 \item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
 \code{regdata} serão utilizadas}
 
+\item{fit_fun}{um de \code{c("gam", "bam")}, indicando a funcao de estimacao a ser utilizada. Veja
+\code{\link[mgcv]{bam}} para maiores detalhes}
+
 \item{pesos}{opcional, vetor de pesos para cada observacao no ajuste. Sera normalizado
 internamente}
 
@@ -45,9 +48,6 @@ seja informado a previsão sera feita tantos passos à frente quanto amostras em
 \item{newregdata}{\code{data.frame}-like contendo variáveis explicativas na nova amostra}
 
 \item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
-
-\item{tipo}{um de \code{c("gam", "bam")}, indicando a funcao de estimacao a ser utilizada. Veja
-\code{\link[mgcv]{bam}} para maiores detalhes}
 }
 \value{
 Objeto da classe \code{modprev} e subclasse \code{GAM}, uma lista de dois
