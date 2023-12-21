@@ -5,7 +5,6 @@ test_that("Estimacao de modelo Reg Lin - simples", {
 
     expect_equal(class(mod)[1], "reg_lin")
     expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
-    expect_equal(attr(mod, "mod_atrs")$formula, Y ~ V1 + V2 + V3)
 
     # Sem passar a formula
     expect_warning(mod2 <- estimamodelo(datregdin$obs, "reg_lin", regdata = datregdin$varex))
@@ -35,7 +34,6 @@ test_that("Estimacao de modelo GAM - argumentos opcionais de lm", {
     compmod <- lm(as.numeric(datregdin$obs) ~ data.matrix(datregdin$varex), weights = runif(200))
 
     expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
-    expect_equal(attr(mod, "mod_atrs")$formula, Y ~ V1 + V2 + V3)
     expect_equal(mod$model$weights, compmod$weights)
 })
 
@@ -77,18 +75,24 @@ test_that("Previsao de modelo Reg Lin", {
 })
 
 test_that("Atualizacao de modelo Reg Lin", {
-    yy <- window(datregdin$obs, 1, 150)
-    xx <- head(datregdin$varex, 150)
-    mod <- estimamodelo(yy, "reg_lin", regdata = xx, formula = ~ V1 + V2 + V3)
+    yy <- window(datregdin$obs, 1, 100)
+    xx <- head(datregdin$varex, 100)
+    pesos <- runif(100)
+    mod <- estimamodelo(yy, "reg_lin", regdata = xx, formula = ~ V1 + V2 + V3, weights = pesos)
 
-    yy2 <- window(datregdin$obs, 151, 200)
-    xx2 <- tail(datregdin$varex, 50)
+    yy2 <- window(datregdin$obs, 101, 200)
+    xx2 <- tail(datregdin$varex, 100)
 
     mod_upd <- update(mod, yy2, xx2)
     expect_equal(coef(mod$modelo), coef(mod_upd$modelo))
+    expect_equal(mod$model$weights, mod_upd$model$weights)
     expect_equal(mod_upd$serie, yy2)
 
-    expect_equal(attr(mod_upd, "mod_atrs")$tsp, c(151, 200, 1))
+    orig_call <- attr(mod, "mod_atrs")$call
+    upd_call  <- attr(mod_upd, "mod_atrs")$call
+    compare_calls(orig_call, upd_call, c("formula", "weights"))
+
+    expect_equal(attr(mod_upd, "mod_atrs")$tsp, c(101, 200, 1))
 
     # Erro quando nao passa newseries ou newregdata
 
@@ -98,10 +102,14 @@ test_that("Atualizacao de modelo Reg Lin", {
 
     # Com refit
 
+    compmod <- estimamodelo(yy2, "reg_lin", regdata = xx2, formula = ~ V1 + V2 + V3, weights = pesos)
     mod_refit <- update(mod, yy2, xx2, refit = TRUE)
+    expect_equal(unname(coef(mod_refit$modelo)), unname(coef(compmod$modelo)))
+    expect_equal(mod$model$weights, mod_refit$model$weights)
     expect_equal(mod_refit$serie, yy2)
 
-    expect_snapshot_value(coef(mod_refit$modelo), style = "deparse")
+    refit_call  <- attr(mod_refit, "mod_atrs")$call
+    compare_calls(orig_call, refit_call, c("formula", "weights"))
 
-    expect_equal(attr(mod_refit, "mod_atrs")$tsp, c(151, 200, 1))
+    expect_equal(attr(mod_refit, "mod_atrs")$tsp, c(101, 200, 1))
 })
