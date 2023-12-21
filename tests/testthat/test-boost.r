@@ -146,9 +146,8 @@ test_that("Atualizacao de BOOST", {
     orig_call <- attr(mod, "mod_atrs")$call
     upd_call  <- attr(mod_upd, "mod_atrs")$call
 
-    for (i in c("formula", "cv_control", "baselearner", "weights", "family")) {
-        expect_equal(orig_call[[i]], upd_call[[i]])
-    }
+    compare_calls(orig_call, upd_call,
+        c("formula", "cv_control", "baselearner", "weights", "family"))
 
     expect_equal(attr(mod_upd, "mod_atrs")$tsp, c(101, 200, 1))
 
@@ -165,10 +164,8 @@ test_that("Atualizacao de BOOST", {
     expect_equal(mod$modelo$family@name, mod_refit$modelo$family@name)
 
     refit_call  <- attr(mod_refit, "mod_atrs")$call
-
-    for (i in c("formula", "cv_control", "baselearner", "weights", "family")) {
-        expect_equal(orig_call[[i]], refit_call[[i]])
-    }
+    compare_calls(orig_call, refit_call,
+        c("formula", "cv_control", "baselearner", "weights", "family"))
 
     expect_equal(attr(mod_refit, "mod_atrs")$tsp, c(101, 200, 1))
 })
