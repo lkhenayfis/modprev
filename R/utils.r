@@ -100,6 +100,21 @@ deltats <- function(ini, delta, freq) {
     return(out)
 }
 
+# AUXILIARES PARA TESTES ---------------------------------------------------------------------------
+
+#' Compara Duas Chamadas
+#' 
+#' Funcao interna para uso nos testes de update, nao deve ser utilizada diretamente
+#' 
+#' @param call1,call2 chamadas a comparr
+#' @param itens vetor de strings indicando os argumentos das calls a comparar
+#' 
+#' @return Apenas executa os testes, sem retornar valor algum
+
+compare_calls <- function(call1, call2, items) {
+    for (item in items) expect_equal(call1[[item]], call2[[item]])
+}
+
 # AUXILIAR PARA MODELOS COM VARIAVEL EXPLICATIVA ---------------------------------------------------
 
 expandeformula <- function(data, modo = c("ls", "gam")) {
