@@ -7,7 +7,6 @@ test_that("Estimacao de modelo GAM - simples", {
 
     expect_equal(class(mod)[1], "GAM")
     expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
-    expect_equal(attr(mod, "mod_atrs")$formula, Y ~ s(V1, V2, V3))
 
     # Sem passar a formula
     expect_warning(mod2 <- estimamodelo(datregdin$obs, "GAM", regdata = datregdin$varex))
@@ -43,7 +42,6 @@ test_that("Estimacao de modelo GAM - funcao 'bam'", {
 
     expect_equal(class(mod)[1], "GAM")
     expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
-    expect_equal(attr(mod, "mod_atrs")$formula, Y ~ s(V1, V2, V3))
 
     # Sem passar a formula
     expect_warning(
@@ -86,7 +84,6 @@ test_that("Estimacao de modelo GAM - argumentos opcionais de gam", {
     )
 
     expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
-    expect_equal(attr(mod, "mod_atrs")$formula, Y ~ s(V1, V2, V3))
     expect_equal(mod$model$weights, compmod$weights)
 })
 
@@ -130,16 +127,27 @@ test_that("Previsao de modelo GAM", {
 test_that("Atualizacao de modelo GAM", {
     yy <- window(datregdin$obs, 1, 100)
     xx <- head(datregdin$varex, 100)
-    mod <- estimamodelo(yy, "GAM", regdata = xx, formula = ~ s(V1, V2, V3, k = 15))
+    SP <- 3
+    K  <- 15
+    pesos <- runif(100)
+    mod <- estimamodelo(yy, "GAM", regdata = xx, formula = ~ s(V1, V2, V3, sp = SP, k = K),
+        weights = pesos)
 
     yy2 <- window(datregdin$obs, 101, 200)
     xx2 <- tail(datregdin$varex, 100)
 
     mod_upd <- update(mod, yy2, xx2)
     expect_equal(coef(mod$modelo), coef(mod_upd$modelo))
+    expect_equal(unname(mod$model$smooth[[1]]$sp), unname(mod_upd$model$smooth[[1]]$sp))
+    expect_equal(unname(mod$model$smooth[[1]]$bs.dim), unname(mod_upd$model$smooth[[1]]$bs.dim))
+    expect_equal(mod$model$weights, mod_upd$model$weights)
     expect_equal(mod_upd$serie, yy2)
 
     expect_equal(attr(mod_upd, "mod_atrs")$tsp, c(101, 200, 1))
+
+    orig_call <- attr(mod, "mod_atrs")$call
+    upd_call  <- attr(mod_upd, "mod_atrs")$call
+    compare_calls(orig_call, upd_call, c("formula", "weights"))
 
     # Erro quando nao passa newseries ou newregdata
 
@@ -150,8 +158,17 @@ test_that("Atualizacao de modelo GAM", {
 
     # Com refit
 
+    compmod <- estimamodelo(yy2, "GAM", regdata = xx2, formula = ~ s(V1, V2, V3, sp = SP, k = K),
+        weights = pesos)
     mod_refit <- update(mod, yy2, xx2, refit = TRUE)
+    expect_equal(unname(coef(mod_refit$modelo)), unname(coef(compmod$modelo)))
+    expect_equal(unname(mod$model$smooth[[1]]$sp), unname(mod_refit$model$smooth[[1]]$sp))
+    expect_equal(unname(mod$model$smooth[[1]]$bs.dim), unname(mod_refit$model$smooth[[1]]$bs.dim))
+    expect_equal(mod$model$weights, mod_refit$model$weights)
     expect_equal(mod_refit$serie, yy2)
+
+    refit_call <- attr(mod_refit, "mod_atrs")$call
+    compare_calls(orig_call, refit_call, c("formula", "weights"))
 
     expect_equal(attr(mod_refit, "mod_atrs")$tsp, c(101, 200, 1))
 })
