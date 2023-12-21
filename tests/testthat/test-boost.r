@@ -128,8 +128,9 @@ test_that("Atualizacao de BOOST", {
     xx <- head(datregdin$varex, 100)
 
     set.seed(12)
-    mod <- estimamodelo(yy, "BOOST", regdata = xx, formula = ~ V1 + V2 + V3,
-        baselearner = "bols", cv_control = list(B = 1))
+    pesos <- runif(100)
+    mod   <- estimamodelo(yy, "BOOST", regdata = xx, formula = ~ V1 + V2 + V3,
+        baselearner = "bols", cv_control = list(B = 1), weights = pesos, family = Laplace())
 
     yy2 <- window(datregdin$obs, 101, 200)
     xx2 <- tail(datregdin$varex, 100)
@@ -138,11 +139,20 @@ test_that("Atualizacao de BOOST", {
     expect_equal(coef(mod$modelo), coef(mod_upd$modelo))
     expect_equal(mod$modelo$mstop(), mod_upd$modelo$mstop())
     expect_equal(mod$modelo$xselect(), mod_upd$modelo$xselect())
+    expect_equal(mod$modelo[["(weights)"]], mod_upd$modelo[["(weights)"]])
+    expect_equal(mod$modelo$family@name, mod_upd$modelo$family@name)
     expect_equal(mod_upd$serie, yy2)
+
+    orig_call <- attr(mod, "mod_atrs")$call
+    upd_call  <- attr(mod_upd, "mod_atrs")$call
+
+    for (i in c("formula", "cv_control", "baselearner", "weights", "family")) {
+        expect_equal(orig_call[[i]], upd_call[[i]])
+    }
 
     expect_equal(attr(mod_upd, "mod_atrs")$tsp, c(101, 200, 1))
 
-    # Erro quando nao passa newseries ou newregdata
+    # Erro quando nao passa newseries
 
     expect_error(mod_erro <- update(mod))
     expect_error(mod_erro <- update(mod, newregdata = xx2))
@@ -151,6 +161,14 @@ test_that("Atualizacao de BOOST", {
 
     mod_refit <- update(mod, yy2, xx2, refit = TRUE)
     expect_equal(mod_refit$serie, yy2)
+    expect_equal(mod$modelo[["(weights)"]], mod_refit$modelo[["(weights)"]])
+    expect_equal(mod$modelo$family@name, mod_refit$modelo$family@name)
+
+    refit_call  <- attr(mod_refit, "mod_atrs")$call
+
+    for (i in c("formula", "cv_control", "baselearner", "weights", "family")) {
+        expect_equal(orig_call[[i]], refit_call[[i]])
+    }
 
     expect_equal(attr(mod_refit, "mod_atrs")$tsp, c(101, 200, 1))
 })

@@ -127,7 +127,6 @@ update.BOOST <- function(object, newseries, newregdata, refit = FALSE, ...) {
     mod_atrs <- attr(object, "mod_atrs")
 
     if (refit) {
-        envir <- mod_atrs$envir
         call  <- mod_atrs$call
         call$serie   <- newseries
         call$regdata <- newregdata
