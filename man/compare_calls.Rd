@@ -4,10 +4,10 @@
 \alias{compare_calls}
 \title{Compara Duas Chamadas}
 \usage{
-compare_calls(call1, call2, items)
+compare_calls(call1, call2, itens)
 }
 \arguments{
-\item{call1, call2}{chamadas a comparr}
+\item{call1, call2}{chamadas a comparar}
 
 \item{itens}{vetor de strings indicando os argumentos das calls a comparar}
 }
