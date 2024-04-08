@@ -42,7 +42,8 @@ NULL
 #' 
 #' @rdname modelos_boost
 
-BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"), cv_control = list(), ...) {
+BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"),
+    cv_control = list(), train_test = logical(0), ...) {
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
@@ -52,6 +53,17 @@ BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"), cv_co
     aux_tsp <- tsp(serie)
 
     regdata <- cbind(Y = as.numeric(serie), regdata)
+
+    if (length(cv_control) != 0) {
+        fit <- BOOST_traincv(regdata, formula, cv_control, ...)
+    }
+
+    mod_atrs <- list(call = match.call(), tsp = aux_tsp)
+
+    new_modprevU(fit, serie, "BOOST", mod_atrs)
+}
+
+BOOST_traincv <- function(regdata, formula, cv_control, ...) {
     fit <- mboost(formula, data = regdata, ...)
 
     cv_spec <- c(list(quote(cv), model.weights(fit)), match_fun_args(cv_control, mboost::cv))
@@ -66,10 +78,7 @@ BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"), cv_co
     )
     cv <- eval(as.call(cv))
     fit <- fit[mstop(cv)]
-
-    mod_atrs <- list(call = match.call(), tsp = aux_tsp)
-
-    new_modprevU(fit, serie, "BOOST", mod_atrs)
+    return(fit)
 }
 
 # METODOS ------------------------------------------------------------------------------------------
