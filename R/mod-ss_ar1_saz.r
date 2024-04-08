@@ -29,7 +29,7 @@ ss_ar1_saz <- function(serie, ...) {
     arrT <- matrix(c(1, 0, 0, 0), 2)
     arrR <- matrix(c(0, 1), 2)
 
-    if(frequency(serie) == 1) {
+    if (frequency(serie) == 1) {
         mod <- SSModel(serie ~ -1 +
                 SSMcustom(Z = arrZ, T = arrT, R = arrR, a1 = c(1, 0), Q = NA),
             H = 0)
@@ -49,7 +49,7 @@ ss_ar1_saz <- function(serie, ...) {
     }
     fit <- fitSSM(mod, inits = c(mean(serie), 0, 0, 0), updatefn = upfunc, method = "BFGS")
 
-    if(abs(logLik(fit$model)) < 1e-10) {
+    if (abs(logLik(fit$model)) < 1e-10) {
         fit$model$Z[] <- NA
     }
 
@@ -110,20 +110,20 @@ predict.ss_ar1_saz <- function(object, n.ahead, ...) {
 
 update.ss_ar1_saz <- function(object, newseries, refit = FALSE, ...) {
 
-    if(refit) {
+    if (refit) {
         object <- estimamodelo(newseries, "ss_ar1_saz")
     } else {
         modelo <- object$modelo
 
         # Se modelo não convergiu, tenta reestimar
-        if(all(is.na(modelo$Z))) return(estimamodelo(newseries, tipo = "ss_ar1_saz")$modelo)
+        if (all(is.na(modelo$Z))) return(estimamodelo(newseries, tipo = "ss_ar1_saz")$modelo)
 
         # Do contrario, atualiza normalmente
         modelo$y <- newseries
         attr(modelo$y, "dim") <- c(length(newseries), 1)
         attr(modelo, "n") <- as.integer(length(newseries))
 
-        newseries  <- if(is.ts(newseries)) newseries else ts(newseries)
+        newseries  <- if (is.ts(newseries)) newseries else ts(newseries)
 
         object <- new_modprevU(modelo, newseries, "ss_ar1_saz")
     }

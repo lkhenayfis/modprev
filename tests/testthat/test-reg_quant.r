@@ -28,10 +28,10 @@ test_that("Estimacao de modelo Reg Quant - argumentos opcionais de rq", {
     # passando pesos
     set.seed(12)
     mod <- estimamodelo(datregdin$obs, "reg_quant", regdata = datregdin$varex, formula = ~ V1 + V2 + V3,
-        weights = runif(200))
+        weights = runif (200))
 
     set.seed(12)
-    compmod <- rq(as.numeric(datregdin$obs) ~ data.matrix(datregdin$varex), weights = runif(200))
+    compmod <- rq(as.numeric(datregdin$obs) ~ data.matrix(datregdin$varex), weights = runif (200))
 
     expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
     expect_equal(mod$model$weights, compmod$weights)
@@ -85,7 +85,7 @@ test_that("Previsao de modelo Reg Quant", {
 test_that("Atualizacao de modelo Reg Quant", {
     yy <- window(datregdin$obs, 1, 100)
     xx <- head(datregdin$varex, 100)
-    pesos <- runif(100)
+    pesos <- runif (100)
     mod <- estimamodelo(yy, "reg_quant", regdata = xx, formula = ~ V1 + V2 + V3,
         weights = pesos, tau = .7)
 

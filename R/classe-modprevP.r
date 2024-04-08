@@ -29,7 +29,7 @@
 estimamodelo_P <- function(serie, tipo, ...) {
 
     aux_tsp <- tsp(serie)
-    if(aux_tsp[3] == 1) stop("'serie' nao possui sazonalidade -- nao pode ser modelada periodicamente")
+    if (aux_tsp[3] == 1) stop("'serie' nao possui sazonalidade -- nao pode ser modelada periodicamente")
 
     seasons <- as.numeric(cycle(serie))
     seasons <- factor(seasons, unique(seasons))
@@ -42,7 +42,7 @@ estimamodelo_P <- function(serie, tipo, ...) {
 
     args <- list(...)
 
-    if("regdata" %in% ...names()) {
+    if ("regdata" %in% ...names()) {
         l_regdata <- split(args$regdata, seasons)
         args$regdata <- NULL
     } else {
@@ -85,7 +85,7 @@ new_modprevP <- function(fits, serie, atrs) {
     new <- list(modelos = fits, serie = serie)
     class(new) <- c("modprevP", "modprev")
 
-    if(!missing("atrs")) attr(new, "mod_atrs") <- atrs
+    if (!missing("atrs")) attr(new, "mod_atrs") <- atrs
 
     return(new)
 }
@@ -133,7 +133,7 @@ predict.modprevP <- function(object, n.ahead, ...) {
     has_newdata <- "newdata" %in% ...names()
     newdata_list <- has_newdata && class(args$newdata) == "list"
 
-    if(has_newdata && !newdata_list) {
+    if (has_newdata && !newdata_list) {
 
         # assumindo que newdata e uma continuacao cronologica da serie
         aux_split <- ts(seq_len(nrow(args$newdata)), start = tp1, frequency = aux_tsp[3])
@@ -141,15 +141,15 @@ predict.modprevP <- function(object, n.ahead, ...) {
         newdata <- split(args$newdata, cycle(aux_split))
         args$newdata <- NULL
 
-    } else if(has_newdata && newdata_list) {
+    } else if (has_newdata && newdata_list) {
         names(newdata) <- seq_along(newdata)
-    } else if(!has_newdata) {
+    } else if (!has_newdata) {
         newdata <- structure(vector("list", nmods), names = seq_len(nmods))
     }
 
     submodels <- as.numeric(names(newdata))
 
-    if(missing("n.ahead")) {
+    if (missing("n.ahead")) {
         v_h <- lapply(newdata, nrow)
     } else {
         aux_split <- ts(seq_len(n.ahead), start = tp1, frequency = aux_tsp[3])
@@ -204,14 +204,14 @@ update.modprevP <- function(object, newseries, refit = FALSE, ...) {
     has_newregdata <- "newregdata" %in% ...names()
     newregdata_list <- has_newregdata && class(args$newregdata) == "list"
 
-    if(has_newregdata && !newregdata_list) {
+    if (has_newregdata && !newregdata_list) {
 
         newregdata <- split(args$newregdata, seasons)
         args$newregdata <- NULL
 
-    } else if(has_newregdata && newregdata_list) {
+    } else if (has_newregdata && newregdata_list) {
         names(newregdata) <- seq_along(newregdata)
-    } else if(!has_newregdata) {
+    } else if (!has_newregdata) {
         newregdata <- structure(vector("list", nmods), names = seq_len(nmods))
     }
 

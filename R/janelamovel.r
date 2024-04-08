@@ -82,17 +82,17 @@ janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cad
 
     args <- list(...)
 
-    if(!is.ts(serie)) serie <- ts(serie)
+    if (!is.ts(serie)) serie <- ts(serie)
 
     has_regdata <- "regdata" %in% ...names()
-    if(!has_regdata) {
+    if (!has_regdata) {
         regdata <- NULL
     } else {
         regdata <- args$regdata
         args$regdata <- NULL
     }
 
-    if(has_regdata && (length(serie) + n.ahead > nrow(regdata))) {
+    if (has_regdata && (length(serie) + n.ahead > nrow(regdata))) {
         warning("'regdata' deve conter 'length(serie) + n.ahead' observacoes -- reduzindo 'serie'")
 
         reduz <- length(serie) + n.ahead - nrow(regdata)
@@ -164,9 +164,9 @@ verbose_fun <- function(verbose) {
 
     verb_func <- switch(as.character(verbose),
         "0" = function(...) NULL,
-        "1" = function(i, f, r) if(r) cat("\t Prevendo serie [", i, "] -> [", f, "]\n") else NULL,
+        "1" = function(i, f, r) if (r) cat("\t Prevendo serie [", i, "] -> [", f, "]\n") else NULL,
         "2" = function(i, f, r) {
-            if(r) {
+            if (r) {
                 cat("REFIT -- Prevendo serie [", i, "] -> [", f, "]\n")
             } else {
                 cat("\t Prevendo serie [", i, "] -> [", f, "]\n")
@@ -208,7 +208,7 @@ expandejanelas <- function(serie, janela, passo) {
     S <- frequency(serie)
     INI <- start(serie)
 
-    if(length(janela) > 1) {
+    if (length(janela) > 1) {
         inifix <- TRUE
     } else {
         inifix <- FALSE
@@ -218,9 +218,9 @@ expandejanelas <- function(serie, janela, passo) {
     v_ends <- seq(janela[2], N - (janela[1] - 1), by = passo)
 
     ultimo <- N - (janela[1] - 1)
-    if(tail(v_ends, 1) != ultimo) v_ends <- c(v_ends, ultimo)
+    if (tail(v_ends, 1) != ultimo) v_ends <- c(v_ends, ultimo)
 
-    if(inifix) {
+    if (inifix) {
         ini <- deltats(INI, janela[1] - 1, S)
         janelas <- lapply(v_ends, function(i) {
             end <- deltats(ini, i - 1, S)
@@ -254,9 +254,9 @@ expandejanelas <- function(serie, janela, passo) {
 expanderefit <- function(janelas, refit.cada) {
 
     nj <- length(janelas)
-    if((length(refit.cada) == 1) && is.na(refit.cada)) refit.cada <- length(janelas)
+    if ((length(refit.cada) == 1) && is.na(refit.cada)) refit.cada <- length(janelas)
 
-    if(length(refit.cada) == 1) {
+    if (length(refit.cada) == 1) {
         v_refit <- seq(1, nj, by = refit.cada)
     } else {
         stop("'refit.cada' como vetor de indices ainda nao implementado")

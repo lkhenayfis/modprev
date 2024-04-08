@@ -22,6 +22,6 @@ plot.modprev <- function(x, ...) {
     # Plota
     plot(x$serie, panel.first = grid(col = "grey85"),
         xlab = "Tempo", ylab = "Geracao", ...)
-    if(!("main" %in% names(list(...)))) title(main = attr(x, "tipo"))
+    if (!("main" %in% names(list(...)))) title(main = attr(x, "tipo"))
     lines(fitt, col = 4, lty = 2)
 }

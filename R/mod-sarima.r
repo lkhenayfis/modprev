@@ -48,7 +48,7 @@ NULL
 sarima <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...) {
 
     # o is.null e necessario para garantir que nao entre no sarimax errado durante janelamovel
-    if(!missing(regdata) && !is.null(regdata)) return(sarimax(serie, regdata, formula, ...))
+    if (!missing(regdata) && !is.null(regdata)) return(sarimax(serie, regdata, formula, ...))
 
     args <- list(...)
 
@@ -58,7 +58,7 @@ sarima <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...)
     not_auto <- any(c("order", "seasonal") %in% names(args))
     fitfunc <- ifelse(not_auto, Arima, auto.arima)
 
-    if(!not_auto && !("allowdrift" %in% names(args))) args$allowdrift <- FALSE
+    if (!not_auto && !("allowdrift" %in% names(args))) args$allowdrift <- FALSE
 
     mc <- as.call(c(list(fitfunc, substitute(serie)), args))
     mod <- eval(mc, envir = parent.frame())
@@ -102,10 +102,10 @@ predict.sarima <- function(object, n.ahead, ...) {
 #' @export
 
 update.sarima <- function(object, newseries, refit = FALSE, ...) {
-    if(refit) {
+    if (refit) {
         object <- estimamodelo(newseries, "sarima")
     } else {
-        newseries <- if(is.ts(newseries)) newseries else ts(newseries)
+        newseries <- if (is.ts(newseries)) newseries else ts(newseries)
         modelo <- Arima(newseries, model = object$modelo)
 
         object <- new_modprevU(modelo, newseries, "sarima")

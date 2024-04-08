@@ -74,21 +74,21 @@ Outros argumentos são permitidos, como por exemplo nos modelos de regressão di
 ```{r, eval=FALSE}
 ss_reg_din <- function(serie, regdata, formula, vardin = FALSE) {
 
-    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
+    if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro regdata")
 
-    if(missing(formula) || is.null(formula)) {
+    if (missing(formula) || is.null(formula)) {
         formula <- colnames(regdata)
-        if(length(formula) > 1) formula <- paste0(colnames(regdata), collapse = " + ")
+        if (length(formula) > 1) formula <- paste0(colnames(regdata), collapse = " + ")
         formula <- paste0("~ ", formula)
         formula <- as.formula(formula)
     }
 
     nvars  <- ncol(model.matrix(formula, data = regdata)) - 1 # model.matrix inclui intercept
 
-    if(vardin & (frequency(serie) == 1)) warning("'vardin' e TRUE mas 'serie' nao possui sazonalidade")
+    if (vardin & (frequency(serie) == 1)) warning("'vardin' e TRUE mas 'serie' nao possui sazonalidade")
     vardin <- vardin * 1
 
-    if(vardin != 0) {
+    if (vardin != 0) {
 
         saz <- frequency(serie) * (vardin == 1) + vardin * (vardin > 1)
         upfunc <- function(par, mod, ...) {
@@ -98,7 +98,7 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE) {
             mod["H"][] <- rep(exp(parH[1] * uH + parH[2] * vH), length.out = dim(mod["H"])[3])
 
             parQ <- par[-c(1:2)]
-            for(i in seq_along(parQ)) mod["Q"][i, i, 1] <- exp(parQ[i])
+            for (i in seq_along(parQ)) mod["Q"][i, i, 1] <- exp(parQ[i])
 
             return(mod)
         }
@@ -110,7 +110,7 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE) {
             mod["H"][1, 1, 1] <- exp(par[1])
 
             parQ <- par[-1]
-            for(i in seq_along(parQ)) mod["Q"][i, i, 1] <- exp(parQ[i])
+            for (i in seq_along(parQ)) mod["Q"][i, i, 1] <- exp(parQ[i])
 
             return(mod)
         }
@@ -120,7 +120,7 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE) {
             H = array(NA_real_, c(1, 1, saz)))
     fit <- fitSSM(mod, rep(0, nvars + 1 + (vardin != 0)), upfunc, method = "BFGS")
 
-    if(fit$optim.out$convergence < 0) {
+    if (fit$optim.out$convergence < 0) {
         fit$model$Z[] <- NA
     }
 
@@ -179,9 +179,9 @@ Novamente, é permissível que estes métodos possuam outros argumentos:
 predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
     modelo <- object$modelo
 
-    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro newdata")
+    if (missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro newdata")
 
-    if(!missing(n.ahead)) {
+    if (!missing(n.ahead)) {
         regobs <- min(n.ahead, nrow(newdata))
         newdata <- newdata[seq(regobs), , drop = FALSE]
     }
@@ -210,11 +210,11 @@ Devem seguir algumas restrições de argumentos:
 
 ```{r, eval=FALSE}
 update.sarima <- function(object, newseries, refit = FALSE, ...) {
-    if(refit) {
+    if (refit) {
         object <- estimamodelo(newseries, "sarima")
     } else {
         object$modelo <- Arima(newseries, model = object$modelo)
-        object$serie  <- if(is.ts(newseries)) newseries else ts(newseries)
+        object$serie  <- if (is.ts(newseries)) newseries else ts(newseries)
     }
 
     return(object)
@@ -229,7 +229,7 @@ argumentos extras possivelmente presentes, como no caso de `ss_reg_din`:
 ```{r, eval=FALSE}
 update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...) {
 
-    if(refit) {
+    if (refit) {
         formula <- attr(object$modelo, "formula")
         vardin  <- attr(object$modelo, "vardin")
         object  <- estimamodelo(newseries, "ss_reg_din", regdata = newregdata, formula = formula,
@@ -238,7 +238,7 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
 
         modelo <- object$modelo
 
-        if(missing(newregdata)) {
+        if (missing(newregdata)) {
             stop("Forneca nova variavel explicativa atraves do parametro newregdata")
         }
 

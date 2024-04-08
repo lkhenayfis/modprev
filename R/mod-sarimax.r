@@ -48,7 +48,7 @@ NULL
 
 sarimax <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...) {
 
-    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
+    if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
     Xreg <- expandexreg(regdata, formula)
 
@@ -61,7 +61,7 @@ sarimax <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...
     not_auto <- any(c("order", "seasonal") %in% names(args))
     fitfunc <- ifelse(not_auto, Arima, auto.arima)
 
-    if(!not_auto && !("allowdrift" %in% names(args))) args$allowdrift <- FALSE
+    if (!not_auto && !("allowdrift" %in% names(args))) args$allowdrift <- FALSE
 
     mc <- as.call(c(list(fitfunc, substitute(serie)), args))
     mod <- eval(mc, envir = parent.frame())
@@ -91,9 +91,9 @@ sarimax <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...
 predict.sarimax <- function(object, newdata, n.ahead, ...) {
     modelo <- object$modelo
 
-    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
+    if (missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
 
-    if(!missing(n.ahead)) {
+    if (!missing(n.ahead)) {
         regobs <- min(n.ahead, nrow(newdata))
         newdata <- newdata[seq(regobs), , drop = FALSE]
     }
@@ -127,17 +127,17 @@ update.sarimax <- function(object, newseries, newregdata, refit = FALSE, ...) {
 
     mod_atrs <- attr(object, "mod_atrs")
 
-    if(refit) {
+    if (refit) {
         formula <- mod_atrs$formula
         object <- estimamodelo(newseries, "sarimax", regdata = newregdata, formula = formula)
     } else {
 
-        if(missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
+        if (missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
 
         formula <- mod_atrs$formula
         Xreg <- expandexreg(newregdata, formula)
 
-        newseries <- if(is.ts(newseries)) newseries else ts(newseries)
+        newseries <- if (is.ts(newseries)) newseries else ts(newseries)
         modelo <- Arima(newseries, xreg = Xreg, model = object$modelo)
 
         object <- new_modprevU(modelo, newseries, "sarimax", mod_atrs)

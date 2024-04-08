@@ -76,11 +76,11 @@ test_that("Estimacao de modelo GAM - argumentos opcionais de gam", {
     # passando pesos
     set.seed(12)
     mod <- estimamodelo(datregdin$obs, "GAM", regdata = datregdin$varex, formula = ~ s(V1, V2, V3),
-        weights = runif(200))
+        weights = runif (200))
 
     set.seed(12)
     compmod <- with(datregdin,
-        gam(as.numeric(obs) ~ s(varex$V1, varex$V2, varex$V3), weights = runif(200))
+        gam(as.numeric(obs) ~ s(varex$V1, varex$V2, varex$V3), weights = runif (200))
     )
 
     expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
@@ -129,7 +129,7 @@ test_that("Atualizacao de modelo GAM", {
     xx <- head(datregdin$varex, 100)
     SP <- 3
     K  <- 15
-    pesos <- runif(100)
+    pesos <- runif (100)
     mod <- estimamodelo(yy, "GAM", regdata = xx, formula = ~ s(V1, V2, V3, sp = SP, k = K),
         weights = pesos)
 

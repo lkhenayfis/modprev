@@ -128,7 +128,7 @@ test_that("Atualizacao de BOOST", {
     xx <- head(datregdin$varex, 100)
 
     set.seed(12)
-    pesos <- runif(100)
+    pesos <- runif (100)
     mod   <- estimamodelo(yy, "BOOST", regdata = xx, formula = ~ V1 + V2 + V3,
         baselearner = "bols", cv_control = list(B = 1), weights = pesos, family = Laplace())
 

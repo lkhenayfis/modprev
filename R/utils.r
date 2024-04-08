@@ -23,9 +23,9 @@ shift <- function(v, i) {
     desloc  <- abs(i)
     sizevec <- length(v)
 
-    if(desloc >= sizevec) desloc <- desloc %% sizevec
+    if (desloc >= sizevec) desloc <- desloc %% sizevec
 
-    if(direcao == -1) {
+    if (direcao == -1) {
         c(v[(desloc + 1):sizevec], head(v, desloc))
     } else {
         c(tail(v, desloc), v[1:(sizevec - desloc)])
@@ -87,10 +87,10 @@ match_fun_args <- function(args, fun) {
 
 deltats <- function(ini, delta, freq) {
 
-    if(delta > 0) {
+    if (delta > 0) {
         aux <- ts(seq_len(delta + 1), start = ini, frequency = freq)
         out <- end(aux)
-    } else if(delta < 0) {
+    } else if (delta < 0) {
         aux <- ts(seq_len(abs(delta) + 1), end = ini, frequency = freq)
         out <- start(aux)
     } else {

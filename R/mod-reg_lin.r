@@ -40,11 +40,11 @@ NULL
 
 reg_lin <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...) {
 
-    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
+    if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
     formula <- update(formula, Y ~ .)
 
-    if(!is.ts(serie)) serie <- ts(serie)
+    if (!is.ts(serie)) serie <- ts(serie)
     aux_tsp <- tsp(serie)
 
     regdata <- cbind(Y = as.numeric(serie), regdata)
@@ -84,9 +84,9 @@ predict.reg_lin <- function(object, newdata, n.ahead, ...) {
     modelo <- object$modelo
     aux_tsp <- attr(object, "mod_atrs")$tsp
 
-    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
+    if (missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
 
-    if(!missing(n.ahead)) {
+    if (!missing(n.ahead)) {
         regobs <- min(n.ahead, nrow(newdata))
         newdata <- newdata[seq(regobs), , drop = FALSE]
     }
@@ -117,7 +117,7 @@ update.reg_lin <- function(object, newseries, newregdata, refit = FALSE, ...) {
 
     mod_atrs <- attr(object, "mod_atrs")
 
-    if(refit) {
+    if (refit) {
         call  <- mod_atrs$call
         call$serie   <- newseries
         call$regdata <- newregdata
@@ -126,7 +126,7 @@ update.reg_lin <- function(object, newseries, newregdata, refit = FALSE, ...) {
 
         modelo <- object$modelo
 
-        if(missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
+        if (missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
 
         modelo$model <- cbind.data.frame(Y = as.numeric(newseries), newregdata)
         modelo$fitted.values <- predict(modelo)

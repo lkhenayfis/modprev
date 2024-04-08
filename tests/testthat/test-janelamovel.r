@@ -117,7 +117,7 @@ test_that("Testes de previsao em janela", {
 
     # checa se as janelas comecam onde deveriam
     serie1 <- window(serie, c(1, 1), c(12, 4))
-    for(i in seq(jm)[-length(jm)]) {
+    for (i in seq(jm)[-length(jm)]) {
         expect_equal(start(jm[[i]]), deltats(end(serie1), 12 * (i - 1) + 1, 4))
     }
     expect_equal(start(tail(jm, 1)[[1]]), deltats(end(serie), 1, 4))

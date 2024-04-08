@@ -45,13 +45,13 @@ NULL
 
 ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, ...) {
 
-    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
+    if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
-    if(missing(formula)) formula <- expandeformula(regdata)
+    if (missing(formula)) formula <- expandeformula(regdata)
 
     nvars  <- ncol(model.matrix(formula, data = regdata)) - 1 # model.matrix inclui intercept
 
-    if(vardin && (frequency(serie) == 1)) {
+    if (vardin && (frequency(serie) == 1)) {
         warning("'vardin' e TRUE mas 'serie' nao possui sazonalidade -- ignorando 'vardin'")
         vardin <- FALSE
     }
@@ -70,7 +70,7 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, ...) {
     )
     fit <- fitSSM(mod, start, upfunc, method = "BFGS")
 
-    if(fit$optim.out$convergence < 0) fit$model$Z[] <- NA
+    if (fit$optim.out$convergence < 0) fit$model$Z[] <- NA
 
     mod_atrs <- list(formula = formula, vardin = vardin)
     out <- new_modprevU(fit$model, serie, "ss_reg_din", mod_atrs)
@@ -104,9 +104,9 @@ ss_reg_din <- function(serie, regdata, formula, vardin = FALSE, ...) {
 predict.ss_reg_din <- function(object, newdata, n.ahead, ...) {
     modelo <- object$modelo
 
-    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
+    if (missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
 
-    if(!missing(n.ahead)) {
+    if (!missing(n.ahead)) {
         regobs <- min(n.ahead, nrow(newdata))
         newdata <- newdata[seq(regobs), , drop = FALSE]
     }
@@ -146,7 +146,7 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
 
     mod_atrs <- attr(object, "mod_atrs")
 
-    if(refit) {
+    if (refit) {
         formula <- mod_atrs$formula
         vardin  <- mod_atrs$vardin
         object  <- estimamodelo(newseries, "ss_reg_din", regdata = newregdata, formula = formula,
@@ -155,7 +155,7 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
 
         modelo <- object$modelo
 
-        if(missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
+        if (missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
 
         freqvar <- ifelse(mod_atrs$vardin, frequency(object$serie), 1)
 
@@ -224,7 +224,7 @@ updQ <- function(par, mod, ...) {
     nQ <- dim(mod["Q"])[1]
 
     parQ <- tail(par, nQ)
-    for(i in seq_along(parQ)) mod["Q"][i, i, 1] <- exp(parQ[i])
+    for (i in seq_along(parQ)) mod["Q"][i, i, 1] <- exp(parQ[i])
     return(mod)
 }
 
@@ -258,9 +258,9 @@ parsedesloc <- function(serie, newseries, freq) {
     freq_old <- frequency(serie)
     freq_new <- frequency(newseries)
 
-    if(freq == 1) return(0)
+    if (freq == 1) return(0)
 
-    if(freq_old != freq) {
+    if (freq_old != freq) {
         wrn <- paste0("O modelo foi ajustado com heterocedasticidade, mas 'serie' nao era um objeto",
             "ts -- Sera transformado com inicio = c(1, 1) e frequecia igual a da heterocedasticidade")
         warning(wrn)
@@ -268,7 +268,7 @@ parsedesloc <- function(serie, newseries, freq) {
     }
     init_old <- start(serie)[2]
 
-    if(freq_new != freq) {
+    if (freq_new != freq) {
         wrn <- paste0("'newseries' nao e serie temporal ou nao tem sazonalidade igual a da",
             " heterocedasticidade -- Sera transformada para uma ts iniciando imediatamente apos ",
             "o termino da serie original")

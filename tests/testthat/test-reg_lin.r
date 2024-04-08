@@ -28,10 +28,10 @@ test_that("Estimacao de modelo Reg Lin - argumentos opcionais de lm", {
     # passando pesos
     set.seed(12)
     mod <- estimamodelo(datregdin$obs, "reg_lin", regdata = datregdin$varex, formula = ~ V1 + V2 + V3,
-        weights = runif(200))
+        weights = runif (200))
 
     set.seed(12)
-    compmod <- lm(as.numeric(datregdin$obs) ~ data.matrix(datregdin$varex), weights = runif(200))
+    compmod <- lm(as.numeric(datregdin$obs) ~ data.matrix(datregdin$varex), weights = runif (200))
 
     expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
     expect_equal(mod$model$weights, compmod$weights)
@@ -77,7 +77,7 @@ test_that("Previsao de modelo Reg Lin", {
 test_that("Atualizacao de modelo Reg Lin", {
     yy <- window(datregdin$obs, 1, 100)
     xx <- head(datregdin$varex, 100)
-    pesos <- runif(100)
+    pesos <- runif (100)
     mod <- estimamodelo(yy, "reg_lin", regdata = xx, formula = ~ V1 + V2 + V3, weights = pesos)
 
     yy2 <- window(datregdin$obs, 101, 200)
