@@ -53,7 +53,7 @@ reg_quant <- function(serie, regdata, formula = expandeformula(regdata, "ls"), .
     cc <- c(cc, list(...))
     fit <- eval(as.call(cc))
 
-    mod_atrs <- list(formula = formula, tsp = aux_tsp)
+    mod_atrs <- list(call = match.call(), tsp = aux_tsp)
 
     new_modprevU(fit, serie, "reg_quant", mod_atrs)
 }
@@ -118,8 +118,10 @@ update.reg_quant <- function(object, newseries, newregdata, refit = FALSE, ...) 
     mod_atrs <- attr(object, "mod_atrs")
 
     if(refit) {
-        formula <- mod_atrs$formula
-        object  <- estimamodelo(newseries, "reg_lin", regdata = newregdata, formula = formula)
+        call  <- mod_atrs$call
+        call$serie   <- newseries
+        call$regdata <- newregdata
+        object <- eval(call, parent.frame())
     } else {
 
         modelo <- object$modelo
