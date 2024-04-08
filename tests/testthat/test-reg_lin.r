@@ -23,7 +23,7 @@ test_that("Estimacao de modelo Reg Lin - simples", {
     expect_equal(attr(mod, "mod_atrs")$tsp, c(1, 20.9, 10))
 })
 
-test_that("Estimacao de modelo GAM - argumentos opcionais de lm", {
+test_that("Estimacao de modelo Reg Lin - argumentos opcionais de lm", {
 
     # passando pesos
     set.seed(12)
