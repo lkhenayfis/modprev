@@ -35,7 +35,10 @@ NULL
 #'     \code{regdata} serão utilizadas
 #' @param cv_control uma lista nomeada contendo quaisquer argumentos das funcoes
 #'     \code{\link[mboost]{cv}} e \code{\link[mboost]{cvrisk}}
-#' @param ... demais argumentos passados a funcao \code{\link[mboost]{mboost}}
+#' @param test_data uma lista contento valores out-of-sample da variavel dependente e regressores
+#'     que serao utilizados para selecao do criterio de parada
+#' @param ... para estimacao, demais argumentos passados a funcao \code{\link[mboost]{mboost}}; nas
+#'     restantes nao possui uso
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{BOOST}, uma lista de dois 
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
@@ -120,7 +123,6 @@ BOOST_traintest <- function(regdata, formula, test_data, ...) {
 #' @param newdata \code{data.frame}-like contendo variéveis explicativas fora da amostra
 #' @param n.ahead número de passos à frente para previsão. Este argumento não é necessario, caso não
 #'     seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}
-#' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
 #'     previsão \code{n.ahead} passos à frente;
@@ -153,7 +155,6 @@ predict.BOOST <- function(object, newdata, n.ahead, ...) {
 #' @param newseries nova série com a qual atualizar o modelo
 #' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
 #' @param refit booleano indicando se o modelo deve ou nao ser reajustado
-#' @param ... nao possui uso, existe apenas para consistencia com a generica
 #' 
 #' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
 #'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};

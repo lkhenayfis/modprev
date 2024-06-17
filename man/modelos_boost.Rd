@@ -12,6 +12,7 @@ BOOST(
   regdata,
   formula = expandeformula(regdata, "ls"),
   cv_control = list(),
+  test_data = list(c(), data.frame()),
   ...
 )
 
@@ -30,7 +31,11 @@ BOOST(
 \item{cv_control}{uma lista nomeada contendo quaisquer argumentos das funcoes
 \code{\link[mboost]{cv}} e \code{\link[mboost]{cvrisk}}}
 
-\item{...}{nao possui uso, existe apenas para consistencia com a generica}
+\item{test_data}{uma lista contento valores out-of-sample da variavel dependente e regressores
+que serao utilizados para selecao do criterio de parada}
+
+\item{...}{para estimacao, demais argumentos passados a funcao \code{\link[mboost]{mboost}}; nas
+restantes nao possui uso}
 
 \item{object}{objeto com classes \code{c("BOOST", "modprev")} contendo modelo}
 
