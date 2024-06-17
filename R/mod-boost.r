@@ -43,7 +43,7 @@ NULL
 #' @rdname modelos_boost
 
 BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"),
-    cv_control = list(), train_test = logical(0), ...) {
+    cv_control = list(), test_data = list(c(), data.frame()), ...) {
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
@@ -56,6 +56,8 @@ BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"),
 
     if (length(cv_control) != 0) {
         fit <- BOOST_traincv(regdata, formula, cv_control, ...)
+    } else {
+        fit <- BOOST_traintest(regdata, formula, test_data, ...)
     }
 
     mod_atrs <- list(call = match.call(), tsp = aux_tsp)
@@ -78,6 +80,35 @@ BOOST_traincv <- function(regdata, formula, cv_control, ...) {
     )
     cv <- eval(as.call(cv))
     fit <- fit[mstop(cv)]
+    return(fit)
+}
+
+BOOST_traintest <- function(regdata, formula, test_data, ...) {
+    cc <- match.call()
+
+    test_data <- cbind(Y = as.numeric(test_data[[1]]), test_data[[2]])
+
+    insample    <- c(rep(TRUE, nrow(regdata)), rep(FALSE, nrow(test_data)))
+    outofsample <- !insample
+
+    fulldata <- rbind(regdata, test_data)
+
+    if (!is.null(cc$control)) {
+        cc$control <- eval(cc$control, parent.frame())
+        cc$control$risk <- "oobag"
+    } else {
+        cc$control <- boost_control(risk = "oobag")
+    }
+
+    cc[[1]] <- quote(mboost)
+    cc[c("test_data", "regdata")] <- NULL
+    cc$data <- quote(fulldata)
+    cc$weights <- quote(insample)
+    cc$oobweights <- quote(outofsample)
+
+    fit <- eval(cc)
+    fit[which.min(fit$risk())]
+
     return(fit)
 }
 
