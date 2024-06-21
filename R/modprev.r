@@ -12,7 +12,7 @@
 #' @docType package
 #' @name modprev
 #' 
-#' @import forecast KFAS stats utils quantreg mboost
+#' @import forecast KFAS stats utils quantreg mboost lightgbm
 #' 
 #' @importFrom graphics grid lines title
 NULL
