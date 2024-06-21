@@ -44,7 +44,7 @@ NULL
 #' @return Objeto da classe \code{modprev} e subclasse \code{LGBM}, uma lista de dois 
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
-#' @rdname light_gbm
+#' @rdname modelos_lightgbm
 
 LGBM <- function(serie, regdata, test_data = list(c(), data.frame()),
     dataset_params = list(), train_params = list(), ...) {
@@ -76,4 +76,41 @@ LGBM_traintest <- function(regdata, test_data, train_params, ...) {
         valids = list(test = test_data), ...)
 
     return(fit)
+}
+
+# METODOS ------------------------------------------------------------------------------------------
+
+#' \bold{Predict}:
+#' 
+#' @param object objeto com classes \code{c("LGBM", "modprev")} contendo modelo
+#' @param newdata \code{data.frame}-like contendo variéveis explicativas fora da amostra
+#' @param n.ahead número de passos à frente para previsão. Este argumento não é necessario, caso não
+#'     seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}
+#' 
+#' @return \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
+#'     previsão \code{n.ahead} passos à frente;
+#' 
+#' @rdname modelos_lgbm
+#' 
+#' @export
+
+predict.LGBM <- function(object, newdata, n.ahead, ...) {
+    modelo <- object$modelo
+    aux_tsp <- attr(object, "mod_atrs")$tsp
+
+    if (missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
+
+    if (!missing(n.ahead)) {
+        regobs <- min(n.ahead, nrow(newdata))
+        newdata <- newdata[seq(regobs), , drop = FALSE]
+    }
+
+    prev <- predict(modelo, newdata = data.matrix(newdata))
+    prev <- cbind(prev, rep(NA_real_, length(prev)))
+    colnames(prev) <- c("prev", "sd")
+
+    prox_t <- aux_tsp[2] + 1 / aux_tsp[3]
+    prev <- ts(prev, start = prox_t, frequency = aux_tsp[3])
+
+    return(prev)
 }
