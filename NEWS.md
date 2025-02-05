@@ -1,8 +1,14 @@
+# lgbm
+
+## New features
+
+* Adiciona modelagem por ligth gradient boostin machines (LGBM)
+
 # boost
 
 ## New features
 
-* Adiciona modelagem por boosting de modelos simples
+* Adiciona modelagem por boost marginal de modelos simples
 
 # gam
 
