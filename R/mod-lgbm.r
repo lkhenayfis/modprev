@@ -6,12 +6,12 @@
 #' 
 #' Estimação e métodos de modelos da classe \code{LGBM}
 #' 
-#' Boosting de árvores pelo algoritmo lgbm estimado atraves de \code{\link[lightgbm]{lgbm}}. Para 
-#' mais detalhes a respeito desta modelagem e seu uso, veja a documentacao oficial do pacote.
+#' Boosting de árvores pelo algoritmo lgbm estimado atraves de \code{\link[lightgbm]{lightgbm}}.  
+#' Para mais detalhes a respeito desta modelagem e seu uso, veja a documentacao oficial do pacote.
 #' 
-#' @name light_gbm
+#' @name modelos_lightgbm
 #' 
-#' @import mboost
+#' @import lightgbm
 NULL
 
 # ESTIMACAO ----------------------------------------------------------------------------------------
@@ -113,4 +113,36 @@ predict.LGBM <- function(object, newdata, n.ahead, ...) {
     prev <- ts(prev, start = prox_t, frequency = aux_tsp[3])
 
     return(prev)
+}
+
+#' @param newseries nova série com a qual atualizar o modelo
+#' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
+#' @param refit booleano indicando se o modelo deve ou nao ser reajustado
+#' @param ... nao possui uso, existe apenas para consistencia com a generica
+#' 
+#' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
+#'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
+#' 
+#' @rdname modelos_lgbm
+#' 
+#' @export
+
+update.LGBM <- function(object, newseries, newregdata, refit = FALSE, ...) {
+
+    mod_atrs <- attr(object, "mod_atrs")
+
+    if (refit) {
+        call  <- mod_atrs$call
+        call$serie   <- newseries
+        call$regdata <- newregdata
+        object <- eval(call, parent.frame())
+    } else {
+
+        modelo <- object$modelo
+        mod_atrs$tsp <- tsp(newseries)
+
+        object <- new_modprevU(modelo, newseries, "LGBM", mod_atrs)
+    }
+
+    return(object)
 }

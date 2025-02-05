@@ -1,6 +1,6 @@
 Package: modprev
 Title: Interface Unificada Para Estimacao E Uso De Modelos
-Version: 1.8
+Version: 1.8.0.9999
 Authors@R: 
     person("Lucas", "Khenayfis", , "lucaskhenayfis@gmail.com", role = c("aut", "cre"))
 Description: Arcabouco unificado para estimacao, previsao, simulacao e etc
@@ -24,7 +24,8 @@ Imports:
     KFAS (>= 1.4.4),
     quantreg (>= 5.9),
     mgcv (>= 1.8-42),
-    mboost (>= 2.9-9)
+    mboost (>= 2.9-9),
+    lightgbm (>= 4.4.0)
 Suggests: 
     knitr,
     rmarkdown,

@@ -2,9 +2,12 @@
 % Please edit documentation in R/mod-lgbm.r
 \name{predict.LGBM}
 \alias{predict.LGBM}
+\alias{update.LGBM}
 \title{\bold{Predict}:}
 \usage{
 \method{predict}{LGBM}(object, newdata, n.ahead, ...)
+
+\method{update}{LGBM}(object, newseries, newregdata, refit = FALSE, ...)
 }
 \arguments{
 \item{object}{objeto com classes \code{c("LGBM", "modprev")} contendo modelo}
@@ -13,10 +16,21 @@
 
 \item{n.ahead}{número de passos à frente para previsão. Este argumento não é necessario, caso não
 seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}}
+
+\item{...}{nao possui uso, existe apenas para consistencia com a generica}
+
+\item{newseries}{nova série com a qual atualizar o modelo}
+
+\item{newregdata}{\code{data.frame}-like contendo variáveis explicativas na nova amostra}
+
+\item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
 }
 \value{
 \code{predict} serie temporal multivariada contendo valor esperado e desvio padrao de
 previsão \code{n.ahead} passos à frente;
+
+\code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado.
+Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
 }
 \description{
 \bold{Predict}:
