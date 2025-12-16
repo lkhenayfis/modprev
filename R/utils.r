@@ -16,8 +16,6 @@
 #' vec_1 <- modprev:::shift(vec, 2)  # c(9, 10, 1, 2, 3, 4, 5, 6, 7, 8)
 #' 
 #' @return Vetor \code{v} com elementos deslocados \code{i} posições
-#' 
-#' @importFrom utils head tail
 
 shift <- function(v, i) {
 
@@ -25,13 +23,36 @@ shift <- function(v, i) {
     desloc  <- abs(i)
     sizevec <- length(v)
 
-    if(desloc >= sizevec) desloc <- desloc %% sizevec
+    if (desloc >= sizevec) desloc <- desloc %% sizevec
 
-    if(direcao == -1) {
+    if (direcao == -1) {
         c(v[(desloc + 1):sizevec], head(v, desloc))
     } else {
         c(tail(v, desloc), v[1:(sizevec - desloc)])
     }
+}
+
+#' Match De Argumentos Com Lista
+#' 
+#' Identifica numa lista \code{args} quais elementos sao arugmentos de uma funcao \code{fun}
+#' 
+#' @param args lista nomeada contendo candidatos a argumentos de uma funcao
+#' @param fun funcao cujos arugmentos procurar em \code{args}
+#' 
+#' @importFrom methods formalArgs
+#' 
+#' @return \code{args} reduzida aos elementos que correspondem a argumentos de \code{fun}
+
+match_fun_args <- function(args, fun) {
+    if (is.primitive(fun)) {
+        fun_args <- formalArgs(args(fun))
+    } else {
+        fun_args <- formalArgs(fun)
+    }
+    fun_args <- fun_args[!grepl("\\.\\.\\.", fun_args)]
+    args <- args[fun_args]
+    args <- args[!sapply(args, is.null)]
+    return(args)
 }
 
 # MANIPULACAO DE INDICE TEMPORAL -------------------------------------------------------------------
@@ -66,10 +87,10 @@ shift <- function(v, i) {
 
 deltats <- function(ini, delta, freq) {
 
-    if(delta > 0) {
+    if (delta > 0) {
         aux <- ts(seq_len(delta + 1), start = ini, frequency = freq)
         out <- end(aux)
-    } else if(delta < 0) {
+    } else if (delta < 0) {
         aux <- ts(seq_len(abs(delta) + 1), end = ini, frequency = freq)
         out <- start(aux)
     } else {
@@ -79,12 +100,35 @@ deltats <- function(ini, delta, freq) {
     return(out)
 }
 
+# AUXILIARES PARA TESTES ---------------------------------------------------------------------------
+
+#' Compara Duas Chamadas
+#' 
+#' Funcao interna para uso nos testes de update, nao deve ser utilizada diretamente
+#' 
+#' @param call1,call2 chamadas a comparar
+#' @param itens vetor de strings indicando os argumentos das calls a comparar
+#' 
+#' @return Apenas executa os testes, sem retornar valor algum
+
+compare_calls <- function(call1, call2, itens) {
+    for (item in itens) testthat::expect_equal(call1[[item]], call2[[item]])
+}
+
 # AUXILIAR PARA MODELOS COM VARIAVEL EXPLICATIVA ---------------------------------------------------
 
-expandeformula <- function(data) {
+expandeformula <- function(data, modo = c("ls", "gam")) {
     warning("'formula' nao foi passado -- usando todas as variaveis de forma aditiva")
+
+    modo <- match.arg(modo)
+
     formula <- colnames(data)
-    formula <- paste0(colnames(data), collapse = " + ")
+    if (modo == "gam") {
+        formula <- paste0(colnames(data), collapse = ", ")
+        formula <- paste0("s(", formula, ")")
+    } else {
+        formula <- paste0(colnames(data), collapse = " + ")
+    }
     formula <- paste0(" ~ ", formula)
     formula <- as.formula(formula)
 

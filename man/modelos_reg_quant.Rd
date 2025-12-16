@@ -7,7 +7,7 @@
 \alias{update.reg_quant}
 \title{Modelos \code{reg_quant}}
 \usage{
-reg_quant(serie, regdata, formula, pesos = rep(1, length(serie)), ...)
+reg_quant(serie, regdata, formula = expandeformula(regdata, "ls"), ...)
 
 \method{predict}{reg_quant}(object, newdata, n.ahead, ...)
 
@@ -20,9 +20,6 @@ reg_quant(serie, regdata, formula, pesos = rep(1, length(serie)), ...)
 
 \item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
 \code{regdata} serão utilizadas}
-
-\item{pesos}{opcional, vetor de pesos para cada observacao no ajuste. Sera normalizado
-internamente}
 
 \item{...}{nao possui uso, existe apenas para consistencia com a generica}
 

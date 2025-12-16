@@ -31,31 +31,29 @@ NULL
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
 #'     \code{regdata} serão utilizadas
-#' @param pesos opcional, vetor de pesos para cada observacao no ajuste. Sera normalizado 
-#'     internamente
-#' @param ... nao possui uso, existe apenas para consistencia com a generica
+#' @param ... demais argumentos passados a \code{\link[stats]{lm}}
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{reg_lin}, uma lista de dois 
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 #' 
 #' @rdname modelos_reg_lin
 
-reg_lin <- function(serie, regdata, formula, pesos = rep(1, length(serie)), ...) {
+reg_lin <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...) {
 
-    if(missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
+    if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
-    if(missing(formula)) formula <- expandeformula(regdata)
     formula <- update(formula, Y ~ .)
 
-    if(!is.ts(serie)) serie <- ts(serie)
+    if (!is.ts(serie)) serie <- ts(serie)
     aux_tsp <- tsp(serie)
 
-    pesos <- pesos / sum(pesos)
+    regdata <- cbind(Y = as.numeric(serie), regdata)
 
-    regdata <- cbind(Y = as.numeric(serie), regdata, pesos = pesos)
-    fit <- lm(formula, regdata, weights = pesos)
+    cc <- list(quote(lm), formula = formula, data = regdata)
+    cc <- c(cc, list(...))
+    fit <- eval(as.call(cc))
 
-    mod_atrs <- list(formula = formula, tsp = aux_tsp, pesos = pesos)
+    mod_atrs <- list(call = match.call(), tsp = aux_tsp)
 
     new_modprevU(fit, serie, "reg_lin", mod_atrs)
 }
@@ -86,9 +84,9 @@ predict.reg_lin <- function(object, newdata, n.ahead, ...) {
     modelo <- object$modelo
     aux_tsp <- attr(object, "mod_atrs")$tsp
 
-    if(missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
+    if (missing(newdata)) stop("Forneca a variavel explicativa para previsao atraves do parametro 'newdata'")
 
-    if(!missing(n.ahead)) {
+    if (!missing(n.ahead)) {
         regobs <- min(n.ahead, nrow(newdata))
         newdata <- newdata[seq(regobs), , drop = FALSE]
     }
@@ -103,8 +101,6 @@ predict.reg_lin <- function(object, newdata, n.ahead, ...) {
     return(prev)
 }
 
-#' @details 
-#' 
 #' @param newseries nova série com a qual atualizar o modelo
 #' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
 #' @param refit booleano indicando se o modelo deve ou nao ser reajustado
@@ -121,16 +117,16 @@ update.reg_lin <- function(object, newseries, newregdata, refit = FALSE, ...) {
 
     mod_atrs <- attr(object, "mod_atrs")
 
-    if(refit) {
-        pesos   <- mod_atrs$pesos[seq_along(newseries)]
-        formula <- mod_atrs$formula
-        object  <- estimamodelo(newseries, "reg_lin", regdata = newregdata, formula = formula,
-            pesos = pesos)
+    if (refit) {
+        call  <- mod_atrs$call
+        call$serie   <- newseries
+        call$regdata <- newregdata
+        object <- eval(call, parent.frame())
     } else {
 
         modelo <- object$modelo
 
-        if(missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
+        if (missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
 
         modelo$model <- cbind.data.frame(Y = as.numeric(newseries), newregdata)
         modelo$fitted.values <- predict(modelo)

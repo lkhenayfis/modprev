@@ -5,6 +5,23 @@
 * Introduz modelos `PAR`, com possibilidade de uso da parcela anual semelhante ao PAR(p)-A
   * como auxiliares aos modelos `PAR`, funcoes para calculo das autocorrelacoes parciais e 
     condicionais periodicas, com opcao de visualizacao
+# lgbm
+
+## New features
+
+* Adiciona modelagem por ligth gradient boostin machines (LGBM)
+
+# boost
+
+## New features
+
+* Adiciona modelagem por boost marginal de modelos simples
+
+# gam
+
+## New features
+
+* Adiciona Modelos Aditivos Generalizados através do tipo de modelo `GAM` 
 
 # master
 
@@ -12,6 +29,8 @@
 
 * Corrige implementacao de heterocedasticidade em modelos de regressao dinamica. Faltava um termo
   constante nos harmonicos estimados
+* `janelamovel` tinha um erro quando `refit.cada > 1`. Como rodava o loop em `lapply`, `update`s sem
+  reajuste estavam sempre usando o modelo inicial
 
 ## Misc
 
@@ -22,6 +41,10 @@
     implementado no pacote
   * encolhimento de variancias na regressao dinamica foi removido, pois os resultados obtidos nao
     foram satisfatorios.
+* A forma como chamadas de cada modelo especifico sao realizadas foi modificada. Anteriormente era
+  necessario expor todos os argumentos de funcoes internas que se desejava dar acesso, o que tornava
+  o codigo poluido e sobrecarregado (como, por exemplo, o argumento `pesos`). Na nova formulacao
+  qualquer argumento opcional das funcoes subjacentes de estimacao pode ser utilizado livremente
 
 # modprev 1.8
 

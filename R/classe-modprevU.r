@@ -58,7 +58,7 @@ new_modprevU <- function(fit, serie, tipo, atrs) {
     new <- list(modelo = fit, serie = serie)
     class(new) <- c(tipo, "modprevU", "modprev")
 
-    if(!missing("atrs")) attr(new, "mod_atrs") <- atrs
+    if (!missing("atrs")) attr(new, "mod_atrs") <- atrs
 
     return(new)
 }

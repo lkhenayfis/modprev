@@ -1,6 +1,6 @@
 Package: modprev
 Title: Interface Unificada Para Estimacao E Uso De Modelos
-Version: 1.8
+Version: 1.8.0.9999
 Authors@R: 
     person("Lucas", "Khenayfis", , "lucaskhenayfis@gmail.com", role = c("aut", "cre"))
 Description: Arcabouco unificado para estimacao, previsao, simulacao e etc
@@ -15,12 +15,17 @@ Description: Arcabouco unificado para estimacao, previsao, simulacao e etc
 License: MIT + file LICENSE
 Depends:
     graphics (>= 3.6),
-    R (>= 3.6),
-    stats (>= 3.6)
+    R (>= 4.0),
+    stats (>= 4.0),
+    utils (>= 4.0),
+    methods (>= 4.0),
 Imports: 
     forecast (>= 8.12),
     KFAS (>= 1.4.4),
-    quantreg (>= 5.9)
+    quantreg (>= 5.9),
+    mgcv (>= 1.8-42),
+    mboost (>= 2.9-9),
+    lightgbm (>= 4.4.0)
 Suggests: 
     knitr,
     rmarkdown,
@@ -32,4 +37,4 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
