@@ -2,39 +2,23 @@
 % Please edit documentation in R/mod-par.r
 \name{modelos_par}
 \alias{modelos_par}
-\alias{par}
-\alias{predict.par}
-\alias{predict.parA}
-\alias{update.par}
-\alias{update.parA}
-\title{Modelos \code{par}}
+\alias{PAR}
+\alias{predict.PAR}
+\alias{update.PAR}
+\title{Modelos \code{PAR}}
 \usage{
-par(serie, s = frequency(serie), p = "auto", A12 = FALSE, max.p = 11, ...)
+PAR(serie, ...)
 
-\method{predict}{par}(object, n.ahead, ...)
+\method{predict}{PAR}(object, n.ahead, ...)
 
-\method{predict}{parA}(object, n.ahead, ...)
-
-\method{update}{par}(object, newseries, refit = FALSE, ...)
-
-\method{update}{parA}(object, newseries, refit = FALSE, ...)
+\method{update}{PAR}(object, newseries, refit = FALSE, ...)
 }
 \arguments{
 \item{serie}{série para ajustar}
 
-\item{s}{periodo de sazonalidade, caso \code{serie} nao seja uma serie temporal com sazonalidade}
-
-\item{p}{vetor de comprimento igual a sazonalidade contendo as ordens de cada modelo periódico;
-caso tenha comprimento menor que \code{s}, sera reciclado. Ver Detalhes}
-
-\item{A12}{booleano indicando se a parcela anual deve ser incorporada à estimação}
-
-\item{max.p}{vetor de comprimento igual a sazonalidade contendo as máximas ordens para
-identificação automática; será reciclado se necessário. Ignorado se \code{p = "auto"}}
-
 \item{...}{para \code{update} nao tem uso, existe apenas para consistência com a genérica}
 
-\item{object}{objeto com classes \code{c("par"|"parA", "modprev")} contendo modelo}
+\item{object}{objeto com classes \code{c("PAR"|"parA", "modprev")} contendo modelo}
 
 \item{n.ahead}{número de passos à frente para previsão}
 
@@ -43,7 +27,7 @@ identificação automática; será reciclado se necessário. Ignorado se \code{p
 \item{refit}{booleano indicando se o modelo deve ou não ser reajustado}
 }
 \value{
-Objeto da classe \code{modprev} e subclasse \code{par}, uma lista de dois
+Objeto da classe \code{modprev} e subclasse \code{PAR}, uma lista de dois
 elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada
 
 \code{predict} retorna uma série temporal multivariada contendo valor esperado e desvio
@@ -53,20 +37,11 @@ padrão da previsão \code{n.ahead} passos à frente;
 Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
 }
 \description{
-Estimação e métodos de modelos da classe \code{par}
+Estimação e métodos de modelos da classe \code{PAR}
 
-Modelos PAR(p) são necessariamente ajustados a séries temporais com sazonalidade. Desta forma, o
-argumento \code{serie} deve ser um objeto \code{ts} com sazonalidade ou então o período de
-sazonalidade deve ser informado através de \code{s}. Caso nenhuma destas condições seja atendida
-a função aborta com erro.
+\code{...} pode conter qualquer, ou nenhum, argumento de \code{\link[parmodels:par]{parmodels::par()}} exceto por \code{serie}, que
+sera passado automaticamente como \code{serie} desta funcao.
 }
 \details{
 Modelos periódicos autorregressivos, possivelmente com parcela anual, similares aos do GEVAZP
-
-A identificação de ordem destes modelos pode ser feita de forma automática, informando o
-argumento \code{p = "auto"}. A seleção da ordem de cada modelo é realizada a partir das PACFs
-periódicas, buscando o primeiro lag, a partir do primeiro, dentro do intervalo de confiança para
-não significância, até o lag \code{max.p} correspondente. Para consistência com o GEVAZP, a
-identificação automática usa funções deautocorrelação parcial periódica quando \code{A12 = FALSE}
-e condicional do contrário.
 }

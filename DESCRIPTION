@@ -25,7 +25,8 @@ Imports:
     quantreg (>= 5.9),
     mgcv (>= 1.8-42),
     mboost (>= 2.9-9),
-    lightgbm (>= 4.4.0)
+    lightgbm (>= 4.4.0),
+    parmodels (>= 0.0.0.9000)
 Suggests: 
     knitr,
     rmarkdown,
@@ -37,4 +38,4 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
