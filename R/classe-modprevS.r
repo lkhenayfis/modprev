@@ -22,6 +22,11 @@
 #' @return Objeto da classe `modprev_S`
 
 estimamodelo_S <- function(target_pipe, data_pipe, data_list, tipo, ...) {
+
+    if (!requireNamespace("shapeshiftr", quietly = TRUE)) {
+        stop("Pacote 'shapeshiftr' necessario para modelos com shapeshifting")
+    }
+
     target_pipe <- parse_pipes(target_pipe, data_list, parent.frame())
     data_pipe   <- parse_pipes(data_pipe, data_list, parent.frame())
 
