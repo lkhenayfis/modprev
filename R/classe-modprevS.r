@@ -49,3 +49,45 @@ new_modprevS <- function(modelo, data_pipe, target_pipe) {
         class = c("modprevS", class(modelo))
     )
 }
+
+# METODOS ------------------------------------------------------------------------------------------
+
+predict.modprevS <- function(object, n.ahead, newdata_list, feedback_fun = NULL, ...) {
+    if (!is.null(feedback_fun)) {
+        predict_recursive_modprevS(object, n.ahead, newdata_list, feedback_fun, ...)
+    } else {
+        predict_default_modprevS(object, n.ahead, newdata_list, ...)
+    }
+}
+
+predict_default_modprevS <- function(object, n.ahead, newdata_list, ...) {
+    data_pipe <- object$data_pipe
+    data <- combine_pipes(eval_pipes(data_pipe, newdata_list, parent.frame()))
+
+    prev <- predict(object$modelo, n.ahead = n.ahead, newdata = data, ...)
+
+    return(prev)
+}
+
+predict_recursive_modprevS <- function(object, n.ahead, newdata_list, feedback_fun, ...) {
+    data_pipe <- object$data_pipe
+    modelo <- object$modelo
+
+    pred_list <- list()
+
+    for (i in seq_len(n.ahead)) {
+        data <- combine_pipes(eval_pipes(data_pipe, newdata_list, parent.frame()))
+
+        pred_list[i] <- list(predict(modelo, newdata = data, ...))
+
+        feedback_data <- feedback_fun(c(pred_list[[i]][, 1]), newdata_list)
+        newdata_list[names(feedback_data)] <- feedback_data
+    }
+
+    start <- start(pred_list[[1]])
+    freq  <- frequency(pred_list[[1]])
+    pred <- ts(do.call(rbind, pred_list), start = start, frequency = freq)
+    colnames(pred) <- c("prev", "sd")
+
+    return(pred)
+}
