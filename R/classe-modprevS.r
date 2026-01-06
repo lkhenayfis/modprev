@@ -52,6 +52,32 @@ new_modprevS <- function(modelo, data_pipe, target_pipe) {
 
 # METODOS ------------------------------------------------------------------------------------------
 
+#' `predict` De Modelos Com Shapesifting
+#' 
+#' Wrapper de previsao para modelos com shapeshifting
+#' 
+#' \bold{FUNCIONALIDADE EM TESTE - SUJEITO A MUDANCAS FUTURAS}
+#' 
+#' O argumento `feedback_fun` controla o modo de previsao sendo empregado. Caso nao seja fornecido,
+#' realiza-se previsao single-shot com o maximo possivel de dados utilizaveis. Se for fornecido, se
+#' aplica previsao recursiva, na qual cada previsao unitaria é feita e realimentada aos dados 
+#' `newdata_list` utilizando a funcao `feedback_fun`. `feedback_fun`, se fornecido, deve ser uma
+#' funcao que recebe como primeiro argumento um vetor com as previsoes feitas ate o momento (apenas
+#' valores previstos, sem desvios padrao) e como segundo argumento a `newdata_list` atual. A funcao
+#' deve retornar uma lista nomeada com os novos valores a serem atualizados em `newdata_list` para o
+#' proximo passo de previsao.
+#' 
+#' @param object objeto com classe `"modprevS"` contendo modelo
+#' @param n.ahead número de passos à frente para previsão
+#' @param newdata_list lista nomeada contendo os dados a serem usados na extracao via pipes
+#' @param feedback_fun função opcional para atualizar `newdata_list` a cada passo de previsão
+#' @param ... Para `predict`, demais argumentos passados para a função de previsão do modelo interno
+#' 
+#' @return `predict` retorna uma série temporal multivariada contendo valor esperado e desvio 
+#'     padrão da previsão `n.ahead` passos à frente
+#' 
+#' @export
+
 predict.modprevS <- function(object, n.ahead, newdata_list, feedback_fun = NULL, ...) {
     if (!is.null(feedback_fun)) {
         predict_recursive_modprevS(object, n.ahead, newdata_list, feedback_fun, ...)
@@ -73,7 +99,7 @@ predict_recursive_modprevS <- function(object, n.ahead, newdata_list, feedback_f
     data_pipe <- object$data_pipe
     modelo <- object$modelo
 
-    pred_list <- list()
+    pred_list <- vector("list", n.ahead)
 
     for (i in seq_len(n.ahead)) {
         data <- combine_pipes(eval_pipes(data_pipe, newdata_list, parent.frame()))
