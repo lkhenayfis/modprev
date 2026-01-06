@@ -2,7 +2,7 @@
 test_that("Estimacao de BOOSTs - simples", {
     set.seed(12)
     mod <- estimamodelo(datregdin$obs, "BOOST", regdata = datregdin$varex, formula = ~ V1 + V2 + V3,
-        cv_control = list(B = 1))
+        validation = "cv", validation_control = list(B = 1))
 
     set.seed(12)
     compmod <- mboost(obs ~ V1 + V2 + V3,
@@ -24,7 +24,7 @@ test_that("Estimacao de BOOSTs - simples", {
 
     ss <- ts(datregdin$obs, frequency = 10)
     mod <- estimamodelo(ss, "BOOST", regdata = datregdin$varex, formula = ~ V1 + V2 + V3,
-        cv_control = list(B = 1))
+        validation = "cv", validation_control = list(B = 1))
     expect_equal(attr(mod, "mod_atrs")$tsp, c(1, 20.9, 10))
 })
 
@@ -33,7 +33,7 @@ test_that("Estimacao de BOOSTs - argumentos opcionais de mboost", {
     # mudando baselearner
     set.seed(12)
     mod <- estimamodelo(datregdin$obs, "BOOST", regdata = datregdin$varex, formula = ~ V1 + V2 + V3,
-        baselearner = "bols", cv_control = list(B = 1))
+        baselearner = "bols", validation = "cv", validation_control = list(B = 1))
 
     set.seed(12)
     compmod <- mboost(obs ~ V1 + V2 + V3,
@@ -49,7 +49,7 @@ test_that("Estimacao de BOOSTs - argumentos opcionais de mboost", {
     # mudando funcao perda
     set.seed(12)
     mod <- estimamodelo(datregdin$obs, "BOOST", regdata = datregdin$varex, formula = ~ V1 + V2 + V3,
-        family = Laplace(), baselearner = "bols", cv_control = list(B = 1))
+        family = Laplace(), baselearner = "bols", validation = "cv", validation_control = list(B = 1))
 
     set.seed(12)
     compmod <- mboost(obs ~ V1 + V2 + V3,
@@ -66,7 +66,7 @@ test_that("Estimacao de BOOSTs - argumentos opcionais de mboost", {
 test_that("Estimacao de BOOSTs - argumentos de validacao cruzada", {
     set.seed(12)
     mod <- estimamodelo(datregdin$obs, "BOOST", regdata = datregdin$varex, formula = ~ V1 + V2 + V3,
-        cv_control = list(B = 4, type = "boot"))
+        validation = "cv", validation_control = list(B = 4, type = "boot"))
 
     set.seed(12)
     compmod <- mboost(obs ~ V1 + V2 + V3,
@@ -89,7 +89,7 @@ test_that("Estimacao de BOOSTs - argumentos de train/test", {
     varex_teste  <- datregdin$varex[150:200, ]
 
     mod <- estimamodelo(obs_treino, "BOOST", regdata = varex_treino, formula = ~ V1 + V2 + V3,
-        test_data = list(obs_teste, varex_teste))
+        validation = "split", validation_control = list(test_serie = obs_teste, test_regdata = varex_teste))
 
     compmod <- mboost(obs ~ V1 + V2 + V3,
         cbind(obs = as.numeric(obs_treino), varex_treino),
@@ -116,7 +116,7 @@ test_that("Previsao de BOOST", {
     # essa seed em particular e so pra garantir que mod vai ate 100 iteracoes
     set.seed(1234)
     mod <- estimamodelo(yy, "BOOST", regdata = xx, formula = ~ V1 + V2 + V3,
-        baselearner = "bols", cv_control = list(B = 1))
+        baselearner = "bols", validation = "cv", validation_control = list(B = 1))
 
     prevcomp <- predict(compmod, newdata = datregdin$varex[151:160, ])
     prev     <- predict(mod, newdata = datregdin$varex[151:160, ])
@@ -142,7 +142,7 @@ test_that("Previsao de BOOST", {
 
     ss <- ts(yy, frequency = 10)
     mod <- estimamodelo(ss, "BOOST", regdata = xx, formula = ~ V1 + V2 + V3,
-        baselearner = "bols", cv_control = list(B = 1))
+        baselearner = "bols", validation = "cv", validation_control = list(B = 1))
     prev <- predict(mod, newdata = datregdin$varex[151:160, ])
 
     expect_equal(start(prev), c(16, 1))
@@ -156,7 +156,7 @@ test_that("Atualizacao de BOOST", {
     set.seed(12)
     pesos <- runif (100)
     mod   <- estimamodelo(yy, "BOOST", regdata = xx, formula = ~ V1 + V2 + V3,
-        baselearner = "bols", cv_control = list(B = 1), weights = pesos, family = Laplace())
+        baselearner = "bols", validation = "cv", validation_control = list(B = 1), weights = pesos, family = Laplace())
 
     yy2 <- window(datregdin$obs, 101, 200)
     xx2 <- tail(datregdin$varex, 100)
@@ -173,7 +173,7 @@ test_that("Atualizacao de BOOST", {
     upd_call  <- attr(mod_upd, "mod_atrs")$call
 
     compare_calls(orig_call, upd_call,
-        c("formula", "cv_control", "baselearner", "weights", "family"))
+        c("formula", "validation", "validation_control", "baselearner", "weights", "family"))
 
     expect_equal(attr(mod_upd, "mod_atrs")$tsp, c(101, 200, 1))
 
@@ -191,7 +191,7 @@ test_that("Atualizacao de BOOST", {
 
     refit_call  <- attr(mod_refit, "mod_atrs")$call
     compare_calls(orig_call, refit_call,
-        c("formula", "cv_control", "baselearner", "weights", "family"))
+        c("formula", "validation", "validation_control", "baselearner", "weights", "family"))
 
     expect_equal(attr(mod_refit, "mod_atrs")$tsp, c(101, 200, 1))
 })
