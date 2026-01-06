@@ -32,8 +32,12 @@ NULL
 #' 
 #' @param serie série para ajustar
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
-#' @param test_data uma lista contento valores out-of-sample da variavel dependente e regressores
-#'     que serao utilizados para selecao do criterio de parada
+#' @param validation character string especificando o método de validação. Um de "none" (sem 
+#'     validação adicional), "cv" (validação cruzada), ou "split" (train/test split)
+#' @param validation_control lista nomeada com argumentos específicos de validação. Para "cv": 
+#'     argumentos passados a \code{\link[lightgbm]{lgb.cv}} (como \code{nfold}, \code{stratified}, 
+#'     \code{nrounds}, etc.). Para "split": deve conter \code{test_serie} e \code{test_regdata} 
+#'     com dados out-of-sample
 #' @param dataset_params lista de parâmetros opcionais para construção do dataset. Veja
 #'     \code{\link[lightgbm]{lgb.Dataset}} para mais detalhes
 #' @param train_params lista de parâmetros opcionais para treinamento do modelo. Veja
@@ -46,31 +50,58 @@ NULL
 #' 
 #' @rdname modelos_lightgbm
 
-LGBM <- function(serie, regdata, test_data = list(c(), data.frame()),
-    dataset_params = list(), train_params = list(), ...) {
+LGBM <- function(serie, regdata, dataset_params = list(), train_params = list(),
+    validation = c("none", "cv", "split"), validation_control = list(),  ...) {
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
+
+    validation <- match.arg(validation)
 
     if (!is.ts(serie)) serie <- ts(serie)
     aux_tsp <- tsp(serie)
 
     regdata <- lgb.Dataset(data.matrix(regdata), dataset_params, label = as.numeric(serie))
 
-    if (length(test_data[[1]]) != 0) {
-        fit <- LGBM_traintest(regdata, test_data, train_params, ...)
-    } else {
-        fit <- lightgbm(regdata, train_params, ...)
-    }
+    fit <- switch(validation,
+        "none"  = lightgbm(regdata, train_params, ...),
+        "cv"    = LGBM_CV(regdata, train_params, validation_control, ...),
+        "split" = LGBM_SPLIT(regdata, train_params, validation_control$test_serie,
+            validation_control$test_regdata, ...)
+    )
 
     mod_atrs <- list(call = match.call(), tsp = aux_tsp)
 
     new_modprevU(fit, serie, "LGBM", mod_atrs)
 }
 
-LGBM_traintest <- function(regdata, test_data, train_params, ...) {
+LGBM_CV <- function(regdata, train_params, cv_control, ...) {
 
-    test_data <- lgb.Dataset.create.valid(regdata, data.matrix(test_data[[2]]),
-        as.numeric(test_data[[1]]))
+    cv_call <- c(
+        list(quote(lgb.cv)),
+        list(params = train_params, data = regdata),
+        cv_control
+    )
+
+    cv_result <- eval(as.call(cv_call))
+
+    best_iter <- cv_result$best_iter
+    if (!is.null(best_iter)) {
+        train_params$nrounds <- best_iter
+    }
+
+    fit <- lightgbm(data = regdata, params = train_params, ...)
+
+    return(fit)
+}
+
+LGBM_SPLIT <- function(regdata, train_params, test_serie, test_regdata, ...) {
+
+    if (is.null(test_serie) || is.null(test_regdata)) {
+        stop("Para validacao 'split', validation_control deve conter 'test_serie' e 'test_regdata'")
+    }
+
+    test_data <- lgb.Dataset.create.valid(regdata, data.matrix(test_regdata),
+        as.numeric(test_serie))
 
     fit <- lightgbm(regdata, train_params,
         valids = list(test = test_data), ...)
