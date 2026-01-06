@@ -33,10 +33,11 @@ NULL
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
 #' @param formula opcional, fórmula da regressão. Se for omitido, todas as variaveis em 
 #'     \code{regdata} serão utilizadas
-#' @param cv_control uma lista nomeada contendo quaisquer argumentos das funcoes
-#'     \code{\link[mboost]{cv}} e \code{\link[mboost]{cvrisk}}
-#' @param test_data uma lista contento valores out-of-sample da variavel dependente e regressores
-#'     que serao utilizados para selecao do criterio de parada
+#' @param validation character string especificando o método de validação. Um de "none" (sem 
+#'     validação adicional), "cv" (validação cruzada), ou "split" (out-of-bag com dados de teste)
+#' @param validation_control lista nomeada com argumentos específicos de validação. Para "cv": 
+#'     argumentos passados a \code{\link[mboost]{cv}} e \code{\link[mboost]{cvrisk}}. Para "split": 
+#'     deve conter \code{test_serie} e \code{test_regdata} com dados out-of-sample
 #' @param ... para estimacao, demais argumentos passados a funcao \code{\link[mboost]{mboost}}; nas
 #'     restantes nao possui uso
 #' 
@@ -46,9 +47,11 @@ NULL
 #' @rdname modelos_boost
 
 BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"),
-    cv_control = list(), test_data = list(c(), data.frame()), ...) {
+    validation = c("none", "cv", "split"), validation_control = list(), ...) {
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
+
+    validation <- match.arg(validation)
 
     formula <- update(formula, Y ~ .)
 
@@ -57,25 +60,26 @@ BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"),
 
     regdata <- cbind(Y = as.numeric(serie), regdata)
 
-    if (length(cv_control) != 0) {
-        fit <- BOOST_traincv(regdata, formula, cv_control, ...)
-    } else {
-        fit <- BOOST_traintest(regdata, formula, test_data, ...)
-    }
+    fit <- switch(validation,
+        "none" = mboost(formula, data = regdata, ...),
+        "cv"   = BOOST_CV(regdata, formula, validation_control, ...),
+        "split"  = BOOST_SPLIT(regdata, formula,
+            validation_control$test_serie, validation_control$test_regdata, ...)
+    )
 
     mod_atrs <- list(call = match.call(), tsp = aux_tsp)
 
     new_modprevU(fit, serie, "BOOST", mod_atrs)
 }
 
-BOOST_traincv <- function(regdata, formula, cv_control, ...) {
+BOOST_CV <- function(regdata, formula, CV_control, ...) {
     fit <- mboost(formula, data = regdata, ...)
 
-    cv_spec <- c(list(quote(cv), model.weights(fit)), match_fun_args(cv_control, mboost::cv))
+    cv_spec <- c(list(quote(cv), model.weights(fit)), match_fun_args(CV_control, mboost::cv))
     cv_spec <- eval(as.call(cv_spec))
 
-    args_cvrisk  <- match_fun_args(cv_control, mboost:::cvrisk.mboost)
-    args_mcapply <- match_fun_args(cv_control, parallel::mclapply)
+    args_cvrisk  <- match_fun_args(CV_control, mboost:::cvrisk.mboost)
+    args_mcapply <- match_fun_args(CV_control, parallel::mclapply)
     cv <- c(
         list(quote(cvrisk), quote(fit), quote(cv_spec)),
         args_cvrisk,
@@ -86,30 +90,30 @@ BOOST_traincv <- function(regdata, formula, cv_control, ...) {
     return(fit)
 }
 
-BOOST_traintest <- function(regdata, formula, test_data, ...) {
-    cc <- match.call()
+BOOST_SPLIT <- function(regdata, formula, test_serie, test_regdata, ...) {
 
-    test_data <- cbind(Y = as.numeric(test_data[[1]]), test_data[[2]])
+    if (is.null(test_serie) || is.null(test_regdata)) {
+        stop("Para validacao 'split', validation_control deve conter 'test_serie' e 'test_regdata'")
+    }
+
+    test_data <- cbind(Y = as.numeric(test_serie), test_regdata)
 
     insample    <- c(rep(TRUE, nrow(regdata)), rep(FALSE, nrow(test_data)))
     outofsample <- !insample
 
     fulldata <- rbind(regdata, test_data)
 
-    if (!is.null(cc$control)) {
-        cc$control <- eval(cc$control, parent.frame())
-        cc$control$risk <- "oobag"
+    dots <- list(...)
+    if (!is.null(dots$control)) {
+        ctrl <- dots$control
+        ctrl$risk <- "splitag"
+        dots$control <- NULL
     } else {
-        cc$control <- boost_control(risk = "oobag")
+        ctrl <- boost_control(risk = "splitag")
     }
 
-    cc[[1]] <- quote(mboost)
-    cc[c("test_data", "regdata")] <- NULL
-    cc$data <- quote(fulldata)
-    cc$weights <- quote(insample)
-    cc$oobweights <- quote(outofsample)
-
-    fit <- eval(cc)
+    fit <- mboost(formula, data = fulldata, weights = insample,
+        splitweights = outofsample, control = ctrl, ...)
     fit[which.min(fit$risk())]
 
     return(fit)
