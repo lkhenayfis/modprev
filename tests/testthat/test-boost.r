@@ -83,16 +83,13 @@ test_that("Estimacao de BOOSTs - argumentos de validacao cruzada", {
 test_that("Estimacao de BOOSTs - argumentos de train/test", {
     set.seed(12)
 
-    obs_treino   <- window(datregdin$obs, end = 150)
-    varex_treino <- datregdin$varex[1:150, ]
-    obs_teste    <- window(datregdin$obs, start = 150)
-    varex_teste  <- datregdin$varex[150:200, ]
+    oob <- c(rep(TRUE, 150), rep(FALSE, 50))
 
-    mod <- estimamodelo(obs_treino, "BOOST", regdata = varex_treino, formula = ~ V1 + V2 + V3,
-        validation = "split", validation_control = list(test_serie = obs_teste, test_regdata = varex_teste))
+    mod <- estimamodelo(datregdin$obs, "BOOST", regdata = datregdin$varex, formula = ~ V1 + V2 + V3,
+        validation = "split", validation_control = list(oob = oob))
 
     compmod <- mboost(obs ~ V1 + V2 + V3,
-        cbind(obs = as.numeric(obs_treino), varex_treino),
+        cbind(obs = as.numeric(datregdin$obs[1:150]), datregdin$varex[1:150, ]),
         control = boost_control(56))
 
     # teste extremamente simplorio so pra garantir que ainda esta rodando

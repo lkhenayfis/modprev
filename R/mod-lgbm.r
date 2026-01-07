@@ -36,8 +36,8 @@ NULL
 #'     validação adicional), "cv" (validação cruzada), ou "split" (train/test split)
 #' @param validation_control lista nomeada com argumentos específicos de validação. Para "cv": 
 #'     argumentos passados a \code{\link[lightgbm]{lgb.cv}} (como \code{nfold}, \code{stratified}, 
-#'     \code{nrounds}, etc.). Para "split": deve conter \code{test_serie} e \code{test_regdata} 
-#'     com dados out-of-sample
+#'     \code{nrounds}, etc.). Para "split": deve conter \code{oob}, um vetor lógico com TRUE para 
+#'     observações in-sample e FALSE para observações out-of-sample
 #' @param dataset_params lista de parâmetros opcionais para construção do dataset. Veja
 #'     \code{\link[lightgbm]{lgb.Dataset}} para mais detalhes
 #' @param train_params lista de parâmetros opcionais para treinamento do modelo. Veja
@@ -60,13 +60,12 @@ LGBM <- function(serie, regdata, dataset_params = list(), train_params = list(),
     if (!is.ts(serie)) serie <- ts(serie)
     aux_tsp <- tsp(serie)
 
-    regdata <- lgb.Dataset(data.matrix(regdata), dataset_params, label = as.numeric(serie))
+    regdata_dataset <- lgb.Dataset(data.matrix(regdata), dataset_params, label = as.numeric(serie))
 
     fit <- switch(validation,
-        "none"  = lightgbm(regdata, train_params, ...),
-        "cv"    = LGBM_CV(regdata, train_params, validation_control, ...),
-        "split" = LGBM_SPLIT(regdata, train_params, validation_control$test_serie,
-            validation_control$test_regdata, ...)
+        "none"  = lightgbm(regdata_dataset, train_params, ...),
+        "cv"    = LGBM_CV(regdata_dataset, train_params, validation_control, ...),
+        "split" = LGBM_SPLIT(serie, regdata, dataset_params, train_params, validation_control$oob, ...)
     )
 
     mod_atrs <- list(call = match.call(), tsp = aux_tsp)
@@ -94,16 +93,24 @@ LGBM_CV <- function(regdata, train_params, cv_control, ...) {
     return(fit)
 }
 
-LGBM_SPLIT <- function(regdata, train_params, test_serie, test_regdata, ...) {
+LGBM_SPLIT <- function(serie, regdata, dataset_params, train_params, oob, ...) {
 
-    if (is.null(test_serie) || is.null(test_regdata)) {
-        stop("Para validacao 'split', validation_control deve conter 'test_serie' e 'test_regdata'")
+    if (is.null(oob)) {
+        stop("Para validacao 'split', validation_control deve conter 'oob'")
     }
 
-    test_data <- lgb.Dataset.create.valid(regdata, data.matrix(test_regdata),
-        as.numeric(test_serie))
+    if (length(oob) != length(serie)) {
+        stop("O vetor 'oob' deve ter o mesmo comprimento que 'serie'")
+    }
 
-    fit <- lightgbm(regdata, train_params,
+    train_data <- lgb.Dataset(data.matrix(regdata[oob, , drop = FALSE]), dataset_params,
+        label = as.numeric(serie[oob]))
+
+    test_data <- lgb.Dataset.create.valid(train_data,
+        data.matrix(regdata[!oob, , drop = FALSE]),
+        as.numeric(serie[!oob]))
+
+    fit <- lightgbm(train_data, train_params,
         valids = list(test = test_data), ...)
 
     return(fit)

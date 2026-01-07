@@ -37,7 +37,8 @@ NULL
 #'     validação adicional), "cv" (validação cruzada), ou "split" (out-of-bag com dados de teste)
 #' @param validation_control lista nomeada com argumentos específicos de validação. Para "cv": 
 #'     argumentos passados a \code{\link[mboost]{cv}} e \code{\link[mboost]{cvrisk}}. Para "split": 
-#'     deve conter \code{test_serie} e \code{test_regdata} com dados out-of-sample
+#'     deve conter \code{oob}, um vetor lógico com TRUE para observações in-sample e FALSE para 
+#'     observações out-of-sample
 #' @param ... para estimacao, demais argumentos passados a funcao \code{\link[mboost]{mboost}}; nas
 #'     restantes nao possui uso
 #' 
@@ -58,13 +59,12 @@ BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"),
     if (!is.ts(serie)) serie <- ts(serie)
     aux_tsp <- tsp(serie)
 
-    regdata <- cbind(Y = as.numeric(serie), regdata)
+    regdata_combined <- cbind(Y = as.numeric(serie), regdata)
 
     fit <- switch(validation,
-        "none" = mboost(formula, data = regdata, ...),
-        "cv"   = BOOST_CV(regdata, formula, validation_control, ...),
-        "split"  = BOOST_SPLIT(regdata, formula,
-            validation_control$test_serie, validation_control$test_regdata, ...)
+        "none"  = mboost(formula, data = regdata_combined, ...),
+        "cv"    = BOOST_CV(regdata_combined, formula, validation_control, ...),
+        "split" = BOOST_SPLIT(serie, regdata, formula, validation_control$oob, ...)
     )
 
     mod_atrs <- list(call = match.call(), tsp = aux_tsp)
@@ -90,18 +90,19 @@ BOOST_CV <- function(regdata, formula, CV_control, ...) {
     return(fit)
 }
 
-BOOST_SPLIT <- function(regdata, formula, test_serie, test_regdata, ...) {
+BOOST_SPLIT <- function(serie, regdata, formula, oob, ...) {
 
-    if (is.null(test_serie) || is.null(test_regdata)) {
-        stop("Para validacao 'split', validation_control deve conter 'test_serie' e 'test_regdata'")
+    if (is.null(oob)) {
+        stop("Para validacao 'split', validation_control deve conter 'oob'")
     }
 
-    test_data <- cbind(Y = as.numeric(test_serie), test_regdata)
+    if (length(oob) != length(serie)) {
+        stop("O vetor 'oob' deve ter o mesmo comprimento que 'serie'")
+    }
 
-    insample    <- c(rep(TRUE, nrow(regdata)), rep(FALSE, nrow(test_data)))
-    outofsample <- !insample
-
-    fulldata <- rbind(regdata, test_data)
+    fulldata <- cbind(Y = as.numeric(serie), regdata)
+    insample    <- oob
+    outofsample <- !oob
 
     dots <- list(...)
     if (!is.null(dots$control)) {
