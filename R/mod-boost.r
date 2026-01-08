@@ -35,7 +35,11 @@ NULL
 #'     \code{regdata} serão utilizadas
 #' @param validation character string especificando o método de validação. Um de "none" (sem 
 #'     validação adicional), "cv" (validação cruzada), ou "split" (out-of-bag com dados de teste)
-#' @param validation_control lista nomeada com argumentos específicos de validação. Para "cv": 
+#' @param validation_control lista nomeada com argumentos específicos de validação, ou uma função
+#'     que retorna tal lista. Se função, deve ter assinatura \code{function(serie, regdata)} e
+#'     retornar uma lista nomeada. Para "cv": argumentos passados a \code{\link[mboost]{cv}}
+#'     e \code{\link[mboost]{cvrisk}}. Para "split": deve conter \code{oob}, um vetor lógico
+#'     com TRUE para observações in-sample e FALSE para observações out-of-sample
 #'     argumentos passados a \code{\link[mboost]{cv}} e \code{\link[mboost]{cvrisk}}. Para "split": 
 #'     deve conter \code{oob}, um vetor lógico com TRUE para observações in-sample e FALSE para 
 #'     observações out-of-sample
@@ -58,6 +62,18 @@ BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"),
 
     if (!is.ts(serie)) serie <- ts(serie)
     aux_tsp <- tsp(serie)
+
+    if (validation != "none") {
+        validation_control <- evaluate_validation_control(
+            validation_control, serie, regdata, validation
+        )
+
+        if (validation == "cv") {
+            validate_control_boost_cv(validation_control)
+        } else if (validation == "split") {
+            validate_control_boost_split(validation_control, length(serie))
+        }
+    }
 
     regdata_combined <- cbind(Y = as.numeric(serie), regdata)
 
@@ -107,14 +123,14 @@ BOOST_SPLIT <- function(serie, regdata, formula, oob, ...) {
     dots <- list(...)
     if (!is.null(dots$control)) {
         ctrl <- dots$control
-        ctrl$risk <- "splitag"
+        ctrl$risk <- "oobag"
         dots$control <- NULL
     } else {
-        ctrl <- boost_control(risk = "splitag")
+        ctrl <- boost_control(risk = "oobag")
     }
 
     fit <- mboost(formula, data = fulldata, weights = insample,
-        splitweights = outofsample, control = ctrl, ...)
+        oobweights = outofsample, control = ctrl, ...)
     fit[which.min(fit$risk())]
 
     return(fit)
