@@ -107,14 +107,14 @@ BOOST_SPLIT <- function(serie, regdata, formula, oob, ...) {
     dots <- list(...)
     if (!is.null(dots$control)) {
         ctrl <- dots$control
-        ctrl$risk <- "splitag"
+        ctrl$risk <- "oobag"
         dots$control <- NULL
     } else {
-        ctrl <- boost_control(risk = "splitag")
+        ctrl <- boost_control(risk = "oobag")
     }
 
     fit <- mboost(formula, data = fulldata, weights = insample,
-        splitweights = outofsample, control = ctrl, ...)
+        oobweights = outofsample, control = ctrl, ...)
     fit[which.min(fit$risk())]
 
     return(fit)
