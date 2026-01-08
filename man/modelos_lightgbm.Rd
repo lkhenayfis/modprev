@@ -8,9 +8,10 @@
 LGBM(
   serie,
   regdata,
-  test_data = list(c(), data.frame()),
   dataset_params = list(),
   train_params = list(),
+  validation = c("none", "cv", "split"),
+  validation_control = list(),
   ...
 )
 }
@@ -19,14 +20,21 @@ LGBM(
 
 \item{regdata}{\code{data.frame}-like contendo variáveis explicativas}
 
-\item{test_data}{uma lista contento valores out-of-sample da variavel dependente e regressores
-que serao utilizados para selecao do criterio de parada}
-
 \item{dataset_params}{lista de parâmetros opcionais para construção do dataset. Veja
 \code{\link[lightgbm]{lgb.Dataset}} para mais detalhes}
 
 \item{train_params}{lista de parâmetros opcionais para treinamento do modelo. Veja
 \code{\link[lightgbm]{lightgbm}} para mais detalhes}
+
+\item{validation}{character string especificando o método de validação. Um de "none" (sem
+validação adicional), "cv" (validação cruzada), ou "split" (train/test split)}
+
+\item{validation_control}{lista nomeada com argumentos específicos de validação, ou uma função
+que retorna tal lista. Se função, deve ter assinatura \code{function(serie, regdata)} e
+retornar uma lista nomeada. Para "cv": argumentos passados a
+\code{\link[lightgbm]{lgb.cv}} (como \code{nfold}, \code{stratified}, \code{nrounds}, etc.).
+Para "split": deve conter \code{oob}, um vetor lógico com TRUE para observações in-sample
+e FALSE para observações out-of-sample}
 
 \item{...}{para estimacao, demais argumentos passados a funcao \code{\link[lightgbm]{lightgbm}};
 nas restantes nao possui uso}
