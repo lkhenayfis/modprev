@@ -11,8 +11,8 @@ BOOST(
   serie,
   regdata,
   formula = expandeformula(regdata, "ls"),
-  cv_control = list(),
-  test_data = list(c(), data.frame()),
+  validation = c("none", "cv", "split"),
+  validation_control = list(),
   ...
 )
 
@@ -28,11 +28,13 @@ BOOST(
 \item{formula}{opcional, fórmula da regressão. Se for omitido, todas as variaveis em
 \code{regdata} serão utilizadas}
 
-\item{cv_control}{uma lista nomeada contendo quaisquer argumentos das funcoes
-\code{\link[mboost]{cv}} e \code{\link[mboost]{cvrisk}}}
+\item{validation}{character string especificando o método de validação. Um de "none" (sem
+validação adicional), "cv" (validação cruzada), ou "split" (out-of-bag com dados de teste)}
 
-\item{test_data}{uma lista contento valores out-of-sample da variavel dependente e regressores
-que serao utilizados para selecao do criterio de parada}
+\item{validation_control}{lista nomeada com argumentos específicos de validação. Para "cv":
+argumentos passados a \code{\link[mboost]{cv}} e \code{\link[mboost]{cvrisk}}. Para "split":
+deve conter \code{oob}, um vetor lógico com TRUE para observações in-sample e FALSE para
+observações out-of-sample}
 
 \item{...}{para estimacao, demais argumentos passados a funcao \code{\link[mboost]{mboost}}; nas
 restantes nao possui uso}
