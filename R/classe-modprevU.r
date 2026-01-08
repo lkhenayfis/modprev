@@ -24,16 +24,23 @@
 #' @family Metodos modprevU
 
 estimamodelo_U <- function(serie, tipo, ...) {
+    if (is_registered(tipo)) {
+        spec <- get_model(tipo, error = FALSE)
 
-    tipo <- str2lang(paste0("modprev:::", tipo))
+        if (!is.null(spec)) {
+            fit_fn <- spec$fit_fn
+            return(fit_fn(serie, ...))
+        }
+    }
 
     mc <- match.call()
+    eval_env <- parent.frame()
+
+    tipo_fn <- str2lang(paste0("modprev:::", tipo))
     mc$tipo <- NULL
-    mc[[1]] <- tipo
+    mc[[1]] <- tipo_fn
 
-    out <- eval(mc, envir = parent.frame(), enclos = parent.frame())
-
-    return(out)
+    eval(mc, envir = eval_env, enclos = eval_env)
 }
 
 #' Contrutor Interno De \code{modprevU}
