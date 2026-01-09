@@ -1,6 +1,9 @@
 test_that("dispatch with registered models", {
     f <- estimamodelo_U
 
+    saved_registry <- modprev:::.get_models()
+    on.exit(modprev:::.set_models(saved_registry), add = TRUE)
+
     modprev:::.init_registry()
     modprev:::.clear_registry()
 
@@ -17,12 +20,13 @@ test_that("dispatch with registered models", {
 
     expect_s3_class(result, "modprevU")
     expect_equal(result$modelo$params, mean(serie))
-
-    modprev:::.remove_model("test_dispatch")
 })
 
 test_that("dispatch falls back to legacy for unregistered models", {
     f <- estimamodelo_U
+
+    saved_registry <- modprev:::.get_models()
+    on.exit(modprev:::.set_models(saved_registry), add = TRUE)
 
     modprev:::.init_registry()
     modprev:::.clear_registry()
@@ -36,6 +40,9 @@ test_that("dispatch falls back to legacy for unregistered models", {
 
 test_that("dispatch passes ... arguments correctly via registry", {
     f <- estimamodelo_U
+
+    saved_registry <- modprev:::.get_models()
+    on.exit(modprev:::.set_models(saved_registry), add = TRUE)
 
     modprev:::.init_registry()
     modprev:::.clear_registry()
@@ -58,8 +65,6 @@ test_that("dispatch passes ... arguments correctly via registry", {
 
     expect_equal(result$modelo$custom, "test_value")
     expect_equal(attr(result, "mod_atrs")$args$extra, 123)
-
-    modprev:::.remove_model("test_args")
 })
 
 test_that("dispatch passes ... arguments correctly via legacy", {
@@ -75,6 +80,9 @@ test_that("dispatch passes ... arguments correctly via legacy", {
 test_that("legacy dispatch behavior", {
     f <- estimamodelo_U
     expect_true(is.function(f))
+
+    saved_registry <- modprev:::.get_models()
+    on.exit(modprev:::.set_models(saved_registry), add = TRUE)
 
     modprev:::.init_registry()
     modprev:::.clear_registry()
@@ -130,6 +138,9 @@ test_that("estimamodelo_U integration", {
     })
 
     test_that("estimamodelo_U works with registered models (registry path)", {
+        saved_registry <- modprev:::.get_models()
+        on.exit(modprev:::.set_models(saved_registry), add = TRUE)
+
         modprev:::.init_registry()
         modprev:::.clear_registry()
 
@@ -146,8 +157,6 @@ test_that("estimamodelo_U integration", {
 
         expect_s3_class(result, "modprevU")
         expect_equal(result$modelo$mean, mean(serie))
-
-        modprev:::.remove_model("test_integrated")
     })
 
     test_that("estimamodelo_U maintains backward compatibility", {
@@ -166,6 +175,9 @@ test_that("estimamodelo_U integration", {
         result_legacy <- f(serie, "sarima", max.d = 0)
         expect_equal(result_legacy$modelo$arma[6], 0)
 
+        saved_registry <- modprev:::.get_models()
+        on.exit(modprev:::.set_models(saved_registry), add = TRUE)
+
         modprev:::.init_registry()
         modprev:::.clear_registry()
 
@@ -180,8 +192,6 @@ test_that("estimamodelo_U integration", {
         serie_test <- ts(1:10)
         result_registry <- f(serie_test, "test_params", test_param = "value")
         expect_equal(result_registry$modelo$param, "value")
-
-        modprev:::.remove_model("test_params")
     })
 
     test_that("estimamodelo_U works with reg_lin and regdata", {
