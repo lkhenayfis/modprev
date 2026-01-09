@@ -31,7 +31,11 @@ BOOST(
 \item{validation}{character string especificando o método de validação. Um de "none" (sem
 validação adicional), "cv" (validação cruzada), ou "split" (out-of-bag com dados de teste)}
 
-\item{validation_control}{lista nomeada com argumentos específicos de validação. Para "cv":
+\item{validation_control}{lista nomeada com argumentos específicos de validação, ou uma função
+que retorna tal lista. Se função, deve ter assinatura \code{function(serie, regdata)} e
+retornar uma lista nomeada. Para "cv": argumentos passados a \code{\link[mboost]{cv}}
+e \code{\link[mboost]{cvrisk}}. Para "split": deve conter \code{oob}, um vetor lógico
+com TRUE para observações in-sample e FALSE para observações out-of-sample
 argumentos passados a \code{\link[mboost]{cv}} e \code{\link[mboost]{cvrisk}}. Para "split":
 deve conter \code{oob}, um vetor lógico com TRUE para observações in-sample e FALSE para
 observações out-of-sample}

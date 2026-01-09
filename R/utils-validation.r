@@ -169,3 +169,64 @@ validate_control_split <- function(control_list, serie_length) {
 
     invisible(control_list)
 }
+
+#' Validate BOOST CV Mode Control Parameters
+#'
+#' Checks that control list contains valid parameters for BOOST cross-validation
+#'
+#' This is a lightweight validator that checks basic structure only. BOOST CV
+#' uses `match_fun_args()` to extract parameters for `mboost::cv()`,
+#' `mboost::cvrisk()`, and `parallel::mclapply()`, so comprehensive validation
+#' is not feasible. We validate only critical parameters to catch confusing
+#' errors early.
+#'
+#' @param control_list Named list of validation control parameters
+#'
+#' @return The input control_list (invisibly) if valid, otherwise raises error
+#'
+#' @examples
+#' # Minimal valid control
+#' validate_control_boost_cv(list())
+#'
+#' # With CV parameters
+#' validate_control_boost_cv(list(type = "kfold", B = 10))
+
+validate_control_boost_cv <- function(control_list) {
+
+    if (!is.list(control_list)) {
+        stop("control_list deve ser uma lista", call. = FALSE)
+    }
+
+    if ("type" %in% names(control_list)) {
+        valid_types <- c("bootstrap", "kfold", "subsampling")
+        matched_type <- tryCatch(
+            match.arg(control_list$type, valid_types),
+            error = function(e) {
+                stop(sprintf(
+                    "'type' deve ser um de: %s",
+                    paste(valid_types, collapse = ", ")
+                ), call. = FALSE)
+            }
+        )
+    }
+
+    if ("B" %in% names(control_list)) {
+        if (!is.numeric(control_list$B) || length(control_list$B) != 1) {
+            stop("'B' deve ser um numero", call. = FALSE)
+        }
+        if (control_list$B < 2) {
+            stop("'B' deve ser >= 2", call. = FALSE)
+        }
+    }
+
+    if ("prob" %in% names(control_list)) {
+        if (!is.numeric(control_list$prob) || length(control_list$prob) != 1) {
+            stop("'prob' deve ser um numero", call. = FALSE)
+        }
+        if (control_list$prob <= 0 || control_list$prob >= 1) {
+            stop("'prob' deve estar entre 0 e 1", call. = FALSE)
+        }
+    }
+
+    invisible(control_list)
+}

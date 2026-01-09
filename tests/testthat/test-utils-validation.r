@@ -348,3 +348,133 @@ test_that("validate_control_split", {
         expect_silent(f(ctrl, 2))
     })
 })
+
+test_that("validate_control_boost_cv", {
+    f <- validate_control_boost_cv
+    expect_true(is.function(f))
+
+    test_that("validate_control_boost_cv accepts empty list", {
+        expect_silent(f(list()))
+    })
+
+    test_that("validate_control_boost_cv accepts valid type values", {
+        expect_silent(f(list(type = "bootstrap")))
+        expect_silent(f(list(type = "kfold")))
+        expect_silent(f(list(type = "subsampling")))
+    })
+
+    test_that("validate_control_boost_cv rejects invalid type", {
+        expect_error(
+            f(list(type = "invalid")),
+            "'type' deve ser um de"
+        )
+        expect_error(
+            f(list(type = 123)),
+            "'type' deve ser um de"
+        )
+    })
+
+    test_that("validate_control_boost_cv validates B type", {
+        expect_error(
+            f(list(B = "10")),
+            "'B' deve ser um numero"
+        )
+        expect_error(
+            f(list(B = c(5, 10))),
+            "'B' deve ser um numero"
+        )
+    })
+
+    test_that("validate_control_boost_cv validates B value", {
+        expect_error(
+            f(list(B = 1)),
+            "'B' deve ser >= 2"
+        )
+        expect_error(
+            f(list(B = 0)),
+            "'B' deve ser >= 2"
+        )
+        expect_error(
+            f(list(B = -5)),
+            "'B' deve ser >= 2"
+        )
+    })
+
+    test_that("validate_control_boost_cv accepts valid B", {
+        expect_silent(f(list(B = 2)))
+        expect_silent(f(list(B = 10)))
+        expect_silent(f(list(B = 100)))
+    })
+
+    test_that("validate_control_boost_cv validates prob type", {
+        expect_error(
+            f(list(prob = "0.5")),
+            "'prob' deve ser um numero"
+        )
+        expect_error(
+            f(list(prob = c(0.5, 0.7))),
+            "'prob' deve ser um numero"
+        )
+    })
+
+    test_that("validate_control_boost_cv validates prob range", {
+        expect_error(
+            f(list(prob = 0)),
+            "'prob' deve estar entre 0 e 1"
+        )
+        expect_error(
+            f(list(prob = 1)),
+            "'prob' deve estar entre 0 e 1"
+        )
+        expect_error(
+            f(list(prob = 1.5)),
+            "'prob' deve estar entre 0 e 1"
+        )
+        expect_error(
+            f(list(prob = -0.5)),
+            "'prob' deve estar entre 0 e 1"
+        )
+    })
+
+    test_that("validate_control_boost_cv accepts valid prob", {
+        expect_silent(f(list(prob = 0.5)))
+        expect_silent(f(list(prob = 0.1)))
+        expect_silent(f(list(prob = 0.9)))
+    })
+
+    test_that("validate_control_boost_cv accepts combined parameters", {
+        ctrl <- list(type = "kfold", B = 10, prob = 0.5)
+        expect_silent(f(ctrl))
+    })
+
+    test_that("validate_control_boost_cv allows unknown parameters", {
+        ctrl <- list(type = "kfold", custom_param = "allowed", grid = 1:10)
+        expect_silent(f(ctrl))
+    })
+
+    test_that("validate_control_boost_cv rejects non-list input", {
+        expect_error(
+            f("not a list"),
+            "control_list deve ser uma lista"
+        )
+        expect_error(
+            f(NULL),
+            "control_list deve ser uma lista"
+        )
+    })
+
+    test_that("validate_control_boost_cv returns input unchanged", {
+        ctrl <- list(type = "kfold", B = 5)
+        result <- f(ctrl)
+        expect_identical(result, ctrl)
+    })
+
+    test_that("validate_control_boost_cv accepts partial type matching", {
+        expect_silent(f(list(type = "boot")))
+        expect_silent(f(list(type = "kf")))
+        expect_silent(f(list(type = "sub")))
+    })
+})
+
+
+

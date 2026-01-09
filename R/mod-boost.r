@@ -71,7 +71,7 @@ BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"),
         if (validation == "cv") {
             validate_control_boost_cv(validation_control)
         } else if (validation == "split") {
-            validate_control_boost_split(validation_control, length(serie))
+            validate_control_split(validation_control, length(serie))
         }
     }
 
