@@ -61,7 +61,8 @@ GAM <- function(serie, regdata, formula = expandeformula(regdata, "gam"), fit_fu
     cc <- c(cc, list(...))
     fit <- eval(as.call(cc))
 
-    mod_atrs <- list(call = match.call(), tsp = aux_tsp)
+    mod_atrs <- list(formula = formula, fit_fun = fit_fun, tsp = aux_tsp)
+    mod_atrs <- c(mod_atrs, list(...))
 
     new_modprevU(fit, serie, "GAM", mod_atrs)
 }
@@ -121,10 +122,9 @@ update.GAM <- function(object, newseries, newregdata, refit = FALSE, ...) {
     mod_atrs <- attr(object, "mod_atrs")
 
     if (refit) {
-        call  <- mod_atrs$call
-        call$serie   <- newseries
-        call$regdata <- newregdata
-        object <- eval(call, parent.frame())
+        call <- list(estimamodelo, tipo = "GAM", serie = newseries, regdata = newregdata)
+        call <- c(call, mod_atrs)
+        object <- eval(as.call(call), parent.frame())
     } else {
 
         # atualizar objetos gam tem um problema quando ha NAs na serie e/ou regdata. A funcao do

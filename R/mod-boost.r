@@ -67,7 +67,9 @@ BOOST <- function(serie, regdata, formula = expandeformula(regdata, "ls"),
         "split" = BOOST_SPLIT(serie, regdata, formula, validation_control$oob, ...)
     )
 
-    mod_atrs <- list(call = match.call(), tsp = aux_tsp)
+    mod_atrs <- list(formula = formula, validation = validation,
+        validation_control = validation_control, tsp = aux_tsp)
+    mod_atrs <- c(mod_atrs, list(...))
 
     new_modprevU(fit, serie, "BOOST", mod_atrs)
 }
@@ -173,10 +175,10 @@ update.BOOST <- function(object, newseries, newregdata, refit = FALSE, ...) {
     mod_atrs <- attr(object, "mod_atrs")
 
     if (refit) {
-        call  <- mod_atrs$call
-        call$serie   <- newseries
-        call$regdata <- newregdata
-        object <- eval(call, parent.frame())
+        call <- list(estimamodelo, tipo = "BOOST", serie = newseries, regdata = newregdata)
+        call <- c(call, mod_atrs)
+        call$tsp <- NULL
+        object <- eval(as.call(call), parent.frame())
     } else {
 
         # manipular os objetos 'mboost' e extremamente complicado dado sua complexidade. Por enquanto

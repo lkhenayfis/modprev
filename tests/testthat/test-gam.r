@@ -129,7 +129,7 @@ test_that("Atualizacao de modelo GAM", {
     xx <- head(datregdin$varex, 100)
     SP <- 3
     K  <- 15
-    pesos <- runif (100)
+    pesos <- runif(100)
     mod <- estimamodelo(yy, "GAM", regdata = xx, formula = ~ s(V1, V2, V3, sp = SP, k = K),
         weights = pesos)
 
