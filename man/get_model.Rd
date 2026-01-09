@@ -32,7 +32,7 @@ which is useful for conditional logic.
 
 \examples{
 dummy_fit <- function(serie, ...) {
-  new_modprevU(list(data = serie), serie, "test", list())
+    new_modprevU(list(data = serie), serie, "test", list())
 }
 dummy_predict <- function(object, n.ahead, ...) ts(rep(0, n.ahead))
 dummy_update <- function(object, newseries, refit = FALSE, ...) object
@@ -44,7 +44,7 @@ spec$fit_fn
 
 spec_missing <- get_model("nonexistent", error = FALSE)
 if (is.null(spec_missing)) {
-  message("Model not registered")
+    message("Model not registered")
 }
 
 }

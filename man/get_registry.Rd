@@ -41,16 +41,16 @@ registry <- get_registry()
 print(registry)
 
 dummy_fit <- function(serie, ...) {
-  new_modprevU(list(data = serie), serie, "dummy", list())
+    new_modprevU(list(data = serie), serie, "dummy", list())
 }
 dummy_predict <- function(object, n.ahead, ...) ts(rep(0, n.ahead))
 dummy_update <- function(object, newseries, refit, ...) object
 
 spec <- model_spec(
-  tipo = "dummy",
-  fit_fn = dummy_fit,
-  predict_fn = dummy_predict,
-  update_fn = dummy_update
+    tipo = "dummy",
+    fit_fn = dummy_fit,
+    predict_fn = dummy_predict,
+    update_fn = dummy_update
 )
 
 modprev:::.add_model("dummy", spec)

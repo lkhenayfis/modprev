@@ -79,40 +79,40 @@ Set \code{validate = FALSE} to skip these checks when you need non-standard sign
 
 \examples{
 my_fit <- function(serie, ...) {
-  params <- list(mean = mean(serie), sd = sd(serie))
-  new_modprevU(params, serie, "my_model", list())
+    params <- list(mean = mean(serie), sd = sd(serie))
+    new_modprevU(params, serie, "my_model", list())
 }
 
 my_predict <- function(object, n.ahead, ...) {
-  ts(rep(object$modelo$mean, n.ahead))
+    ts(rep(object$modelo$mean, n.ahead))
 }
 
 my_update <- function(object, newseries, refit = FALSE, ...) {
-  if (refit) {
-    estimamodelo(newseries, "my_model")
-  } else {
-    object$serie <- newseries
-    object
-  }
+    if (refit) {
+        estimamodelo(newseries, "my_model")
+    } else {
+        object$serie <- newseries
+        object
+    }
 }
 
 register_model(
-  tipo = "my_model",
-  fit_fn = my_fit,
-  predict_fn = my_predict,
-  update_fn = my_update,
-  metadata = list(description = "Simple mean model", author = "Me")
+    tipo = "my_model",
+    fit_fn = my_fit,
+    predict_fn = my_predict,
+    update_fn = my_update,
+    metadata = list(description = "Simple mean model", author = "Me")
 )
 
 is_registered("my_model")
 
 register_model(
-  tipo = "my_reg_model",
-  fit_fn = my_fit,
-  predict_fn = my_predict,
-  update_fn = my_update,
-  requires_regdata = TRUE,
-  deps = c("mgcv", "quantreg")
+    tipo = "my_reg_model",
+    fit_fn = my_fit,
+    predict_fn = my_predict,
+    update_fn = my_update,
+    requires_regdata = TRUE,
+    deps = c("mgcv", "quantreg")
 )
 
 }

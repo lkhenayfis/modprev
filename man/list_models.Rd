@@ -40,7 +40,7 @@ regression data requirements, dependencies, and descriptions.
 
 \examples{
 dummy_fit <- function(serie, ...) {
-  new_modprevU(list(data = serie), serie, "test", list())
+    new_modprevU(list(data = serie), serie, "test", list())
 }
 dummy_predict <- function(object, n.ahead, ...) ts(rep(0, n.ahead))
 dummy_update <- function(object, newseries, refit = FALSE, ...) object
