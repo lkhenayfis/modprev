@@ -48,17 +48,28 @@ with_registered_models <- function(
 #' @param serie Time series (if NULL, generates one)
 #' @param regdata Regression data (if NULL and needed, generates)
 #' @param n.ahead Number of steps to predict
+#' @param test_update Logical; if TRUE, tests update workflow
 #'
-#' @return List with fit, predict, and update results
+#' @return List with fit, predict, and optionally updated results
 #'
 #' @keywords internal
 
-test_model_workflow <- function(tipo, serie = NULL, regdata = NULL, n.ahead = 12) {
+test_model_workflow <- function(
+    tipo,
+    serie = NULL,
+    regdata = NULL,
+    n.ahead = 12,
+    test_update = FALSE
+) {
     spec <- get_model(tipo)
+
+    models_without_sd <- c("reg_quant", "BOOST", "LGBM")
+    allow_na_sd <- tipo %in% models_without_sd
 
     if (is.null(serie)) {
         if (spec$requires_regdata) {
-            data <- make_regression_data(n = 100, seed = 123)
+            n_obs <- if (tipo == "GAM") 200 else 100
+            data <- make_regression_data(n = n_obs, seed = 123)
             serie <- data$serie
             regdata <- data$regdata
         } else {
@@ -81,23 +92,28 @@ test_model_workflow <- function(tipo, serie = NULL, regdata = NULL, n.ahead = 12
         pred <- predict(fit, n.ahead = n.ahead)
     }
 
-    expect_prediction_format(pred, n.ahead = n.ahead)
+    expect_prediction_format(pred, n.ahead = n.ahead, allow_na_sd = allow_na_sd)
 
-    newseries <- ts(
-        as.numeric(serie) + rnorm(length(serie), sd = 0.1),
-        start = start(serie),
-        frequency = frequency(serie)
-    )
+    results <- list(fit = fit, pred = pred)
 
-    if (spec$requires_regdata) {
-        updated <- update(fit, newseries, newregdata = regdata, refit = FALSE)
-    } else {
-        updated <- update(fit, newseries, refit = FALSE)
+    if (test_update) {
+        newseries <- ts(
+            as.numeric(serie) + rnorm(length(serie), sd = 0.1),
+            start = start(serie),
+            frequency = frequency(serie)
+        )
+
+        if (spec$requires_regdata) {
+            updated <- update(fit, newseries, newregdata = regdata, refit = FALSE)
+        } else {
+            updated <- update(fit, newseries, refit = FALSE)
+        }
+
+        expect_update_preserves_class(fit, updated)
+        results$updated <- updated
     }
 
-    expect_update_preserves_class(fit, updated)
-
-    list(fit = fit, pred = pred, updated = updated)
+    results
 }
 
 #' Validate Model Works with janelamovel

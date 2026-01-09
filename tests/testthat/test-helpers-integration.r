@@ -66,7 +66,7 @@ test_that("test_model_workflow", {
     expect_true(is.function(f))
 
     test_that("works with univariate model", {
-        result <- f("sarima")
+        result <- f("sarima", test_update = TRUE)
 
         expect_type(result, "list")
         expect_named(result, c("fit", "pred", "updated"))
@@ -76,7 +76,7 @@ test_that("test_model_workflow", {
     })
 
     test_that("works with regression model", {
-        expect_warning(result <- f("reg_lin"), "formula")
+        expect_warning(result <- f("reg_lin", test_update = TRUE), "formula")
 
         expect_type(result, "list")
         expect_named(result, c("fit", "pred", "updated"))
