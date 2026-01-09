@@ -74,12 +74,20 @@ expect_modprev_structure <- function(object, tipo, subclass = NULL, has_atrs = F
 #' @param pred Prediction object from predict()
 #' @param n.ahead Expected number of forecast steps
 #' @param check_tsp Logical; if TRUE, validates tsp attributes
+#' @param allow_na_sd Logical; if TRUE, allows NA values in sd column.
+#'     Default is FALSE. Some models (e.g., reg_quant, BOOST, LGBM) do not
+#'     provide uncertainty estimates and legitimately return NA.
 #'
 #' @return Invisibly returns pred (for chaining)
 #'
 #' @keywords internal
 
-expect_prediction_format <- function(pred, n.ahead = NULL, check_tsp = FALSE) {
+expect_prediction_format <- function(
+    pred,
+    n.ahead = NULL,
+    check_tsp = FALSE,
+    allow_na_sd = FALSE
+) {
     testthat::expect_s3_class(pred, "ts")
 
     testthat::expect_equal(ncol(pred), 2, label = "Prediction should have 2 columns")
@@ -103,15 +111,25 @@ expect_prediction_format <- function(pred, n.ahead = NULL, check_tsp = FALSE) {
         label = "Predictions should not contain NA"
     )
 
-    testthat::expect_false(
-        any(is.na(pred[, "sd"])),
-        label = "Standard deviations should not contain NA"
-    )
+    if (!allow_na_sd) {
+        testthat::expect_false(
+            any(is.na(pred[, "sd"])),
+            label = "Standard deviations should not contain NA"
+        )
 
-    testthat::expect_true(
-        all(pred[, "sd"] > 0),
-        label = "Standard deviations should be positive"
-    )
+        testthat::expect_true(
+            all(pred[, "sd"] > 0),
+            label = "Standard deviations should be positive"
+        )
+    } else {
+        non_na_sd <- pred[!is.na(pred[, "sd"]), "sd"]
+        if (length(non_na_sd) > 0) {
+            testthat::expect_true(
+                all(non_na_sd > 0),
+                label = "Non-NA standard deviations should be positive"
+            )
+        }
+    }
 
     if (check_tsp) {
         tsp_attr <- tsp(pred)
