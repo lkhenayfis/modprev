@@ -106,6 +106,16 @@ expect_prediction_format <- function(
         label = "Prediction columns should be 'prev' and 'sd'"
     )
 
+    testthat::expect_true(
+        typeof(pred[, "prev"]) %in% c("double", "integer"),
+        label = "prev column should be numeric (double or integer)"
+    )
+
+    testthat::expect_true(
+        typeof(pred[, "sd"]) %in% c("double", "integer"),
+        label = "sd column should be numeric (double or integer)"
+    )
+
     testthat::expect_false(
         any(is.na(pred[, "prev"])),
         label = "Predictions should not contain NA"
