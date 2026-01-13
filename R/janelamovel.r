@@ -1,84 +1,61 @@
 ########################################### JANELA MOVEL ###########################################
 
 #' Previsão Em Horizonte Rolante
-#' 
+#'
 #' Função para realizar previsões e reajustes em janela móvel
-#' 
-#' Os argumentos \code{serie} e \code{tipo} tem exatamente o mesmo efeito daqueles descritos em 
+#'
+#' A partir da versão 2.0.0, esta função requer um objeto de configuração criado
+#' por \code{\link{jm_config}}. O uso de argumentos individuais não é mais suportado.
+#'
+#' Os argumentos \code{serie} e \code{tipo} tem exatamente o mesmo efeito daqueles descritos em
 #' \code{\link{estimamodelo}}.
-#' 
-#' \code{janela} pode ser ou um escalar ou um vetor de dois elementos inteiros. No primeiro caso, 
-#' entende-se que deverao ser rodadas janelas de tamanho \code{janela}. Quando este argumento e um
-#' vetor entende-se que todas as janelas devem iniciar no instante de tempo \code{janela[1]} com 
-#' largura inicial \code{janela[2]}. Essencialmente estas duas formas permitem a execucao em janela
-#' rolante ou expansivel, respectivamente.
-#' 
-#' O argumento \code{passo} permite especificar quantas novas observacoes sao incorporadas entre 
-#' janelas adjacentes. No caso de janela rolante, cada janela incorpora \code{passos} novos pontos e
-#' abandona os \code{passos} valores mais antigos, de modo que todas tem o mesmo tamanho; janelas 
-#' expansiveis vao simplesmente agregando novas observacoes. Deve ser observado que, no caso de 
-#' janelas rolantes, sempre havera uma janela contendo o final da serie, mesmo que passos seja um
-#' número tal que da penultima para a ultima janela ocorra um intervalo menor que \code{passos}.
-#' 
-#' O comportamento dessa função é mais fortemente impactado por \code{refit.cada}. Através deste 
-#' argumento é possível indicar intervalos de tempo nos quais o modelo será reestimado. Nas demais 
-#' janelas será feita apenas a atualização das informações. Caso \code{refit.cada = NA} (o padrão),
-#' o modelo só será ajustado uma vez e atualizado a cada nova janela.
-#' 
+#'
+#' O objeto \code{config} controla o comportamento da janela móvel. Veja \code{\link{jm_config}}
+#' para detalhes sobre os parâmetros de configuração.
+#'
 #' \bold{Modelos com variáveis explicativas:}
-#' 
-#' Caso o modelo escolhido use de variáveis explicativas, é necessário que o \code{regdata} seja 
+#'
+#' Caso o modelo escolhido use de variáveis explicativas, é necessário que o \code{regdata} seja
 #' passado na forma de um \code{data.frame}-like contendo as variáveis a serem utilizadas.
-#' 
+#'
 #' Este argumento \emph{DEVE CONTER AS VARIÁVEIS EXPLICATIVAS CORRESPONDENTES A TODAS AS OBSERVAÇÕES
-#' DA SÉRIE MAIS \code{n.ahead} À FRENTE}. A primeira parte dessa restrição é natural, pois são 
-#' necessárias as variáveis explicativas insample para ajustes do modelo. As observações 
-#' \code{n.ahead} passos à frente do final da série são necessárias apenas para a previsão das 
+#' DA SÉRIE MAIS \code{n.ahead} À FRENTE}. A primeira parte dessa restrição é natural, pois são
+#' necessárias as variáveis explicativas insample para ajustes do modelo. As observações
+#' \code{n.ahead} passos à frente do final da série são necessárias apenas para a previsão das
 #' últimas janelas.
-#' 
+#'
 #' @param serie serie temporal pela qual passar a janela movel
 #' @param tipo tipo de modelo a ser ajustado. Ver \code{\link{estimamodelo}}.
-#' @param janela especificação da janela móvel ou expansível
-#' @param passo inteiro de saltos temporais entre cada janela. Ver Detalhes
-#' @param n.ahead número de passos à frente para prever a cada passo
-#' @param refit.cada escalar indicando de quantas em quantas observacoes o modelo deve ser 
-#'     reajustado
-#' @param verbose Escalar inteiro indicando quanta informacao a ser emitida durante rodada. 
-#'     0 = nenhuma, 1: toda vez que reajusta modelo, 2: todo horizonte de previsão e reajuste
-#' @param full.output booleano indicando se deve ser retornada uma lista com modelo usado, previsao 
-#'     e variaveis exogenas (caso existam) ou apenas a previsao
-#' @param ... demais argumentos pertinentes a estimação de cada \code{tipo}. Veja 
-#'     \code{\link{estimamodelo}} para mais detalhes
-#' 
-#' @examples 
-#' 
-#' # janela rolante de cinco anos, prevendo um ano a frente e rolando de seis em seis meses
-#' jm_sarima <- janelamovel(AirPassengers, "sarima", 60, passo = 6, n.ahead = 12)
-#' 
-#' # mesma configuracao, porem janela extensivel (inicio fixo no primeiro mes)
-#' jm_sarima <- janelamovel(AirPassengers, "sarima", c(1, 60), passo = 6, n.ahead = 12)
-#' 
-#' # VARIAVEIS EXPLICATIVAS -----------------------------------------
-#' 
-#' # serie deve conter n.ahead menos observacoes que a variavel explicativa
+#' @param config Objeto de configuração criado por \code{\link{jm_config}}. Obrigatório.
+#' @param ... demais argumentos pertinentes a estimação de cada \code{tipo}. Para
+#'     modelos \code{modprevS}, deve incluir \code{newdata_list}. Veja
+#'     \code{\link{estimamodelo}} para mais detalhes.
+#'
+#' @examples
+#'
+#' # Janela rolante de 60 observações, prevendo 12 passos
+#' cfg <- jm_config(janela = 60, passo = 6, n.ahead = 12)
+#' jm_sarima <- janelamovel(AirPassengers, "sarima", config = cfg)
+#'
+#' # Janela expansível começando na posição 1
+#' cfg <- jm_config(janela = c(1, 60), passo = 6, n.ahead = 12, verbose = 1)
+#' jm_sarima <- janelamovel(AirPassengers, "sarima", config = cfg)
+#'
+#' # Com variáveis explicativas
 #' serie <- window(datregdin$obs, 1, 190)
 #' varex <- datregdin$varex
-#' jm_regdin <- janelamovel(serie, "ss_reg_din", 100, passo = 10, n.ahead = 5, regdata = varex)
-#' 
-#' # MODO VERBOSE ---------------------------------------------------
-#' 
-#' \dontrun{
-#' jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 0)
-#' jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 1, refit.cada = 12)
-#' jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 2, refit.cada = 3)
-#' }
-#' 
+#' cfg <- jm_config(janela = 100, passo = 10, n.ahead = 5)
+#' jm_regdin <- janelamovel(serie, "ss_reg_din", config = cfg, regdata = varex)
+#'
 #' @return lista contendo previsoes de 1 a n.ahead passos à frente para cada janela
-#' 
+#'
+#' @seealso \code{\link{jm_config}} para criação de objetos de configuração
+#'
 #' @export
 
-janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cada = NA, verbose = 0,
-    full.output = FALSE, ...) {
+janelamovel <- function(serie, tipo, config, ...) {
+
+    validate_jm_config(config)
 
     args <- list(...)
 
@@ -92,19 +69,19 @@ janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cad
         args$regdata <- NULL
     }
 
-    if (has_regdata && (length(serie) + n.ahead > nrow(regdata))) {
+    if (has_regdata && (length(serie) + config$n.ahead > nrow(regdata))) {
         warning("'regdata' deve conter 'length(serie) + n.ahead' observacoes -- reduzindo 'serie'")
 
-        reduz <- length(serie) + n.ahead - nrow(regdata)
+        reduz <- length(serie) + config$n.ahead - nrow(regdata)
         serie <- window(serie, start(serie), deltats(end(serie), -reduz, frequency(serie)))
     }
 
-    verb_func <- verbose_fun(verbose)
-    janelas <- expandejanelas(serie, janela, passo)
-    v_refit <- expanderefit(janelas, refit.cada)
+    verb_func <- verbose_fun(config$verbose)
+    janelas <- expandejanelas(serie, config$janela, config$passo)
+    v_refit <- expanderefit(janelas, config$refit.cada)
 
     # variavel auxiliar para fazer o subset de newdata pareado com serie
-    aux <- ts(seq_len(length(serie) + n.ahead), start = start(serie), frequency = frequency(serie))
+    aux <- ts(seq_len(length(serie) + config$n.ahead), start = start(serie), frequency = frequency(serie))
 
     # Estima um modelo inicial que vai ser usado na primeira janela e atualizado dali em diante
     ij <- janelas[[1]]
@@ -113,7 +90,7 @@ janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cad
     mod <- c(list(quote(estimamodelo), serie = iserie, tipo = tipo, regdata = iregdata), args)
     mod <- eval(as.call(mod), parent.frame(), parent.frame())
 
-    retfun <- whichreturn(full.output)
+    retfun <- whichreturn(config$full.output)
 
     jm <- vector("list", length(janelas))
     for (i in seq_along(janelas)) {
@@ -125,14 +102,13 @@ janelamovel <- function(serie, tipo, janela, passo = 1L, n.ahead = 1L, refit.cad
         iregdata <- regdata[window(aux, ij[[1]], ij[[2]]), , drop = FALSE]
         mod      <- update(mod, iserie, newregdata = iregdata, refit = v_refit[i])
 
-        ijn <- list(deltats(ij[[2]], 1, frequency(aux)), deltats(ij[[2]], n.ahead, frequency(aux)))
+        ijn <- list(deltats(ij[[2]], 1, frequency(aux)), deltats(ij[[2]], config$n.ahead, frequency(aux)))
         inewdata <- regdata[window(aux, ijn[[1]], ijn[[2]]), , drop = FALSE]
-        pred <- predict(mod, n.ahead, newdata = inewdata)
+        pred <- predict(mod, config$n.ahead, newdata = inewdata)
 
         jm[[i]] <- retfun(pred, mod, inewdata)
     }
 
-    # Retorna
     return(jm)
 }
 

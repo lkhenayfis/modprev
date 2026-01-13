@@ -110,7 +110,8 @@ test_that("Testes de previsao em janela", {
 
     serie <- geraserie(100, 4)
 
-    jm <- janelamovel(serie, "sarima", 48, 12, 6)
+    cfg <- jm_config(janela = 48, passo = 12, n.ahead = 6)
+    jm <- janelamovel(serie, "sarima", config = cfg)
 
     expect_equal(length(jm), 6)
     expect_true(all(sapply(jm, function(m) all(dim(m) == c(6, 2)))))
@@ -123,7 +124,8 @@ test_that("Testes de previsao em janela", {
     expect_equal(start(tail(jm, 1)[[1]]), deltats(end(serie), 1, 4))
 
     # teste simples com ss_ar1_saz, nao precisa repetir os inicios de janela
-    jm <- janelamovel(serie, "ss_ar1_saz", 48, 12, 6)
+    cfg <- jm_config(janela = 48, passo = 12, n.ahead = 6)
+    jm <- janelamovel(serie, "ss_ar1_saz", config = cfg)
 
     expect_equal(length(jm), 6)
     expect_true(all(sapply(jm, function(m) all(dim(m) == c(6, 2)))))
@@ -134,8 +136,8 @@ test_that("Testes de previsao em janela", {
     ss <- window(dados[[2]], 1, 195)
     regd <- dados[[1]]
 
-    jm <- janelamovel(ss, "ss_reg_din", 150, passo = 5, n.ahead = 5, regdata = regd,
-        formula = ~ V1)
+    cfg <- jm_config(janela = 150, passo = 5, n.ahead = 5)
+    jm <- janelamovel(ss, "ss_reg_din", config = cfg, regdata = regd, formula = ~ V1)
 
     expect_equal(length(jm), 10)
     expect_true(all(sapply(jm, function(m) all(dim(m) == c(5, 2)))))
@@ -158,8 +160,8 @@ test_that("Testes de previsao em janela", {
     # Full Output ---------------------------------------------------
 
     # Caso com variavel explicativa
-    jm <- janelamovel(ss, "ss_reg_din", 150, passo = 5, n.ahead = 5, regdata = regd, formula = ~ V1,
-        full.output = TRUE)
+    cfg <- jm_config(janela = 150, passo = 5, n.ahead = 5, full.output = TRUE)
+    jm <- janelamovel(ss, "ss_reg_din", config = cfg, regdata = regd, formula = ~ V1)
     outs <- sapply(jm, function(l) {
         length(l) &
             ("ts" %in% class(l[[1]])) & ("modprev" %in% class(l[[2]])) & ("data.frame" %in% class(l[[3]]))
@@ -167,10 +169,32 @@ test_that("Testes de previsao em janela", {
     expect_true(all(outs))
 
     # Caso sem variavel explicativa
-    jm <- janelamovel(serie, "ss_ar1_saz", 48, 12, 6, full.output = TRUE)
+    cfg <- jm_config(janela = 48, passo = 12, n.ahead = 6, full.output = TRUE)
+    jm <- janelamovel(serie, "ss_ar1_saz", config = cfg)
     outs <- sapply(jm, function(l) {
         length(l) &
             ("ts" %in% class(l[[1]])) & ("modprev" %in% class(l[[2]])) & (is.null(l[[3]]))
     })
     expect_true(all(outs))
+})
+
+test_that("janelamovel requires config parameter", {
+    serie <- geraserie(100, 4)
+
+    expect_error(janelamovel(serie, "sarima"))
+
+})
+
+test_that("janelamovel validates config is jm_config", {
+    serie <- geraserie(100, 4)
+
+    expect_error(
+        janelamovel(serie, "sarima", config = list(janela = 48)),
+        "'config' must be a jm_config object"
+    )
+
+    expect_error(
+        janelamovel(serie, "sarima", config = 48),
+        "'config' must be a jm_config object"
+    )
 })
