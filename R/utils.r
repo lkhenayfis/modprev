@@ -117,8 +117,8 @@ compare_calls <- function(call1, call2, itens) {
 
 # AUXILIAR PARA MODELOS COM VARIAVEL EXPLICATIVA ---------------------------------------------------
 
-expandeformula <- function(data, modo = c("ls", "gam")) {
-    warning("'formula' nao foi passado -- usando todas as variaveis de forma aditiva")
+expandeformula <- function(data, modo = c("ls", "gam"), warn = FALSE) {
+    if (warn) warning("'formula' nao foi passado -- usando todas as variaveis de forma aditiva")
 
     modo <- match.arg(modo)
 
