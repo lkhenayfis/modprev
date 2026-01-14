@@ -19,6 +19,7 @@ Depends:
     stats (>= 4.0),
     utils (>= 4.0),
     methods (>= 4.0),
+    MASS (>= 7.0.0)
 Imports: 
     forecast (>= 8.12),
     KFAS (>= 1.4.4),

@@ -230,6 +230,8 @@ print.model_registry <- function(x, ...) {
 #'
 #' register_model("test", dummy_fit, dummy_predict, dummy_update)
 #' is_registered("test")
+#' 
+#' modprev:::.remove_model("test")
 #'
 #' @seealso [register_model()], [get_registry()]
 #'
@@ -405,6 +407,8 @@ register_model <- function(tipo, fit_fn, predict_fn, update_fn,
 #' if (is.null(spec_missing)) {
 #'     message("Model not registered")
 #' }
+#' 
+#' modprev:::.remove_model("test")
 #'
 #' @seealso [register_model()], [is_registered()], [list_models()]
 #'
@@ -476,6 +480,8 @@ get_model <- function(tipo, error = TRUE) {
 #'
 #' info <- list_models(details = TRUE)
 #' head(info)
+#' 
+#' modprev:::.remove_model("test")
 #'
 #' @seealso [get_model()], [register_model()], [get_registry()]
 #'

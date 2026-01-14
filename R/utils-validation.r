@@ -19,16 +19,6 @@
 #'
 #' @return Named list of validation control parameters suitable for the
 #'     specified validation mode
-#'
-#' @examples
-#' # Function-based control for adaptive CV
-#' ctrl_fn <- function(serie, regdata) {
-#'     list(nfold = min(10, length(serie) %/% 20))
-#' }
-#' evaluate_validation_control(ctrl_fn, ts(1:100), data.frame(x = 1:100), "cv")
-#'
-#' # Static list passes through unchanged
-#' evaluate_validation_control(list(nfold = 5), ts(1:100), NULL, "cv")
 
 evaluate_validation_control <- function(validation_control, serie, regdata, validation) {
 
@@ -72,9 +62,6 @@ evaluate_validation_control <- function(validation_control, serie, regdata, vali
 #' @param serie_length Integer length of the series being modeled
 #'
 #' @return The input control_list (invisibly) if valid, otherwise raises error
-#'
-#' @examples
-#' validate_control_lgbm_cv(list(nfold = 5, stratified = TRUE), 100)
 
 validate_control_lgbm_cv <- function(control_list, serie_length) {
 
@@ -127,11 +114,6 @@ validate_control_lgbm_cv <- function(control_list, serie_length) {
 #' @param serie_length Integer length of the series being modeled
 #'
 #' @return The input control_list (invisibly) if valid, otherwise raises error
-#'
-#' @examples
-#' n <- 100
-#' oob <- c(rep(TRUE, 80), rep(FALSE, 20))
-#' validate_control_split(list(oob = oob), n)
 
 validate_control_split <- function(control_list, serie_length) {
 
@@ -183,13 +165,6 @@ validate_control_split <- function(control_list, serie_length) {
 #' @param control_list Named list of validation control parameters
 #'
 #' @return The input control_list (invisibly) if valid, otherwise raises error
-#'
-#' @examples
-#' # Minimal valid control
-#' validate_control_boost_cv(list())
-#'
-#' # With CV parameters
-#' validate_control_boost_cv(list(type = "kfold", B = 10))
 
 validate_control_boost_cv <- function(control_list) {
 
