@@ -17,8 +17,3 @@ The input control_list (invisibly) if valid, otherwise raises error
 \description{
 Checks that control list contains required 'oob' parameter for train/test split
 }
-\examples{
-n <- 100
-oob <- c(rep(TRUE, 80), rep(FALSE, 20))
-validate_control_split(list(oob = oob), n)
-}

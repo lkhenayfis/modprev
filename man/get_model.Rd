@@ -47,6 +47,8 @@ if (is.null(spec_missing)) {
     message("Model not registered")
 }
 
+modprev:::.remove_model("test")
+
 }
 \seealso{
 \code{\link[=register_model]{register_model()}}, \code{\link[=is_registered]{is_registered()}}, \code{\link[=list_models]{list_models()}}

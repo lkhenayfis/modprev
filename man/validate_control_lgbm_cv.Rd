@@ -17,6 +17,3 @@ The input control_list (invisibly) if valid, otherwise raises error
 \description{
 Checks that control list contains valid parameters for LGBM cross-validation
 }
-\examples{
-validate_control_lgbm_cv(list(nfold = 5, stratified = TRUE), 100)
-}

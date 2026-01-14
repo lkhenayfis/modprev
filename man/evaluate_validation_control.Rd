@@ -29,13 +29,3 @@ This function supports both static list and function-based specification of
 validation control parameters. When a function is provided, it is called with
 serie and regdata to produce the control list dynamically.
 }
-\examples{
-# Function-based control for adaptive CV
-ctrl_fn <- function(serie, regdata) {
-    list(nfold = min(10, length(serie) \%/\% 20))
-}
-evaluate_validation_control(ctrl_fn, ts(1:100), data.frame(x = 1:100), "cv")
-
-# Static list passes through unchanged
-evaluate_validation_control(list(nfold = 5), ts(1:100), NULL, "cv")
-}

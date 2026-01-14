@@ -29,6 +29,8 @@ dummy_update <- function(object, newseries, refit = FALSE, ...) object
 register_model("test", dummy_fit, dummy_predict, dummy_update)
 is_registered("test")
 
+modprev:::.remove_model("test")
+
 }
 \seealso{
 \code{\link[=register_model]{register_model()}}, \code{\link[=get_registry]{get_registry()}}

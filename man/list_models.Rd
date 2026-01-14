@@ -55,6 +55,8 @@ print(models)
 info <- list_models(details = TRUE)
 head(info)
 
+modprev:::.remove_model("test")
+
 }
 \seealso{
 \code{\link[=get_model]{get_model()}}, \code{\link[=register_model]{register_model()}}, \code{\link[=get_registry]{get_registry()}}

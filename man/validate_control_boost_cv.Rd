@@ -22,10 +22,3 @@ uses \code{match_fun_args()} to extract parameters for \code{mboost::cv()},
 is not feasible. We validate only critical parameters to catch confusing
 errors early.
 }
-\examples{
-# Minimal valid control
-validate_control_boost_cv(list())
-
-# With CV parameters
-validate_control_boost_cv(list(type = "kfold", B = 10))
-}

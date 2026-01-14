@@ -29,7 +29,7 @@ frente para prever. Em modelos de séries temporais simples, isto é tudo.
 \bold{Modelos com variáveis explicativas:}
 
 No caso de modelos com variáveis explicativas deve ser fornecido um parâmetro \code{newdata} na
-forma de code{data.frame}-like contendo as variáveis necessárias para o modelo. Usualmente a
+forma de \code{data.frame}-like contendo as variáveis necessárias para o modelo. Usualmente a
 previsão será feita tantos passos à frente quanto há observações em \code{newdata}, porém se
 \code{n.ahead} for fornecido será usado com precedência sobre o número de observações novas.
 
