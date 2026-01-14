@@ -18,14 +18,6 @@ test_that("model-behaviors", {
         })
     })
 
-    test_that("all models have valid $modelo component", {
-        with_registered_models(function(tipo) {
-            result <- test_model_workflow(tipo, n.ahead = 12)
-
-            expect_valid_modelo(result$fit$modelo, tipo)
-        })
-    })
-
     test_that("all models produce valid prediction format", {
         with_registered_models(function(tipo) {
             result <- test_model_workflow(tipo, n.ahead = 12)

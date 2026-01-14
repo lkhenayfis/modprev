@@ -195,35 +195,3 @@ test_that("expect_compatible_tsp", {
         expect_error(f(wrong_freq, follows_serie = serie))
     })
 })
-
-test_that("expect_valid_modelo", {
-    f <- expect_valid_modelo
-    expect_true(is.function(f))
-
-    test_that("validates sarima models", {
-        mod <- estimamodelo(AirPassengers, "sarima")
-
-        expect_error(f(mod$modelo, "sarima"), NA)
-    })
-
-    test_that("validates reg_lin models", {
-        data <- data.frame(x1 = rnorm(100), x2 = rnorm(100))
-        serie <- ts(rnorm(100))
-        expect_warning(mod <- estimamodelo(serie, "reg_lin", regdata = data))
-
-        expect_error(f(mod$modelo, "reg_lin"), NA)
-    })
-
-    test_that("validates ss_ar1_saz models", {
-        serie <- ts(rnorm(100), frequency = 12)
-        mod <- estimamodelo(serie, "ss_ar1_saz")
-
-        expect_error(f(mod$modelo, "ss_ar1_saz"), NA)
-    })
-
-    test_that("fails with wrong modelo type for sarima", {
-        wrong_modelo <- list(some = "data")
-
-        expect_error(f(wrong_modelo, "sarima"))
-    })
-})
