@@ -153,10 +153,7 @@ test_that("make_regression_data", {
     test_that("works with regression models", {
         data <- f(seed = 123)
 
-        expect_warning(
-            estimamodelo(data$serie, "reg_lin", regdata = data$regdata),
-            "formula"
-        )
+        estimamodelo(data$serie, "reg_lin", regdata = data$regdata)
     })
 })
 

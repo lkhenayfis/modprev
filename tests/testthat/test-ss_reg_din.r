@@ -15,7 +15,7 @@ test_that("Estimacao de modelo S.S. RegDin - regressao simples", {
     expect_error(estimamodelo(serie, tipo = "ss_reg_din"))
 
     # sem passar formula
-    expect_warning(estimamodelo(serie, tipo = "ss_reg_din", regdata = varex))
+    estimamodelo(serie, tipo = "ss_reg_din", regdata = varex)
 
     # NAs nos regressores
     varex[c(1, 10, 20), ] <- NA_real_

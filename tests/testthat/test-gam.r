@@ -9,7 +9,7 @@ test_that("Estimacao de modelo GAM - simples", {
     expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
 
     # Sem passar a formula
-    expect_warning(mod2 <- estimamodelo(datregdin$obs, "GAM", regdata = datregdin$varex))
+    mod2 <- estimamodelo(datregdin$obs, "GAM", regdata = datregdin$varex)
     expect_equal(unname(mod2$model$coefficients), unname(mod$model$coefficients))
 
     # Formula com coisas mais complicadas
@@ -44,9 +44,7 @@ test_that("Estimacao de modelo GAM - funcao 'bam'", {
     expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
 
     # Sem passar a formula
-    expect_warning(
-        mod2 <- estimamodelo(datregdin$obs, "GAM", regdata = datregdin$varex, fit_fun = "bam")
-    )
+    mod2 <- estimamodelo(datregdin$obs, "GAM", regdata = datregdin$varex, fit_fun = "bam")
     expect_equal(unname(mod2$model$coefficients), unname(mod$model$coefficients))
 
     # Formula com coisas mais complicadas

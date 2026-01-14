@@ -100,7 +100,7 @@ test_that("legacy dispatch behavior", {
         serie <- ts(1:100)
         regdata <- data.frame(x = 1:100)
 
-        result <- suppressWarnings(f(serie, "reg_lin", regdata = regdata))
+        result <- f(serie, "reg_lin", regdata = regdata)
 
         expect_s3_class(result, "modprevU")
         expect_s3_class(result, "reg_lin")
@@ -198,7 +198,7 @@ test_that("estimamodelo_U integration", {
         serie <- ts(1:100)
         regdata <- data.frame(x = 1:100)
 
-        expect_warning(result <- f(serie, "reg_lin", regdata = regdata))
+        result <- f(serie, "reg_lin", regdata = regdata)
 
         expect_s3_class(result, "modprevU")
         expect_s3_class(result, "reg_lin")
@@ -219,7 +219,7 @@ test_that("integration with existing tests", {
         serie <- ts(1:100)
         regdata <- data.frame(x = 1:100)
 
-        expect_warning(mod <- estimamodelo(serie, "reg_lin", regdata = regdata))
+        mod <- estimamodelo(serie, "reg_lin", regdata = regdata)
 
         expect_s3_class(mod, "reg_lin")
         expect_s3_class(mod, "modprevU")

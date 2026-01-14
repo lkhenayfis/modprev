@@ -76,7 +76,7 @@ test_that("test_model_workflow", {
     })
 
     test_that("works with regression model", {
-        expect_warning(result <- f("reg_lin", test_update = TRUE), "formula")
+        result <- f("reg_lin", test_update = TRUE)
 
         expect_type(result, "list")
         expect_named(result, c("fit", "pred", "updated"))
@@ -96,11 +96,7 @@ test_that("test_model_workflow", {
     test_that("accepts custom regdata", {
         data <- make_regression_data(n = 100, n_predictors = 3, seed = 123)
 
-        expect_warning(
-            result <- f("reg_lin", serie = data$serie, regdata = data$regdata),
-            "formula"
-        )
-
+        result <- f("reg_lin", serie = data$serie, regdata = data$regdata)
         expect_s3_class(result$fit, "reg_lin")
     })
 
@@ -131,7 +127,7 @@ test_that("expect_janelamovel_compatible", {
     })
 
     test_that("validates janelamovel structure", {
-        jan <- f("sarima", janela = 24)
+        jan <- f("sarima", config = jm_config(janela = 24))
 
         expect_true(length(jan) > 0)
 

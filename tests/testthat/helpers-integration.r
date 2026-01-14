@@ -122,14 +122,13 @@ test_model_workflow <- function(
 #'
 #' @param tipo Model type
 #' @param serie Time series (if NULL, generates one)
-#' @param janela Window size
-#' @param ... Additional arguments to janelamovel
+#' @param config configuration object for janelamovel as created by [`jm_config()`]
 #'
 #' @return janelamovel object (invisibly)
 #'
 #' @keywords internal
 
-expect_janelamovel_compatible <- function(tipo, serie = NULL, janela = 24, ...) {
+expect_janelamovel_compatible <- function(tipo, serie = NULL, config = jm_config(janela = 24)) {
     spec <- get_model(tipo)
 
     if (spec$requires_regdata) {
@@ -140,7 +139,7 @@ expect_janelamovel_compatible <- function(tipo, serie = NULL, janela = 24, ...) 
         serie <- make_univariate_series(n = 100, seed = 123)
     }
 
-    jan <- janelamovel(serie, tipo, janela = janela, ...)
+    jan <- janelamovel(serie, tipo, config = config)
 
     testthat::expect_type(jan, "list")
     testthat::expect_true(length(jan) > 0)
