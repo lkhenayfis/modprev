@@ -1,3 +1,30 @@
+# refactor
+
+## BREAKING CHANGES
+
+* `janelamovel()` agora recebe suas configuracoes atraves de um argumento especifico `config`, ao
+  ao inves de todos eles individualmente
+  
+  **Migration:**
+  ```r
+  # Antigo (deprecado)
+  jm <- janelamovel(serie, "sarima", 60, passo = 6, n.ahead = 12)
+  
+  # Novo
+  cfg <- jm_config(janela = 60, passo = 6, n.ahead = 12)
+  jm <- janelamovel(serie, "sarima", config = cfg)
+  ```
+
+## New features
+
+* Introduz `jm_config()` para configuracao de janelas moveis
+
+## Misc
+
+* Criado registro de modelos para formalizacao dos arcaboucos suportados
+* Reformulacao geral de testes para ter um guardachuva de testes basicos automatico para qualquer
+  novo modelo introduzido
+
 # lgbm
 
 ## New features
