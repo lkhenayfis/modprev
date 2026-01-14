@@ -51,7 +51,7 @@ NULL
 #' @rdname modelos_lightgbm
 
 LGBM <- function(serie, regdata, dataset_params = list(), train_params = list(),
-    validation = c("none", "cv", "split"), validation_control = list(),  ...) {
+    validation = c("none", "cv", "split"), validation_control = list(), ...) {
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
@@ -62,11 +62,15 @@ LGBM <- function(serie, regdata, dataset_params = list(), train_params = list(),
 
     regdata_dataset <- lgb.Dataset(data.matrix(regdata), dataset_params, label = as.numeric(serie))
 
+    args <- list(...)
+    if (!("verbose" %in% names(args))) args$verbose <- -1
+
     fit <- switch(validation,
-        "none"  = lightgbm(regdata_dataset, train_params, ...),
-        "cv"    = LGBM_CV(regdata_dataset, train_params, validation_control, ...),
-        "split" = LGBM_SPLIT(serie, regdata, dataset_params, train_params, validation_control$oob, ...)
+        "none"  = c(list(lightgbm, regdata_dataset, train_params), args),
+        "cv"    = c(list(LGBM_CV, regdata_dataset, train_params, validation_control), args),
+        "split" = c(list(LGBM_SPLIT, serie, regdata, dataset_params, train_params, validation_control$oob), args)
     )
+    fit <- eval(as.call(fit), parent.frame())
 
     mod_atrs <- list(call = match.call(), tsp = aux_tsp)
 
