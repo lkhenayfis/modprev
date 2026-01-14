@@ -29,10 +29,12 @@ LGBM(
 \item{validation}{character string especificando o método de validação. Um de "none" (sem
 validação adicional), "cv" (validação cruzada), ou "split" (train/test split)}
 
-\item{validation_control}{lista nomeada com argumentos específicos de validação. Para "cv":
-argumentos passados a \code{\link[lightgbm]{lgb.cv}} (como \code{nfold}, \code{stratified},
-\code{nrounds}, etc.). Para "split": deve conter \code{oob}, um vetor lógico com TRUE para
-observações in-sample e FALSE para observações out-of-sample}
+\item{validation_control}{lista nomeada com argumentos específicos de validação, ou uma função
+que retorna tal lista. Se função, deve ter assinatura \code{function(serie, regdata)} e
+retornar uma lista nomeada. Para "cv": argumentos passados a
+\code{\link[lightgbm]{lgb.cv}} (como \code{nfold}, \code{stratified}, \code{nrounds}, etc.).
+Para "split": deve conter \code{oob}, um vetor lógico com TRUE para observações in-sample
+e FALSE para observações out-of-sample}
 
 \item{...}{para estimacao, demais argumentos passados a funcao \code{\link[lightgbm]{lightgbm}};
 nas restantes nao possui uso}

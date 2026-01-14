@@ -32,17 +32,19 @@ NULL
 #' 
 #' @param serie série para ajustar
 #' @param regdata \code{data.frame}-like contendo variáveis explicativas
-#' @param validation character string especificando o método de validação. Um de "none" (sem 
+#' @param validation character string especificando o método de validação. Um de "none" (sem
 #'     validação adicional), "cv" (validação cruzada), ou "split" (train/test split)
-#' @param validation_control lista nomeada com argumentos específicos de validação. Para "cv": 
-#'     argumentos passados a \code{\link[lightgbm]{lgb.cv}} (como \code{nfold}, \code{stratified}, 
-#'     \code{nrounds}, etc.). Para "split": deve conter \code{oob}, um vetor lógico com TRUE para 
-#'     observações in-sample e FALSE para observações out-of-sample
+#' @param validation_control lista nomeada com argumentos específicos de validação, ou uma função
+#'     que retorna tal lista. Se função, deve ter assinatura \code{function(serie, regdata)} e
+#'     retornar uma lista nomeada. Para "cv": argumentos passados a
+#'     \code{\link[lightgbm]{lgb.cv}} (como \code{nfold}, \code{stratified}, \code{nrounds}, etc.).
+#'     Para "split": deve conter \code{oob}, um vetor lógico com TRUE para observações in-sample
+#'     e FALSE para observações out-of-sample
 #' @param dataset_params lista de parâmetros opcionais para construção do dataset. Veja
 #'     \code{\link[lightgbm]{lgb.Dataset}} para mais detalhes
 #' @param train_params lista de parâmetros opcionais para treinamento do modelo. Veja
 #'     \code{\link[lightgbm]{lightgbm}} para mais detalhes
-#' @param ... para estimacao, demais argumentos passados a funcao \code{\link[lightgbm]{lightgbm}}; 
+#' @param ... para estimacao, demais argumentos passados a funcao \code{\link[lightgbm]{lightgbm}};
 #'     nas restantes nao possui uso
 #' 
 #' @return Objeto da classe \code{modprev} e subclasse \code{LGBM}, uma lista de dois 
@@ -59,6 +61,18 @@ LGBM <- function(serie, regdata, dataset_params = list(), train_params = list(),
 
     if (!is.ts(serie)) serie <- ts(serie)
     aux_tsp <- tsp(serie)
+
+    if (validation != "none") {
+        validation_control <- evaluate_validation_control(
+            validation_control, serie, regdata, validation
+        )
+
+        if (validation == "cv") {
+            validate_control_lgbm_cv(validation_control, length(serie))
+        } else if (validation == "split") {
+            validate_control_split(validation_control, length(serie))
+        }
+    }
 
     regdata_dataset <- lgb.Dataset(data.matrix(regdata), dataset_params, label = as.numeric(serie))
 

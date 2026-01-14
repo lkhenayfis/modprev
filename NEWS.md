@@ -24,6 +24,13 @@
 * Criado registro de modelos para formalizacao dos arcaboucos suportados
 * Reformulacao geral de testes para ter um guardachuva de testes basicos automatico para qualquer
   novo modelo introduzido
+# modprevS
+
+## New features
+
+* Introduz modelos com shapeshifting. Assim como modelos periodicos, esta e uma generalizacao dos
+  modelos simples para combina-los com as functionalidades de manipulacao de dados e construcao de
+  regressores do pacote [`shapeshiftr`](https://github.com/lkhenayfis/shapeshiftr)
 
 # lgbm
 
