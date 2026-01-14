@@ -4,40 +4,18 @@
 \alias{janelamovel}
 \title{Previsão Em Horizonte Rolante}
 \usage{
-janelamovel(
-  serie,
-  tipo,
-  janela,
-  passo = 1L,
-  n.ahead = 1L,
-  refit.cada = NA,
-  verbose = 0,
-  full.output = FALSE,
-  ...
-)
+janelamovel(serie, tipo, config, ...)
 }
 \arguments{
 \item{serie}{serie temporal pela qual passar a janela movel}
 
 \item{tipo}{tipo de modelo a ser ajustado. Ver \code{\link{estimamodelo}}.}
 
-\item{janela}{especificação da janela móvel ou expansível}
+\item{config}{Objeto de configuração criado por \code{\link{jm_config}}. Obrigatório.}
 
-\item{passo}{inteiro de saltos temporais entre cada janela. Ver Detalhes}
-
-\item{n.ahead}{número de passos à frente para prever a cada passo}
-
-\item{refit.cada}{escalar indicando de quantas em quantas observacoes o modelo deve ser
-reajustado}
-
-\item{verbose}{Escalar inteiro indicando quanta informacao a ser emitida durante rodada.
-0 = nenhuma, 1: toda vez que reajusta modelo, 2: todo horizonte de previsão e reajuste}
-
-\item{full.output}{booleano indicando se deve ser retornada uma lista com modelo usado, previsao
-e variaveis exogenas (caso existam) ou apenas a previsao}
-
-\item{...}{demais argumentos pertinentes a estimação de cada \code{tipo}. Veja
-\code{\link{estimamodelo}} para mais detalhes}
+\item{...}{demais argumentos pertinentes a estimação de cada \code{tipo}. Para
+modelos \code{modprevS}, deve incluir \code{newdata_list}. Veja
+\code{\link{estimamodelo}} para mais detalhes.}
 }
 \value{
 lista contendo previsoes de 1 a n.ahead passos à frente para cada janela
@@ -46,26 +24,14 @@ lista contendo previsoes de 1 a n.ahead passos à frente para cada janela
 Função para realizar previsões e reajustes em janela móvel
 }
 \details{
+A partir da versão 2.0.0, esta função requer um objeto de configuração criado
+por \code{\link{jm_config}}. O uso de argumentos individuais não é mais suportado.
+
 Os argumentos \code{serie} e \code{tipo} tem exatamente o mesmo efeito daqueles descritos em
 \code{\link{estimamodelo}}.
 
-\code{janela} pode ser ou um escalar ou um vetor de dois elementos inteiros. No primeiro caso,
-entende-se que deverao ser rodadas janelas de tamanho \code{janela}. Quando este argumento e um
-vetor entende-se que todas as janelas devem iniciar no instante de tempo \code{janela[1]} com
-largura inicial \code{janela[2]}. Essencialmente estas duas formas permitem a execucao em janela
-rolante ou expansivel, respectivamente.
-
-O argumento \code{passo} permite especificar quantas novas observacoes sao incorporadas entre
-janelas adjacentes. No caso de janela rolante, cada janela incorpora \code{passos} novos pontos e
-abandona os \code{passos} valores mais antigos, de modo que todas tem o mesmo tamanho; janelas
-expansiveis vao simplesmente agregando novas observacoes. Deve ser observado que, no caso de
-janelas rolantes, sempre havera uma janela contendo o final da serie, mesmo que passos seja um
-número tal que da penultima para a ultima janela ocorra um intervalo menor que \code{passos}.
-
-O comportamento dessa função é mais fortemente impactado por \code{refit.cada}. Através deste
-argumento é possível indicar intervalos de tempo nos quais o modelo será reestimado. Nas demais
-janelas será feita apenas a atualização das informações. Caso \code{refit.cada = NA} (o padrão),
-o modelo só será ajustado uma vez e atualizado a cada nova janela.
+O objeto \code{config} controla o comportamento da janela móvel. Veja \code{\link{jm_config}}
+para detalhes sobre os parâmetros de configuração.
 
 \bold{Modelos com variáveis explicativas:}
 
@@ -80,25 +46,21 @@ necessárias as variáveis explicativas insample para ajustes do modelo. As obse
 }
 \examples{
 
-# janela rolante de cinco anos, prevendo um ano a frente e rolando de seis em seis meses
-jm_sarima <- janelamovel(AirPassengers, "sarima", 60, passo = 6, n.ahead = 12)
+# Janela rolante de 60 observações, prevendo 12 passos
+cfg <- jm_config(janela = 60, passo = 6, n.ahead = 12)
+jm_sarima <- janelamovel(AirPassengers, "sarima", config = cfg)
 
-# mesma configuracao, porem janela extensivel (inicio fixo no primeiro mes)
-jm_sarima <- janelamovel(AirPassengers, "sarima", c(1, 60), passo = 6, n.ahead = 12)
+# Janela expansível começando na posição 1
+cfg <- jm_config(janela = c(1, 60), passo = 6, n.ahead = 12, verbose = 1)
+jm_sarima <- janelamovel(AirPassengers, "sarima", config = cfg)
 
-# VARIAVEIS EXPLICATIVAS -----------------------------------------
-
-# serie deve conter n.ahead menos observacoes que a variavel explicativa
+# Com variáveis explicativas
 serie <- window(datregdin$obs, 1, 190)
 varex <- datregdin$varex
-jm_regdin <- janelamovel(serie, "ss_reg_din", 100, passo = 10, n.ahead = 5, regdata = varex)
+cfg <- jm_config(janela = 100, passo = 10, n.ahead = 5)
+jm_regdin <- janelamovel(serie, "ss_reg_din", config = cfg, regdata = varex)
 
-# MODO VERBOSE ---------------------------------------------------
-
-\dontrun{
-jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 0)
-jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 1, refit.cada = 12)
-jm_sarima <- janelamovel(AirPassengers, "sarima", 60, 2, 12, verbose = 2, refit.cada = 3)
 }
-
+\seealso{
+\code{\link{jm_config}} para criação de objetos de configuração
 }

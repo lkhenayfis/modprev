@@ -13,12 +13,4 @@ NULL invisibly
 Internal function that registers all built-in model types with the registry.
 Called during package initialization.
 }
-\details{
-Model registrations will be added in subsequent tickets:
-\itemize{
-\item T009: Univariate time series models (sarima, ss_ar1_saz)
-\item T010: Regression-based models (sarimax, reg_lin, reg_quant, ss_reg_din)
-\item T011: Machine learning models (GAM, BOOST, LGBM)
-}
-}
 \keyword{internal}
