@@ -1,4 +1,4 @@
-# refactor
+# modprev 2.0.0
 
 ## BREAKING CHANGES
 
@@ -18,39 +18,12 @@
 ## New features
 
 * Introduz `jm_config()` para configuracao de janelas moveis
-
-## Misc
-
-* Criado registro de modelos para formalizacao dos arcaboucos suportados
-* Reformulacao geral de testes para ter um guardachuva de testes basicos automatico para qualquer
-  novo modelo introduzido
-# modprevS
-
-## New features
-
 * Introduz modelos com shapeshifting. Assim como modelos periodicos, esta e uma generalizacao dos
   modelos simples para combina-los com as functionalidades de manipulacao de dados e construcao de
   regressores do pacote [`shapeshiftr`](https://github.com/lkhenayfis/shapeshiftr)
-
-# lgbm
-
-## New features
-
-* Adiciona modelagem por ligth gradient boostin machines (LGBM)
-
-# boost
-
-## New features
-
+* Adiciona modelagem por light gradient boosting machines (LGBM)
 * Adiciona modelagem por boost marginal de modelos simples
-
-# gam
-
-## New features
-
 * Adiciona Modelos Aditivos Generalizados através do tipo de modelo `GAM` 
-
-# master
 
 ## Bug fixes
 
@@ -61,6 +34,9 @@
 
 ## Misc
 
+* Criado registro de modelos para formalizacao dos arcaboucos suportados
+* Reformulacao geral de testes para ter um guardachuva de testes basicos automatico para qualquer
+  novo modelo introduzido
 * Diversas modificacoes na interface de `ss_reg_din`
   * `vardin` agora so pode ser um booleano. Para que a serie seja estimada com heterocedasticidade
     ela deve ter sazonalidade
