@@ -15,6 +15,5 @@
 The input object \code{x}, invisibly.
 }
 \description{
-Displays registered models in a readable format with indicators for models requiring
-regression data.
+Print Method for model_registry
 }

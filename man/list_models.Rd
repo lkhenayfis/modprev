@@ -7,55 +7,25 @@
 list_models(details = FALSE)
 }
 \arguments{
-\item{details}{Logical indicating whether to return detailed information. Defaults
-to \code{FALSE}. If \code{FALSE}, returns character vector of model names. If \code{TRUE}, returns
-data.frame with additional information.}
+\item{details}{Logical. Whether to return detailed information. Defaults to \code{FALSE}.
+If \code{FALSE}, returns a sorted character vector of model names. If \code{TRUE}, returns a
+data.frame with columns \code{tipo}, \code{requires_regdata}, \code{deps}, and \code{description}.}
 }
 \value{
-If \code{details = FALSE}, a character vector of registered model names (sorted
-alphabetically). If \code{details = TRUE}, a data.frame with the following columns:
-\describe{
-\item{tipo}{Character. Model type identifier}
-\item{requires_regdata}{Logical. Whether model requires \code{regdata} argument}
-\item{deps}{Character. Package dependencies (comma-separated)}
-\item{description}{Character. Description from metadata (empty string if not provided)}
-}
+Sorted character vector of model names when \code{details = FALSE}, or a data.frame
+with model metadata when \code{details = TRUE}.
 }
 \description{
 Returns names and optionally detailed information about all registered models.
 }
-\details{
-This function provides programmatic access to the model inventory, enabling dynamic
-workflows, help systems, and validation checks. It's useful for discovering available
-models, checking their requirements, and building model selection interfaces.
-}
-\section{Simple vs. Detailed Output}{
-\itemize{
-\item \strong{Simple} (\code{details = FALSE}): Returns a character vector of model names, suitable
-for quick checks like \code{"sarima" \%in\% list_models()}.
-\item \strong{Detailed} (\code{details = TRUE}): Returns a data.frame with columns for model type,
-regression data requirements, dependencies, and descriptions.
-}
-}
-
 \examples{
 dummy_fit <- function(serie, ...) {
-    new_modprevU(list(data = serie), serie, "test", list())
+    new_modprevU(list(data = serie), serie, "ex_list", list())
 }
-dummy_predict <- function(object, n.ahead, ...) ts(rep(0, n.ahead))
-dummy_update <- function(object, newseries, refit = FALSE, ...) object
 
-register_model("test", dummy_fit, dummy_predict, dummy_update)
-
-models <- list_models()
-print(models)
-
-"test" \%in\% list_models()
-
-info <- list_models(details = TRUE)
-head(info)
-
-modprev:::.remove_model("test")
+register_model("ex_list", dummy_fit)
+list_models()
+list_models(details = TRUE)
 
 }
 \seealso{

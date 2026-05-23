@@ -24,23 +24,8 @@
 #' @family Metodos modprevU
 
 estimamodelo_U <- function(serie, tipo, ...) {
-    if (is_registered(tipo)) {
-        spec <- get_model(tipo, error = FALSE)
-
-        if (!is.null(spec)) {
-            fit_fn <- spec$fit_fn
-            return(fit_fn(serie, ...))
-        }
-    }
-
-    mc <- match.call()
-    eval_env <- parent.frame()
-
-    tipo_fn <- str2lang(paste0("modprev:::", tipo))
-    mc$tipo <- NULL
-    mc[[1]] <- tipo_fn
-
-    eval(mc, envir = eval_env, enclos = eval_env)
+    spec <- get_model(tipo)
+    spec$fit_fn(serie, ...)
 }
 
 #' Contrutor Interno De \code{modprevU}
@@ -67,7 +52,7 @@ new_modprevU <- function(fit, serie, tipo, atrs) {
 
     if (!missing("atrs")) attr(new, "mod_atrs") <- atrs
 
-    return(new)
+    new
 }
 
 # METODOS -----------------------------------------------------------------------------------------

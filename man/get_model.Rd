@@ -9,45 +9,28 @@ get_model(tipo, error = TRUE)
 \arguments{
 \item{tipo}{Character string identifying the model type (e.g., \code{"sarima"}, \code{"reg_lin"}).}
 
-\item{error}{Logical indicating whether to throw an error if the model is not found.
-Defaults to \code{TRUE}. Set to \code{FALSE} to return \code{NULL} for missing models instead.}
+\item{error}{Logical. Whether to throw an error if the model is not found. Defaults to
+\code{TRUE}. Set to \code{FALSE} to return \code{NULL} for missing models.}
 }
 \value{
-A \link{model_spec} object if the model is registered, \code{NULL} if the model is not
-found and \code{error = FALSE}.
+A \link{model_spec} object if the model is registered, \code{NULL} if not found and
+\code{error = FALSE}.
 }
 \description{
-Retrieves a registered model's specification for use in model estimation and other operations.
+Retrieves a registered model's specification. Used internally by \code{\link[=estimamodelo]{estimamodelo()}}
+but can be called directly to inspect or use a model's functions programmatically.
 }
 \details{
-This function provides type-safe access to registered model specifications. It's used
-internally by \code{\link[=estimamodelo]{estimamodelo()}} but can also be called directly when you need to inspect
-or use a model's functions programmatically.
+Set \code{error = FALSE} to return \code{NULL} instead of erroring when the model is not found.
 }
-\section{Error Handling}{
-By default, attempting to retrieve a non-existent model throws an error with a helpful
-message listing all available models. Set \code{error = FALSE} to return \code{NULL} instead,
-which is useful for conditional logic.
-}
-
 \examples{
 dummy_fit <- function(serie, ...) {
-    new_modprevU(list(data = serie), serie, "test", list())
-}
-dummy_predict <- function(object, n.ahead, ...) ts(rep(0, n.ahead))
-dummy_update <- function(object, newseries, refit = FALSE, ...) object
-
-register_model("test", dummy_fit, dummy_predict, dummy_update)
-
-spec <- get_model("test")
-spec$fit_fn
-
-spec_missing <- get_model("nonexistent", error = FALSE)
-if (is.null(spec_missing)) {
-    message("Model not registered")
+    new_modprevU(list(data = serie), serie, "ex_get", list())
 }
 
-modprev:::.remove_model("test")
+register_model("ex_get", dummy_fit)
+spec <- get_model("ex_get")
+get_model("nonexistent", error = FALSE)
 
 }
 \seealso{

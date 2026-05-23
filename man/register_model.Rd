@@ -7,41 +7,25 @@
 register_model(
   tipo,
   fit_fn,
-  predict_fn,
-  update_fn,
   requires_regdata = FALSE,
   deps = character(),
   metadata = list(),
-  validate = TRUE,
   overwrite = FALSE
 )
 }
 \arguments{
-\item{tipo}{Character string uniquely identifying the model type. Should match the
-class name used in model objects.}
+\item{tipo}{Character string uniquely identifying the model type.}
 
-\item{fit_fn}{Function for model estimation. Must have \code{serie} argument and return
-a \code{modprevU} object.}
+\item{fit_fn}{Function for model estimation. Must have \code{serie} argument.}
 
-\item{predict_fn}{Function for generating predictions. Must be compatible with S3
-\code{predict()} generic (arguments: \code{object}, \code{n.ahead}).}
+\item{requires_regdata}{Logical. Whether the model requires a \code{regdata} argument.
+Defaults to \code{FALSE}.}
 
-\item{update_fn}{Function for updating models. Must accept \code{object}, \code{newseries},
-and \code{refit} arguments.}
+\item{deps}{Character vector of required package names. Defaults to \code{character()}.}
 
-\item{requires_regdata}{Logical indicating whether the model requires regression data
-via \code{regdata} argument. Defaults to \code{FALSE}.}
+\item{metadata}{Named list of additional model information. Defaults to \code{list()}.}
 
-\item{deps}{Character vector of required package names. Defaults to empty vector.}
-
-\item{metadata}{Optional named list containing additional model information (description,
-author, version, etc.). Defaults to empty list.}
-
-\item{validate}{Logical indicating whether to validate function signatures. Defaults
-to \code{TRUE}. Set to \code{FALSE} to skip validation for non-standard signatures.}
-
-\item{overwrite}{Logical indicating whether to replace an existing registration.
-Defaults to \code{FALSE}. Set to \code{TRUE} to update an already-registered model.}
+\item{overwrite}{Logical. Whether to replace an existing registration. Defaults to \code{FALSE}.}
 }
 \value{
 The created \link{model_spec} object, invisibly.
@@ -51,69 +35,18 @@ Adds a model specification to the global model registry, making it available for
 with \code{\link[=estimamodelo]{estimamodelo()}}.
 }
 \details{
-This function is the primary interface for extending modprev with new model types.
-It validates the model specification and function signatures, then registers the model
-for runtime discovery. Models can be registered at package load time (in \code{.onLoad()})
-or dynamically at runtime.
+\code{fit_fn} must have a \code{serie} argument and return a \code{modprevU} object. Prediction and
+update dispatch use plain S3 method dispatch and are not stored in the registry.
 }
-\section{Function Signatures}{
-The model functions must follow specific signatures:
-\itemize{
-\item \strong{fit_fn}: \verb{function(serie, ...)} - Must accept time series and return \code{modprevU} object
-\item \strong{predict_fn}: \verb{function(object, n.ahead, ...)} - Standard S3 predict method signature
-\item \strong{update_fn}: \verb{function(object, newseries, refit = FALSE, ...)} - Standard update signature
-}
-
-The \code{...} argument is recommended in all functions for forward compatibility.
-}
-
-\section{Validation}{
-When \code{validate = TRUE} (default), the function checks that:
-\enumerate{
-\item All required arguments are present in function signatures
-\item Function names follow expected patterns
-}
-
-Set \code{validate = FALSE} to skip these checks when you need non-standard signatures.
-}
-
 \examples{
 my_fit <- function(serie, ...) {
-    params <- list(mean = mean(serie), sd = sd(serie))
-    new_modprevU(params, serie, "my_model", list())
+    new_modprevU(list(mean = mean(serie)), serie, "my_model", list())
 }
 
-my_predict <- function(object, n.ahead, ...) {
-    ts(rep(object$modelo$mean, n.ahead))
-}
-
-my_update <- function(object, newseries, refit = FALSE, ...) {
-    if (refit) {
-        estimamodelo(newseries, "my_model")
-    } else {
-        object$serie <- newseries
-        object
-    }
-}
-
-register_model(
-    tipo = "my_model",
-    fit_fn = my_fit,
-    predict_fn = my_predict,
-    update_fn = my_update,
-    metadata = list(description = "Simple mean model", author = "Me")
-)
-
+register_model("my_model", my_fit, metadata = list(description = "Mean model"))
 is_registered("my_model")
 
-register_model(
-    tipo = "my_reg_model",
-    fit_fn = my_fit,
-    predict_fn = my_predict,
-    update_fn = my_update,
-    requires_regdata = TRUE,
-    deps = c("mgcv", "quantreg")
-)
+register_model("my_reg_model", my_fit, requires_regdata = TRUE, deps = "mgcv")
 
 }
 \seealso{

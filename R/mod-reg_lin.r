@@ -53,7 +53,7 @@ reg_lin <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...
     cc <- c(cc, list(...))
     fit <- eval(as.call(cc))
 
-    mod_atrs <- list(call = match.call(), tsp = aux_tsp)
+    mod_atrs <- list(call = c(list(formula = formula), list(...)), tsp = aux_tsp)
 
     new_modprevU(fit, serie, "reg_lin", mod_atrs)
 }
@@ -96,9 +96,7 @@ predict.reg_lin <- function(object, newdata, n.ahead, ...) {
     colnames(prev) <- c("prev", "sd")
 
     prox_t <- aux_tsp[2] + 1 / aux_tsp[3]
-    prev <- ts(prev, start = prox_t, frequency = aux_tsp[3])
-
-    return(prev)
+    ts(prev, start = prox_t, frequency = aux_tsp[3])
 }
 
 #' @param newseries nova série com a qual atualizar o modelo
@@ -118,10 +116,8 @@ update.reg_lin <- function(object, newseries, newregdata, refit = FALSE, ...) {
     mod_atrs <- attr(object, "mod_atrs")
 
     if (refit) {
-        call  <- mod_atrs$call
-        call$serie   <- newseries
-        call$regdata <- newregdata
-        object <- eval(call, parent.frame())
+        fit_args <- c(list(serie = newseries, regdata = newregdata), mod_atrs$call)
+        object <- do.call(reg_lin, fit_args)
     } else {
 
         modelo <- object$modelo
@@ -137,5 +133,5 @@ update.reg_lin <- function(object, newseries, newregdata, refit = FALSE, ...) {
         object <- new_modprevU(modelo, newseries, "reg_lin", mod_atrs)
     }
 
-    return(object)
+    object
 }

@@ -7,55 +7,14 @@
 get_registry()
 }
 \value{
-Object of class \code{"model_registry"} with the following components:
-\describe{
-\item{models}{Named list of \link{model_spec} objects, where names are model type
-identifiers (e.g., \code{"sarima"}, \code{"reg_lin"})}
-}
+Object of class \code{"model_registry"} with component \code{models}: a named list of
+\link{model_spec} objects.
 }
 \description{
 Access the global model registry containing all registered model specifications.
 }
-\details{
-The model registry provides centralized storage and discovery for all available model types
-in the modprev framework. Models are registered using \code{\link[=register_model]{register_model()}} and can be
-retrieved using \code{\link[=get_model]{get_model()}} or listed using \code{\link[=list_models]{list_models()}}.
-}
-\section{Storage}{
-The registry uses an internal environment for O(1) lookup performance. The registry
-automatically initializes on first access and persists for the duration of the R session.
-}
-
-\section{Registry Contents}{
-Each entry in the registry is a \link{model_spec} object containing:
-\itemize{
-\item Model type identifier
-\item Function references for fit, predict, and update operations
-\item Dependency information
-\item Metadata about model requirements
-}
-}
-
 \examples{
-registry <- get_registry()
-print(registry)
-
-dummy_fit <- function(serie, ...) {
-    new_modprevU(list(data = serie), serie, "dummy", list())
-}
-dummy_predict <- function(object, n.ahead, ...) ts(rep(0, n.ahead))
-dummy_update <- function(object, newseries, refit, ...) object
-
-spec <- model_spec(
-    tipo = "dummy",
-    fit_fn = dummy_fit,
-    predict_fn = dummy_predict,
-    update_fn = dummy_update
-)
-
-modprev:::.add_model("dummy", spec)
-registry <- get_registry()
-print(registry)
+get_registry()
 
 }
 \seealso{

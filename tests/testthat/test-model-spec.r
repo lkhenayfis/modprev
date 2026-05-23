@@ -4,14 +4,10 @@ test_that("model_spec", {
 
     test_that("model_spec creates valid specification", {
         dummy_fit <- function(serie, ...) NULL
-        dummy_predict <- function(object, n.ahead, ...) NULL
-        dummy_update <- function(object, newseries, refit, ...) NULL
 
         spec <- f(
             tipo = "test_model",
             fit_fn = dummy_fit,
-            predict_fn = dummy_predict,
-            update_fn = dummy_update,
             requires_regdata = FALSE,
             deps = character()
         )
@@ -19,8 +15,6 @@ test_that("model_spec", {
         expect_s3_class(spec, "model_spec")
         expect_equal(spec$tipo, "test_model")
         expect_identical(spec$fit_fn, dummy_fit)
-        expect_identical(spec$predict_fn, dummy_predict)
-        expect_identical(spec$update_fn, dummy_update)
         expect_false(spec$requires_regdata)
         expect_length(spec$deps, 0)
         expect_type(spec$metadata, "list")
@@ -33,8 +27,6 @@ test_that("model_spec", {
         spec <- f(
             tipo = "reg_model",
             fit_fn = dummy_fn,
-            predict_fn = dummy_fn,
-            update_fn = dummy_fn,
             requires_regdata = TRUE
         )
 
@@ -47,8 +39,6 @@ test_that("model_spec", {
         spec <- f(
             tipo = "test",
             fit_fn = dummy_fn,
-            predict_fn = dummy_fn,
-            update_fn = dummy_fn,
             deps = c("forecast", "KFAS")
         )
 
@@ -62,8 +52,6 @@ test_that("model_spec", {
         spec <- f(
             tipo = "test",
             fit_fn = dummy_fn,
-            predict_fn = dummy_fn,
-            update_fn = dummy_fn,
             metadata = list(description = "Test model", author = "Test Author")
         )
 
@@ -75,57 +63,37 @@ test_that("model_spec", {
         dummy_fn <- function(...) NULL
 
         expect_error(
-            f("", dummy_fn, dummy_fn, dummy_fn),
+            f("", dummy_fn),
             "nchar\\(spec\\$tipo\\) > 0"
         )
 
         expect_error(
-            f(c("a", "b"), dummy_fn, dummy_fn, dummy_fn),
+            f(c("a", "b"), dummy_fn),
             "length\\(spec\\$tipo\\) == 1"
         )
 
         expect_error(
-            f(123, dummy_fn, dummy_fn, dummy_fn),
+            f(123, dummy_fn),
             "is\\.character\\(spec\\$tipo\\)"
         )
 
         expect_error(
-            f(NA_character_, dummy_fn, dummy_fn, dummy_fn),
+            f(NA_character_, dummy_fn),
             "nchar\\(spec\\$tipo\\) > 0"
         )
     })
 
-    test_that("model_spec validates function arguments", {
+    test_that("model_spec validates fit_fn argument", {
         dummy_fn <- function(...) NULL
 
         expect_error(
-            f("test", "not_a_function", dummy_fn, dummy_fn),
+            f("test", "not_a_function"),
             "is\\.function\\(spec\\$fit_fn\\)"
         )
 
         expect_error(
-            f("test", dummy_fn, "not_a_function", dummy_fn),
-            "is\\.function\\(spec\\$predict_fn\\)"
-        )
-
-        expect_error(
-            f("test", dummy_fn, dummy_fn, "not_a_function"),
-            "is\\.function\\(spec\\$update_fn\\)"
-        )
-
-        expect_error(
-            f("test", NULL, dummy_fn, dummy_fn),
+            f("test", NULL),
             "is\\.function\\(spec\\$fit_fn\\)"
-        )
-
-        expect_error(
-            f("test", dummy_fn, NULL, dummy_fn),
-            "is\\.function\\(spec\\$predict_fn\\)"
-        )
-
-        expect_error(
-            f("test", dummy_fn, dummy_fn, NULL),
-            "is\\.function\\(spec\\$update_fn\\)"
         )
     })
 
@@ -133,20 +101,17 @@ test_that("model_spec", {
         dummy_fn <- function(...) NULL
 
         expect_error(
-            f("test", dummy_fn, dummy_fn, dummy_fn, requires_regdata = "yes"),
+            f("test", dummy_fn, requires_regdata = "yes"),
             "is\\.logical\\(spec\\$requires_regdata\\)"
         )
 
         expect_error(
-            f("test", dummy_fn, dummy_fn, dummy_fn,
-              requires_regdata = c(TRUE, FALSE)),
+            f("test", dummy_fn, requires_regdata = c(TRUE, FALSE)),
             "length\\(spec\\$requires_regdata\\) == 1"
         )
 
-
-
         expect_error(
-            f("test", dummy_fn, dummy_fn, dummy_fn, requires_regdata = 1),
+            f("test", dummy_fn, requires_regdata = 1),
             "is\\.logical\\(spec\\$requires_regdata\\)"
         )
     })
@@ -155,20 +120,19 @@ test_that("model_spec", {
         dummy_fn <- function(...) NULL
 
         expect_error(
-            f("test", dummy_fn, dummy_fn, dummy_fn, deps = 123),
+            f("test", dummy_fn, deps = 123),
             "is\\.character\\(spec\\$deps\\)"
         )
 
         expect_error(
-            f("test", dummy_fn, dummy_fn, dummy_fn, deps = list("forecast")),
+            f("test", dummy_fn, deps = list("forecast")),
             "is\\.character\\(spec\\$deps\\)"
         )
 
-        spec <- f("test", dummy_fn, dummy_fn, dummy_fn, deps = character())
+        spec <- f("test", dummy_fn, deps = character())
         expect_length(spec$deps, 0)
 
-        spec <- f("test", dummy_fn, dummy_fn, dummy_fn,
-                  deps = c("forecast", "KFAS"))
+        spec <- f("test", dummy_fn, deps = c("forecast", "KFAS"))
         expect_length(spec$deps, 2)
     })
 
@@ -176,16 +140,16 @@ test_that("model_spec", {
         dummy_fn <- function(...) NULL
 
         expect_error(
-            f("test", dummy_fn, dummy_fn, dummy_fn, metadata = "not a list"),
+            f("test", dummy_fn, metadata = "not a list"),
             "is\\.list\\(spec\\$metadata\\)"
         )
 
         expect_error(
-            f("test", dummy_fn, dummy_fn, dummy_fn, metadata = c(a = 1, b = 2)),
+            f("test", dummy_fn, metadata = c(a = 1, b = 2)),
             "is\\.list\\(spec\\$metadata\\)"
         )
 
-        spec <- f("test", dummy_fn, dummy_fn, dummy_fn, metadata = list())
+        spec <- f("test", dummy_fn, metadata = list())
         expect_length(spec$metadata, 0)
     })
 })
@@ -200,8 +164,6 @@ test_that("new_model_spec", {
         spec <- f(
             tipo = "test",
             fit_fn = dummy_fn,
-            predict_fn = dummy_fn,
-            update_fn = dummy_fn,
             requires_regdata = FALSE,
             deps = character(),
             metadata = list()
@@ -216,8 +178,6 @@ test_that("new_model_spec", {
         spec <- f(
             tipo = "",
             fit_fn = "not_a_function",
-            predict_fn = NULL,
-            update_fn = 123,
             requires_regdata = "invalid",
             deps = list(1, 2),
             metadata = "not_a_list"
@@ -237,8 +197,6 @@ test_that("validate_model_spec", {
         spec <- new_model_spec(
             tipo = "test",
             fit_fn = dummy_fn,
-            predict_fn = dummy_fn,
-            update_fn = dummy_fn,
             requires_regdata = TRUE,
             deps = c("forecast"),
             metadata = list(author = "test")
@@ -254,8 +212,6 @@ test_that("validate_model_spec", {
         spec <- new_model_spec(
             tipo = "test",
             fit_fn = dummy_fn,
-            predict_fn = dummy_fn,
-            update_fn = dummy_fn,
             requires_regdata = FALSE,
             deps = character(),
             metadata = list()
@@ -274,64 +230,47 @@ test_that("validate_model_spec", {
     test_that("validate_model_spec rejects invalid tipo", {
         dummy_fn <- function(...) NULL
 
-        spec_empty <- new_model_spec("", dummy_fn, dummy_fn, dummy_fn,
-                                     FALSE, character(), list())
+        spec_empty <- new_model_spec("", dummy_fn, FALSE, character(), list())
         expect_error(f(spec_empty), "nchar\\(spec\\$tipo\\) > 0")
 
-        spec_multiple <- new_model_spec(c("a", "b"), dummy_fn, dummy_fn, dummy_fn,
-                                        FALSE, character(), list())
+        spec_multiple <- new_model_spec(c("a", "b"), dummy_fn, FALSE, character(), list())
         expect_error(f(spec_multiple), "length\\(spec\\$tipo\\) == 1")
 
-        spec_numeric <- new_model_spec(123, dummy_fn, dummy_fn, dummy_fn,
-                                       FALSE, character(), list())
+        spec_numeric <- new_model_spec(123, dummy_fn, FALSE, character(), list())
         expect_error(f(spec_numeric), "is\\.character\\(spec\\$tipo\\)")
     })
 
-    test_that("validate_model_spec rejects invalid functions", {
+    test_that("validate_model_spec rejects invalid fit_fn", {
         dummy_fn <- function(...) NULL
 
-        spec_bad_fit <- new_model_spec("test", "not_fn", dummy_fn, dummy_fn,
-                                       FALSE, character(), list())
+        spec_bad_fit <- new_model_spec("test", "not_fn", FALSE, character(), list())
         expect_error(f(spec_bad_fit), "is\\.function\\(spec\\$fit_fn\\)")
-
-        spec_bad_predict <- new_model_spec("test", dummy_fn, NULL, dummy_fn,
-                                           FALSE, character(), list())
-        expect_error(f(spec_bad_predict), "is\\.function\\(spec\\$predict_fn\\)")
-
-        spec_bad_update <- new_model_spec("test", dummy_fn, dummy_fn, 123,
-                                          FALSE, character(), list())
-        expect_error(f(spec_bad_update), "is\\.function\\(spec\\$update_fn\\)")
     })
 
     test_that("validate_model_spec rejects invalid requires_regdata", {
         dummy_fn <- function(...) NULL
 
-        spec_str <- new_model_spec("test", dummy_fn, dummy_fn, dummy_fn,
-                                   "yes", character(), list())
+        spec_str <- new_model_spec("test", dummy_fn, "yes", character(), list())
         expect_error(f(spec_str), "is\\.logical\\(spec\\$requires_regdata\\)")
 
-        spec_multiple <- new_model_spec("test", dummy_fn, dummy_fn, dummy_fn,
-                                        c(TRUE, FALSE), character(), list())
+        spec_multiple <- new_model_spec("test", dummy_fn, c(TRUE, FALSE), character(), list())
         expect_error(f(spec_multiple), "length\\(spec\\$requires_regdata\\) == 1")
     })
 
     test_that("validate_model_spec rejects invalid deps", {
         dummy_fn <- function(...) NULL
 
-        spec_numeric <- new_model_spec("test", dummy_fn, dummy_fn, dummy_fn,
-                                       FALSE, 123, list())
+        spec_numeric <- new_model_spec("test", dummy_fn, FALSE, 123, list())
         expect_error(f(spec_numeric), "is\\.character\\(spec\\$deps\\)")
 
-        spec_list <- new_model_spec("test", dummy_fn, dummy_fn, dummy_fn,
-                                    FALSE, list("forecast"), list())
+        spec_list <- new_model_spec("test", dummy_fn, FALSE, list("forecast"), list())
         expect_error(f(spec_list), "is\\.character\\(spec\\$deps\\)")
     })
 
     test_that("validate_model_spec rejects invalid metadata", {
         dummy_fn <- function(...) NULL
 
-        spec_str <- new_model_spec("test", dummy_fn, dummy_fn, dummy_fn,
-                                   FALSE, character(), "not_list")
+        spec_str <- new_model_spec("test", dummy_fn, FALSE, character(), "not_list")
         expect_error(f(spec_str), "is\\.list\\(spec\\$metadata\\)")
     })
 })
@@ -346,8 +285,6 @@ test_that("print.model_spec", {
         spec <- model_spec(
             tipo = "test_model",
             fit_fn = dummy_fn,
-            predict_fn = dummy_fn,
-            update_fn = dummy_fn,
             requires_regdata = TRUE,
             deps = c("forecast", "KFAS")
         )
@@ -365,8 +302,6 @@ test_that("print.model_spec", {
         spec <- model_spec(
             tipo = "test",
             fit_fn = dummy_fn,
-            predict_fn = dummy_fn,
-            update_fn = dummy_fn,
             metadata = list(description = "Test model", version = "1.0")
         )
 
@@ -384,9 +319,7 @@ test_that("print.model_spec", {
 
         spec <- model_spec(
             tipo = "minimal",
-            fit_fn = dummy_fn,
-            predict_fn = dummy_fn,
-            update_fn = dummy_fn
+            fit_fn = dummy_fn
         )
 
         output <- capture.output(f(spec))
@@ -399,9 +332,7 @@ test_that("print.model_spec", {
 
         spec <- model_spec(
             tipo = "minimal",
-            fit_fn = dummy_fn,
-            predict_fn = dummy_fn,
-            update_fn = dummy_fn
+            fit_fn = dummy_fn
         )
 
         output <- capture.output(f(spec))
@@ -414,9 +345,7 @@ test_that("print.model_spec", {
 
         spec <- model_spec(
             tipo = "test",
-            fit_fn = dummy_fn,
-            predict_fn = dummy_fn,
-            update_fn = dummy_fn
+            fit_fn = dummy_fn
         )
 
         result <- withVisible(f(spec))

@@ -48,8 +48,6 @@
     register_model(
         tipo = "sarima",
         fit_fn = sarima,
-        predict_fn = predict.sarima,
-        update_fn = update.sarima,
         requires_regdata = FALSE,
         deps = c("forecast"),
         metadata = list(
@@ -61,8 +59,6 @@
     register_model(
         tipo = "ss_ar1_saz",
         fit_fn = ss_ar1_saz,
-        predict_fn = predict.ss_ar1_saz,
-        update_fn = update.ss_ar1_saz,
         requires_regdata = FALSE,
         deps = c("KFAS"),
         metadata = list(
@@ -74,8 +70,6 @@
     register_model(
         tipo = "sarimax",
         fit_fn = sarimax,
-        predict_fn = predict.sarimax,
-        update_fn = update.sarimax,
         requires_regdata = TRUE,
         deps = c("forecast"),
         metadata = list(
@@ -87,8 +81,6 @@
     register_model(
         tipo = "reg_lin",
         fit_fn = reg_lin,
-        predict_fn = predict.reg_lin,
-        update_fn = update.reg_lin,
         requires_regdata = TRUE,
         deps = c("stats"),
         metadata = list(
@@ -100,8 +92,6 @@
     register_model(
         tipo = "reg_quant",
         fit_fn = reg_quant,
-        predict_fn = predict.reg_quant,
-        update_fn = update.reg_quant,
         requires_regdata = TRUE,
         deps = c("quantreg"),
         metadata = list(
@@ -113,8 +103,6 @@
     register_model(
         tipo = "ss_reg_din",
         fit_fn = ss_reg_din,
-        predict_fn = predict.ss_reg_din,
-        update_fn = update.ss_reg_din,
         requires_regdata = TRUE,
         deps = c("KFAS"),
         metadata = list(
@@ -126,8 +114,6 @@
     register_model(
         tipo = "GAM",
         fit_fn = GAM,
-        predict_fn = predict.GAM,
-        update_fn = update.GAM,
         requires_regdata = TRUE,
         deps = c("mgcv"),
         metadata = list(
@@ -139,8 +125,6 @@
     register_model(
         tipo = "BOOST",
         fit_fn = BOOST,
-        predict_fn = predict.BOOST,
-        update_fn = update.BOOST,
         requires_regdata = TRUE,
         deps = c("mboost"),
         metadata = list(
@@ -152,8 +136,6 @@
     register_model(
         tipo = "LGBM",
         fit_fn = LGBM,
-        predict_fn = predict.LGBM,
-        update_fn = update.LGBM,
         requires_regdata = TRUE,
         deps = c("lightgbm"),
         metadata = list(
