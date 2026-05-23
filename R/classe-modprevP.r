@@ -126,7 +126,7 @@ predict.modprevP <- function(object, n.ahead, ...) {
     args <- list(...)
 
     has_newdata <- "newdata" %in% ...names()
-    newdata_list <- has_newdata && class(args$newdata) == "list"
+    newdata_list <- has_newdata && inherits(args$newdata, "list")
 
     if (has_newdata && !newdata_list) {
 
@@ -149,7 +149,7 @@ predict.modprevP <- function(object, n.ahead, ...) {
     } else {
         aux_split <- ts(seq_len(n.ahead), start = tp1, frequency = aux_tsp[3])
         v_h <- split(seq_len(n.ahead), cycle(aux_split))
-        v_h <- sapply(v_h, length)
+        v_h <- vapply(v_h, length, integer(1))
     }
 
     prevs <- mapply(object$modelos[submodels], newdata, v_h[submodels], FUN = function(mod, nd, h) {
@@ -191,7 +191,7 @@ update.modprevP <- function(object, newseries, refit = FALSE, ...) {
     aux_tsp <- tsp(newseries)
 
     has_newregdata <- "newregdata" %in% ...names()
-    newregdata_list <- has_newregdata && class(args$newregdata) == "list"
+    newregdata_list <- has_newregdata && inherits(args$newregdata, "list")
 
     if (has_newregdata && !newregdata_list) {
 

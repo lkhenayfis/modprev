@@ -51,7 +51,7 @@ match_fun_args <- function(args, fun) {
     }
     fun_args <- fun_args[!grepl("\\.\\.\\.", fun_args)]
     args <- args[fun_args]
-    args <- args[!sapply(args, is.null)]
+    args <- args[!vapply(args, is.null, logical(1))]
     return(args)
 }
 
