@@ -10,7 +10,6 @@ test_that("Estimacao de BOOSTs - simples", {
     cv_comp <- cvrisk(compmod, cv(model.weights(compmod), B = 2))
     compmod <- compmod[mstop(cv_comp)]
 
-    expect_equal(class(mod)[1], "BOOST")
     expect_equal(coef(compmod), coef(mod$model))
     expect_equal(compmod$mstop(), mod$model$mstop())
     expect_equal(compmod$xselect(), mod$model$xselect())
@@ -41,7 +40,6 @@ test_that("Estimacao de BOOSTs - argumentos opcionais de mboost", {
     cv_comp <- cvrisk(compmod, cv(model.weights(compmod), B = 2, type = "boot"))
     compmod <- compmod[mstop(cv_comp)]
 
-    expect_equal(class(mod)[1], "BOOST")
     expect_equal(coef(compmod), coef(mod$model))
     expect_equal(compmod$mstop(), mod$model$mstop())
     expect_equal(compmod$xselect(), mod$model$xselect())
@@ -57,7 +55,6 @@ test_that("Estimacao de BOOSTs - argumentos opcionais de mboost", {
     cv_comp <- cvrisk(compmod, cv(model.weights(compmod), B = 2, type = "boot"))
     compmod <- compmod[mstop(cv_comp)]
 
-    expect_equal(class(mod)[1], "BOOST")
     expect_equal(coef(compmod), coef(mod$model))
     expect_equal(compmod$mstop(), mod$model$mstop())
     expect_equal(compmod$xselect(), mod$model$xselect())
@@ -74,7 +71,6 @@ test_that("Estimacao de BOOSTs - argumentos de validacao cruzada", {
     cv_comp <- cvrisk(compmod, cv(model.weights(compmod), B = 4, type = "boot"))
     compmod <- compmod[mstop(cv_comp)]
 
-    expect_equal(class(mod)[1], "BOOST")
     expect_equal(coef(compmod), coef(mod$model))
     expect_equal(compmod$mstop(), mod$model$mstop())
     expect_equal(compmod$xselect(), mod$model$xselect())
@@ -93,7 +89,6 @@ test_that("Estimacao de BOOSTs - argumentos de train/test", {
         control = boost_control(56))
 
     # teste extremamente simplorio so pra garantir que ainda esta rodando
-    expect_equal(class(mod)[1], "BOOST")
     # por algum motivo os coefs sao marginalmente diferentes. Praticamente nao afeta a previsao,
     # mas quebraria este teste.
     # Vai ficar desativado ate que se entenda melhor o que esta causando esta diferenca
@@ -215,7 +210,6 @@ test_that("BOOST functional validation_control", {
         )
 
         expect_s3_class(mod, "BOOST")
-        expect_s3_class(mod, "modprev")
     })
 
     test_that("BOOST accepts function-based validation_control for split mode", {
@@ -238,7 +232,6 @@ test_that("BOOST functional validation_control", {
         )
 
         expect_s3_class(mod, "BOOST")
-        expect_s3_class(mod, "modprev")
     })
 
     test_that("BOOST backward compatible with list validation_control for CV", {

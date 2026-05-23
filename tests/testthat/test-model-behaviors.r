@@ -18,14 +18,23 @@ test_that("model-behaviors", {
         })
     })
 
-    test_that("all models produce valid prediction format", {
+    test_that("all models — pred shape, fit class hierarchy, and required components", {
         with_registered_models(function(tipo) {
             result <- test_model_workflow(tipo, n.ahead = 12)
 
-            testthat::expect_s3_class(result$pred, "ts")
-            testthat::expect_equal(nrow(result$pred), 12)
-            testthat::expect_equal(ncol(result$pred), 2)
-            testthat::expect_equal(colnames(result$pred), c("prev", "sd"))
+            expect_s3_class(result$pred, "ts")
+            expect_equal(nrow(result$pred), 12)
+            expect_equal(ncol(result$pred), 2)
+            expect_equal(colnames(result$pred), c("prev", "sd"))
+
+            classes <- class(result$fit)
+            expect_true("modprevU" %in% classes)
+            expect_true("modprev" %in% classes)
+            expect_equal(classes[length(classes)], "modprev")
+            expect_true(tipo %in% classes)
+
+            required <- c("modelo", "serie")
+            expect_true(all(required %in% names(result$fit)))
         })
     })
 
@@ -45,7 +54,7 @@ test_that("model-behaviors", {
             }
 
             expect_compatible_tsp(pred, expected_freq = frequency(serie))
-            testthat::expect_equal(start(pred), c(start_year, start_period))
+            expect_equal(start(pred), c(start_year, start_period))
         })
     })
 
@@ -82,34 +91,6 @@ test_that("model-behaviors", {
         })
     })
 
-    test_that("all models inherit from modprevU and modprev", {
-        with_registered_models(function(tipo) {
-            result <- test_model_workflow(tipo, n.ahead = 12)
-
-            classes <- class(result$fit)
-            expect_true("modprevU" %in% classes)
-            expect_true("modprev" %in% classes)
-            expect_equal(classes[length(classes)], "modprev")
-        })
-    })
-
-    test_that("model tipo appears in class hierarchy", {
-        with_registered_models(function(tipo) {
-            result <- test_model_workflow(tipo, n.ahead = 12)
-
-            expect_true(tipo %in% class(result$fit))
-        })
-    })
-
-    test_that("all models have required components", {
-        with_registered_models(function(tipo) {
-            result <- test_model_workflow(tipo, n.ahead = 12)
-
-            required <- c("modelo", "serie")
-            expect_true(all(required %in% names(result$fit)))
-        })
-    })
-
     test_that("all models store original series correctly", {
         with_registered_models(univariate_only = TRUE, function(tipo) {
             serie <- make_univariate_series(seed = 999)
@@ -118,4 +99,54 @@ test_that("model-behaviors", {
             expect_equal(mod$serie, serie)
         })
     })
+
+    test_that("multiple predictions without update are consistent", {
+        with_registered_models(univariate_only = TRUE, function(tipo) {
+            serie <- make_univariate_series(seed = 212)
+            mod <- estimamodelo(serie, tipo)
+
+            pred1 <- predict(mod, n.ahead = 12)
+            pred2 <- predict(mod, n.ahead = 12)
+            pred3 <- predict(mod, n.ahead = 12)
+
+            expect_equal(pred1, pred2)
+            expect_equal(pred2, pred3)
+        })
+    })
+
+    test_that("update with shorter series works correctly", {
+        with_registered_models(univariate_only = TRUE, function(tipo) {
+            serie1 <- make_univariate_series(n = 120, seed = 210)
+            mod <- estimamodelo(serie1, tipo)
+
+            serie2 <- make_univariate_series(n = 100, seed = 211)
+            updated <- update(mod, newserie = serie2)
+
+            expect_equal(updated$serie, serie2)
+
+            models_without_sd <- c("reg_quant", "BOOST", "LGBM")
+            allow_na <- tipo %in% models_without_sd
+
+            pred <- predict(updated, n.ahead = 12)
+            expect_prediction_format(pred, n.ahead = 12, allow_na_sd = allow_na)
+        })
+    })
+
+    test_that("all univariate models are janelamovel compatible", {
+        serie <- make_univariate_series(seed = 444)
+        with_registered_models(univariate_only = TRUE, function(tipo) {
+            expect_janelamovel_compatible(tipo, serie = serie)
+        })
+    })
+
+    test_that("all univariate models are periodic compatible", {
+        serie <- make_univariate_series(seed = 444)
+        with_registered_models(univariate_only = TRUE, function(tipo) {
+            if (tipo == "ss_ar1_saz") {
+                testthat::skip("ss_ar1_saz periodic adapter known incompatible")
+            }
+            expect_periodic_compatible(tipo, serie = serie)
+        })
+    })
+
 })

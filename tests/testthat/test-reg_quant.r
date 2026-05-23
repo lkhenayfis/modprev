@@ -3,7 +3,6 @@ test_that("Estimacao de modelo Reg Quant - simples", {
     compmod <- rq(as.numeric(datregdin$obs) ~ data.matrix(datregdin$varex))
     mod <- estimamodelo(datregdin$obs, "reg_quant", regdata = datregdin$varex, formula = ~ V1 + V2 + V3)
 
-    expect_equal(class(mod)[1], "reg_quant")
     expect_equal(unname(compmod$coefficients), unname(mod$model$coefficients))
 
     # Sem passar a formula

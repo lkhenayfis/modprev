@@ -4,7 +4,6 @@ test_that("Estimacao de modelo S.S. RegDin - regressao simples", {
     varex <- datregdin$varex[, "V1", drop = FALSE]
     mod   <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din", formula = ~ V1)
 
-    expect_equal("ss_reg_din", class(mod)[1])
     expect_snapshot_value(round(mod$modelo["Q"][1, 1, 1], 5), style = "deparse")
     expect_snapshot_value(round(mod$modelo["H"][1, 1, 1], 5), style = "deparse")
 
@@ -39,15 +38,9 @@ test_that("Previsao de modelo S.S. RegDin - regressao simples", {
     newdata <- datregdin$varex[101:120, "V1", drop = FALSE]
     prev    <- predict(mod, newdata = newdata)
 
-    expect_true(all(dim(prev) == c(20, 2)))
-    expect_equal(c("prev", "sd"), colnames(prev))
-
     expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
     prev <- predict(mod, newdata = newdata, n.ahead = 10)
-
-    expect_true(all(dim(prev) == c(10, 2)))
-    expect_equal(c("prev", "sd"), colnames(prev))
 
     expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
@@ -94,7 +87,6 @@ test_that("Estimacao de modelo S.S. RegDin - regressao multipla", {
 
     mod <- estimamodelo(serie, "ss_reg_din", regdata = varex, formula = ~ V1 + V2 * V3)
 
-    expect_equal("ss_reg_din", class(mod)[1])
     expect_snapshot_value(round(mod$modelo["Q"][, , 1], 5), style = "deparse")
     expect_snapshot_value(round(mod$modelo["H"][, , 1], 5), style = "deparse")
 
@@ -118,15 +110,9 @@ test_that("Previsao de modelo S.S. RegDin - regressao multipla", {
     newdata <- datregdin$varex[151:170, ]
     prev    <- predict(mod, newdata = newdata)
 
-    expect_true(all(dim(prev) == c(20, 2)))
-    expect_equal(c("prev", "sd"), colnames(prev))
-
     expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
     prev <- predict(mod, newdata = newdata, n.ahead = 10)
-
-    expect_true(all(dim(prev) == c(10, 2)))
-    expect_equal(c("prev", "sd"), colnames(prev))
 
     expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
@@ -179,7 +165,7 @@ test_that("Estimacao de modelo S.S. RegDin - regressao multipla heterocedastica"
 
     mod1 <- estimamodelo(serie, "ss_reg_din", regdata = varex, formula = ~ V1 + V2 * V3, vardin = TRUE)
 
-    expect_equal("ss_reg_din", class(mod1)[1])
+    expect_s3_class(mod1, "ss_reg_din")
     expect_equal(attr(mod1, "mod_atrs")$vardin, TRUE)
     matH <- matrix(c(mod1$model["H"]), 10)
     expect_true(all(apply(matH, 1, function(v) all(v == v[1]))))
@@ -198,15 +184,9 @@ test_that("Previsao de modelo S.S. RegDin - regressao multipla - heterocedastica
     newdata <- datregdin$varex[151:170, ]
     prev    <- predict(mod, newdata = newdata)
 
-    expect_true(all(dim(prev) == c(20, 2)))
-    expect_equal(c("prev", "sd"), colnames(prev))
-
     expect_snapshot_value(round(c(prev), 5), style = "deparse")
 
     prev <- predict(mod, newdata = newdata, n.ahead = 10)
-
-    expect_true(all(dim(prev) == c(10, 2)))
-    expect_equal(c("prev", "sd"), colnames(prev))
 
     expect_snapshot_value(round(c(prev), 5), style = "deparse")
 

@@ -20,7 +20,6 @@ test_that("LGBM functional validation_control", {
         )
 
         expect_s3_class(mod, "LGBM")
-        expect_s3_class(mod, "modprev")
     })
 
     test_that("LGBM accepts function-based validation_control for split mode", {
@@ -44,7 +43,6 @@ test_that("LGBM functional validation_control", {
         )
 
         expect_s3_class(mod, "LGBM")
-        expect_s3_class(mod, "modprev")
     })
 
     test_that("LGBM backward compatible with list validation_control for CV", {

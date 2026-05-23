@@ -3,7 +3,6 @@ test_that("Estimacao de modelo SARIMA", {
     compmod <- forecast::auto.arima(AirPassengers)
     mod     <- estimamodelo(AirPassengers, tipo = "sarima")
 
-    expect_equal("sarima", class(mod)[1])
     expect_equal(coef(compmod), coef(mod$model))
 
     serie <- c(AirPassengers)
@@ -18,11 +17,9 @@ test_that("Estimacao de modelo SARIMA", {
     # Estimando um modelo pre especificado -------------------------------------
 
     mod <- estimamodelo(AirPassengers, "sarima", order = c(1, 0, 0))
-    expect_equal("sarima", class(mod)[1])
     expect_equal(length(coef(mod$modelo)), 2)
 
     mod <- estimamodelo(AirPassengers, "sarima", order = c(0, 0, 1), seasonal = c(1, 0, 0))
-    expect_equal("sarima", class(mod)[1])
     expect_equal(length(coef(mod$modelo)), 3)
 })
 
@@ -32,9 +29,6 @@ test_that("Previsao de modelo SARIMA", {
 
     prevcomp <- predict(compmod, n.ahead = 24)
     prev     <- predict(mod, n.ahead = 24)
-
-    expect_true(all(dim(prev) == c(24, 2)))
-    expect_equal(c("prev", "sd"), colnames(prev))
 
     expect_true(all(prev[, 1] == prevcomp[[1]]))
     expect_true(all(prev[, 2] == prevcomp[[2]]))
