@@ -134,3 +134,64 @@ expandeformula <- function(data, modo = c("ls", "gam"), warn = FALSE) {
 
     return(formula)
 }
+
+# AUXILIARES PARA MODELOS PERIODICOS ---------------------------------------------------------------
+
+#' Divide Serie Temporal Por Estacao
+#'
+#' Divide um objeto \code{ts} sazonal em uma lista de sub-series, uma por estacao, preservando o
+#' sistema de tempo de cada parcela
+#'
+#' A ordem das estacoes na lista de saida corresponde a ordem de primeira aparicao na serie
+#' de entrada, ou seja, uma serie que comeca na estacao 3 tera \code{"3"} como primeiro elemento
+#' da lista retornada. Cada sub-serie e convertida para frequencia 1 com inicio igual a
+#' \code{tsp(serie)[1] + (n - 1) * (1 / tsp(serie)[3])}, onde \code{n} e o indice da estacao
+#' na ordem de aparicao.
+#'
+#' @param serie objeto \code{ts} com \code{tsp(serie)[3] > 1}. A verificacao de sazonalidade
+#'     deve ser feita pelo chamador
+#'
+#' @return lista nomeada com dois elementos:
+#'     \describe{
+#'         \item{series}{lista nomeada de objetos \code{ts} com frequencia 1, um por estacao,
+#'             nomes iguais aos niveis do fator de estacoes}
+#'         \item{seasons}{fator com os ciclos de \code{serie}, com niveis em ordem de
+#'             primeira aparicao}
+#'     }
+#'
+#' @keywords internal
+
+split_seasonal <- function(serie) {
+    aux_tsp <- tsp(serie)
+    cycles <- as.numeric(cycle(serie))
+    seasons <- factor(cycles, unique(cycles))
+
+    l_series <- split(serie, seasons)
+    l_series <- mapply(seq_along(l_series), l_series, FUN = function(n, v) {
+        ts(v, start = aux_tsp[1] + (n - 1) * (1 / aux_tsp[3]), deltat = 1)
+    }, SIMPLIFY = FALSE)
+    names(l_series) <- levels(seasons)
+
+    list(series = l_series, seasons = seasons)
+}
+
+#' Divide Dados De Variaveis Explicativas Por Estacao
+#'
+#' Divide um \code{data.frame}-like de variaveis explicativas em sublistas por estacao,
+#' usando o fator de estacoes produzido por \code{split_seasonal}
+#'
+#' Esta funcao centraliza a chamada \code{split(regdata, seasons)} utilizada nos modelos
+#' periodicos. Nao trata o caso em que \code{regdata} e uma lista -- esse caso permanece
+#' inline nos pontos de chamada.
+#'
+#' @param regdata \code{data.frame}, matriz ou outro objeto aceito por \code{split()}
+#' @param seasons fator de estacoes conforme construido por \code{\link{split_seasonal}}
+#'
+#' @return lista nomeada resultante de \code{split(regdata, seasons)}, com nomes iguais aos
+#'     niveis de \code{seasons}
+#'
+#' @keywords internal
+
+split_seasonal_regdata <- function(regdata, seasons) {
+    split(regdata, seasons)
+}

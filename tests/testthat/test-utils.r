@@ -43,3 +43,53 @@ test_that("Expansao de formula", {
     ff2 <- expandeformula(dd2)
     expect_equal(as.character(ff2), c("~", "V + V4 + BB + CAD + f1j"))
 })
+
+test_that("Split sazonal -- estrutura e nomes", {
+    serie <- ts(seq_len(20), frequency = 4)
+    result <- split_seasonal(serie)
+
+    expect_equal(names(result), c("series", "seasons"))
+
+    expect_equal(length(result$series), 4)
+    expect_equal(names(result$series), c("1", "2", "3", "4"))
+    expect_true(all(vapply(result$series, length, integer(1)) == 5))
+
+    expect_true(is.factor(result$seasons))
+    expect_equal(levels(result$seasons), c("1", "2", "3", "4"))
+})
+
+test_that("Split sazonal -- invariante tsp das parcelas", {
+    serie <- ts(seq_len(20), frequency = 4)
+    result <- split_seasonal(serie)
+
+    expect_equal(tsp(result$series[["1"]]), c(1, 5, 1))
+    expect_equal(tsp(result$series[["2"]]), c(1.25, 5.25, 1))
+    expect_equal(tsp(result$series[["3"]]), c(1.5, 5.5, 1))
+    expect_equal(tsp(result$series[["4"]]), c(1.75, 5.75, 1))
+
+    vals_by_season <- lapply(result$series, as.numeric)
+    idx_by_season <- split(seq_along(serie), result$seasons)
+    reconstructed <- numeric(length(serie))
+    for (s in names(idx_by_season)) reconstructed[idx_by_season[[s]]] <- vals_by_season[[s]]
+    expect_equal(reconstructed, as.numeric(serie))
+})
+
+test_that("Split sazonal -- inicio em estacao > 1 preserva ordem", {
+    serie <- window(ts(seq_len(20), frequency = 4), start = c(1, 3))
+    result <- split_seasonal(serie)
+
+    expect_equal(names(result$series), c("3", "4", "1", "2"))
+    expect_equal(levels(result$seasons), c("3", "4", "1", "2"))
+})
+
+test_that("Split sazonal regdata -- shape e nomes", {
+    serie <- ts(seq_len(20), frequency = 4)
+    seasons <- factor(as.numeric(cycle(serie)), unique(as.numeric(cycle(serie))))
+    rd <- data.frame(a = seq_len(20), b = seq(21, 40))
+
+    result <- split_seasonal_regdata(rd, seasons)
+
+    expect_equal(length(result), 4)
+    expect_equal(names(result), c("1", "2", "3", "4"))
+    expect_true(all(vapply(result, nrow, integer(1)) == 5))
+})

@@ -31,19 +31,14 @@ estimamodelo_P <- function(serie, tipo, ...) {
     aux_tsp <- tsp(serie)
     if (aux_tsp[3] == 1) stop("'serie' nao possui sazonalidade -- nao pode ser modelada periodicamente")
 
-    seasons <- as.numeric(cycle(serie))
-    seasons <- factor(seasons, unique(seasons))
-
-    l_series <- split(serie, seasons)
-    l_series <- mapply(seq(l_series), l_series, FUN = function(n, v) {
-        ts(v, start = aux_tsp[1] + (n - 1) * (1 / aux_tsp[3]), deltat = 1)
-    }, SIMPLIFY = FALSE)
-    names(l_series) <- levels(seasons)
+    splt <- split_seasonal(serie)
+    l_series <- splt$series
+    seasons <- splt$seasons
 
     args <- list(...)
 
     if ("regdata" %in% ...names()) {
-        l_regdata <- split(args$regdata, seasons)
+        l_regdata <- split_seasonal_regdata(args$regdata, seasons)
         args$regdata <- NULL
     } else {
         # caso nao tenha sido passado regdata, usa uma lista vazia. Nos modelos em que regdata e
@@ -190,23 +185,17 @@ update.modprevP <- function(object, newseries, refit = FALSE, ...) {
 
     args <- list(...)
 
+    splt <- split_seasonal(newseries)
+    l_newseries <- splt$series
+    seasons <- splt$seasons
     aux_tsp <- tsp(newseries)
-
-    seasons <- as.numeric(cycle(newseries))
-    seasons <- factor(seasons, unique(seasons))
-
-    l_newseries <- split(newseries, seasons)
-    l_newseries <- mapply(seq(l_newseries), l_newseries, FUN = function(n, v) {
-        ts(v, start = aux_tsp[1] + (n - 1) * (1 / aux_tsp[3]), deltat = 1)
-    }, SIMPLIFY = FALSE)
-    names(l_newseries) <- levels(seasons)
 
     has_newregdata <- "newregdata" %in% ...names()
     newregdata_list <- has_newregdata && class(args$newregdata) == "list"
 
     if (has_newregdata && !newregdata_list) {
 
-        newregdata <- split(args$newregdata, seasons)
+        newregdata <- split_seasonal_regdata(args$newregdata, seasons)
         args$newregdata <- NULL
 
     } else if (has_newregdata && newregdata_list) {
