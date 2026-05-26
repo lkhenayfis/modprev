@@ -1,26 +1,80 @@
-test_that("model-behaviors", {
+####################################################################################################
+# UNIVARIATE MODELS — FIT + PREDICT BASICS
+####################################################################################################
+
+test_that("univariate models — fit + predict basics", {
+
+    serie_std <- make_univariate_series(n = 100, frequency = 12, seed = 123)
+
+    cache <- with_registered_models(univariate_only = TRUE, function(tipo) {
+        fit <- estimamodelo(serie_std, tipo)
+        pred <- predict(fit, n.ahead = 12)
+        list(fit = fit, pred = pred)
+    })
+    expect_true(length(cache) > 0)
 
     test_that("all univariate models produce valid modprevU structure", {
         with_registered_models(univariate_only = TRUE, function(tipo) {
-            serie <- make_univariate_series(n = 100, frequency = 12, seed = 123)
-            mod <- estimamodelo(serie, tipo)
-
-            expect_modprev_structure(mod, tipo)
+            expect_modprev_structure(cache[[tipo]]$fit, tipo)
         })
     })
 
-    test_that("all regression models produce valid modprevU structure", {
-        with_registered_models(regression_only = TRUE, function(tipo) {
-            data <- make_regression_data(n = 100, n_predictors = 2, seed = 456)
-            mod <- estimamodelo(data$serie, tipo, regdata = data$regdata)
-
-            expect_modprev_structure(mod, tipo)
+    test_that("all univariate models store original series correctly", {
+        with_registered_models(univariate_only = TRUE, function(tipo) {
+            expect_equal(cache[[tipo]]$fit$serie, serie_std)
         })
+    })
+
+    test_that("predictions have correct format", {
+        with_registered_models(univariate_only = TRUE, function(tipo) {
+            expect_prediction_format(cache[[tipo]]$pred, n.ahead = 12)
+        })
+    })
+
+    test_that("predictions have compatible time series properties", {
+        with_registered_models(univariate_only = TRUE, function(tipo) {
+            pred <- cache[[tipo]]$pred
+
+            end_time <- end(serie_std)
+            start_year <- end_time[1]
+            start_period <- end_time[2] + 1
+
+            if (start_period > frequency(serie_std)) {
+                start_year <- start_year + 1
+                start_period <- 1
+            }
+
+            expect_compatible_tsp(pred, expected_freq = frequency(serie_std))
+            expect_equal(start(pred), c(start_year, start_period))
+        })
+    })
+
+    test_that("multiple predictions without update are consistent", {
+        with_registered_models(univariate_only = TRUE, function(tipo) {
+            pred1 <- cache[[tipo]]$pred
+            pred2 <- predict(cache[[tipo]]$fit, n.ahead = 12)
+            pred3 <- predict(cache[[tipo]]$fit, n.ahead = 12)
+
+            expect_equal(pred1, pred2)
+            expect_equal(pred2, pred3)
+        })
+    })
+
+})
+
+####################################################################################################
+# ALL MODELS — FULL WORKFLOW (FIT + PREDICT + UPDATE)
+####################################################################################################
+
+test_that("all models — full workflow", {
+
+    cache <- with_registered_models(function(tipo) {
+        test_model_workflow(tipo, test_update = TRUE, n.ahead = 12)
     })
 
     test_that("all models — pred shape, fit class hierarchy, and required components", {
         with_registered_models(function(tipo) {
-            result <- test_model_workflow(tipo, n.ahead = 12)
+            result <- cache[[tipo]]
 
             expect_s3_class(result$pred, "ts")
             expect_equal(nrow(result$pred), 12)
@@ -38,115 +92,111 @@ test_that("model-behaviors", {
         })
     })
 
-    test_that("predictions have compatible time series properties", {
-        with_registered_models(univariate_only = TRUE, function(tipo) {
-            serie <- make_univariate_series(n = 120, frequency = 12, seed = 222)
-            mod <- estimamodelo(serie, tipo)
-            pred <- predict(mod, n.ahead = 12)
-
-            end_time <- end(serie)
-            start_year <- end_time[1]
-            start_period <- end_time[2] + 1
-
-            if (start_period > frequency(serie)) {
-                start_year <- start_year + 1
-                start_period <- 1
-            }
-
-            expect_compatible_tsp(pred, expected_freq = frequency(serie))
-            expect_equal(start(pred), c(start_year, start_period))
-        })
-    })
-
-    test_that("all models support different n.ahead values", {
-        with_registered_models(univariate_only = TRUE, function(tipo) {
-            serie <- make_univariate_series(seed = 333)
-            mod <- estimamodelo(serie, tipo)
-
-            for (n in c(1, 6, 12, 24)) {
-                pred <- predict(mod, n.ahead = n)
-                expect_prediction_format(pred, n.ahead = n)
-            }
-        })
-    })
-
     test_that("all models support update workflow", {
         with_registered_models(function(tipo) {
-            result <- test_model_workflow(tipo, test_update = TRUE, n.ahead = 12)
-
+            result <- cache[[tipo]]
             expect_update_preserves_class(result$updated, result$fit)
         })
     })
 
-    test_that("update with new data produces valid predictions", {
+})
+
+####################################################################################################
+# UNIVARIATE MODELS — UPDATE WITH NEW SERIES
+####################################################################################################
+
+test_that("univariate models — update with new series", {
+
+    serie_base <- make_univariate_series(n = 100, seed = 555)
+    serie_longer <- make_univariate_series(n = 120, seed = 555)
+    serie_shorter <- make_univariate_series(n = 80, seed = 211)
+
+    cache <- with_registered_models(univariate_only = TRUE, function(tipo) {
+        mod <- estimamodelo(serie_base, tipo)
+        updated_longer <- update(mod, newserie = serie_longer)
+        updated_shorter <- update(mod, newserie = serie_shorter)
+        list(
+            updated_longer = updated_longer,
+            updated_shorter = updated_shorter,
+            pred_longer = predict(updated_longer, n.ahead = 12),
+            pred_shorter = predict(updated_shorter, n.ahead = 12)
+        )
+    })
+    expect_true(length(cache) > 0)
+
+    test_that("update with longer series produces valid predictions", {
         with_registered_models(univariate_only = TRUE, function(tipo) {
-            serie1 <- make_univariate_series(n = 100, seed = 555)
-            mod <- estimamodelo(serie1, tipo)
-
-            serie2 <- make_univariate_series(n = 120, seed = 555)
-            updated <- update(mod, newserie = serie2)
-
-            pred <- predict(updated, n.ahead = 12)
-            expect_prediction_format(pred, n.ahead = 12)
+            expect_prediction_format(cache[[tipo]]$pred_longer, n.ahead = 12)
         })
     })
 
-    test_that("all models store original series correctly", {
+    test_that("update with shorter series preserves new series and predicts", {
         with_registered_models(univariate_only = TRUE, function(tipo) {
-            serie <- make_univariate_series(seed = 999)
-            mod <- estimamodelo(serie, tipo)
-
-            expect_equal(mod$serie, serie)
-        })
-    })
-
-    test_that("multiple predictions without update are consistent", {
-        with_registered_models(univariate_only = TRUE, function(tipo) {
-            serie <- make_univariate_series(seed = 212)
-            mod <- estimamodelo(serie, tipo)
-
-            pred1 <- predict(mod, n.ahead = 12)
-            pred2 <- predict(mod, n.ahead = 12)
-            pred3 <- predict(mod, n.ahead = 12)
-
-            expect_equal(pred1, pred2)
-            expect_equal(pred2, pred3)
-        })
-    })
-
-    test_that("update with shorter series works correctly", {
-        with_registered_models(univariate_only = TRUE, function(tipo) {
-            serie1 <- make_univariate_series(n = 120, seed = 210)
-            mod <- estimamodelo(serie1, tipo)
-
-            serie2 <- make_univariate_series(n = 100, seed = 211)
-            updated <- update(mod, newserie = serie2)
-
-            expect_equal(updated$serie, serie2)
+            expect_equal(cache[[tipo]]$updated_shorter$serie, serie_shorter)
 
             models_without_sd <- c("reg_quant", "BOOST", "LGBM")
             allow_na <- tipo %in% models_without_sd
-
-            pred <- predict(updated, n.ahead = 12)
-            expect_prediction_format(pred, n.ahead = 12, allow_na_sd = allow_na)
+            expect_prediction_format(
+                cache[[tipo]]$pred_shorter,
+                n.ahead = 12,
+                allow_na_sd = allow_na
+            )
         })
     })
 
-    test_that("all univariate models are janelamovel compatible", {
-        serie <- make_univariate_series(seed = 444)
-        with_registered_models(univariate_only = TRUE, function(tipo) {
-            expect_janelamovel_compatible(tipo, serie = serie)
-        })
-    })
+})
 
-    test_that("all univariate models are periodic compatible", {
-        serie <- make_univariate_series(seed = 444)
-        with_registered_models(univariate_only = TRUE, function(tipo) {
-            if (tipo == "ss_ar1_saz") {
-                testthat::skip("ss_ar1_saz periodic adapter known incompatible")
-            }
-            expect_periodic_compatible(tipo, serie = serie)
-        })
-    })
+####################################################################################################
+# REGRESSION MODELS — FIT STRUCTURE
+####################################################################################################
 
+test_that("all regression models produce valid modprevU structure", {
+    data_std <- make_regression_data(n = 100, n_predictors = 2, seed = 456)
+
+    with_registered_models(regression_only = TRUE, function(tipo) {
+        mod <- estimamodelo(data_std$serie, tipo, regdata = data_std$regdata)
+        expect_modprev_structure(mod, tipo)
+    })
+})
+
+####################################################################################################
+# UNIVARIATE MODELS — N.AHEAD VARIATIONS
+####################################################################################################
+
+test_that("all univariate models support different n.ahead values", {
+    serie_std <- make_univariate_series(seed = 333)
+    n_ahead_values <- c(1, 6, 12, 24)
+
+    with_registered_models(univariate_only = TRUE, function(tipo) {
+        fit <- estimamodelo(serie_std, tipo)
+        for (n in n_ahead_values) {
+            pred <- predict(fit, n.ahead = n)
+            expect_prediction_format(pred, n.ahead = n)
+        }
+    })
+})
+
+####################################################################################################
+# UNIVARIATE MODELS — JANELAMOVEL COMPATIBILITY
+####################################################################################################
+
+test_that("all univariate models are janelamovel compatible", {
+    serie <- make_univariate_series(seed = 444)
+    with_registered_models(univariate_only = TRUE, function(tipo) {
+        expect_janelamovel_compatible(tipo, serie = serie)
+    })
+})
+
+####################################################################################################
+# UNIVARIATE MODELS — PERIODIC COMPATIBILITY
+####################################################################################################
+
+test_that("all univariate models are periodic compatible", {
+    serie <- make_univariate_series(seed = 444)
+    with_registered_models(univariate_only = TRUE, function(tipo) {
+        if (tipo == "ss_ar1_saz") {
+            testthat::skip("ss_ar1_saz periodic adapter known incompatible")
+        }
+        expect_periodic_compatible(tipo, serie = serie)
+    })
 })
