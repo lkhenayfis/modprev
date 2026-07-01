@@ -1,5 +1,23 @@
 # modprev 2.1.0
 
+## BREAKING CHANGES
+
+- `janelamovel()` / `jm_config()`: o argumento booleano `full.output` foi substituido pelo inteiro
+  `output.level` (0, 1, 2). `output.level = 0` (padrao) equivale ao antigo `full.output = FALSE`
+  (retorna apenas a previsao) e `output.level = 2` equivale a `full.output = TRUE` (retorna
+  `list(pred, mod, regdata)`). O novo nivel `output.level = 1` retorna `list(pred, mod)`, onde
+  `mod` so e preenchido nas janelas em que o modelo foi reajustado (`NULL` nas demais).
+
+  **Migration:**
+
+  ```r
+  # Antigo (removido)
+  cfg <- jm_config(janela = 60, full.output = TRUE)
+
+  # Novo
+  cfg <- jm_config(janela = 60, output.level = 2)
+  ```
+
 ## Misc
 
 - Simplificacao do registro de modelos: `register_model()` agora possui 6 parametros (`tipo`,
@@ -14,7 +32,8 @@
   por `inherits(x, "list")` em `R/classe-modprevP.r` para tornar a checagem robusta a objetos S3
   que possuam `"list"` em qualquer posicao do vetor de classes (na pratica, apenas listas planas
   sao passadas neste argumento); `informals/` adicionado a `.Rbuildignore`.
-- Sem mudancas visiveis para o usuario final — refator interno apenas.
+- Alem da mudanca de API em `output.level` (ver BREAKING CHANGES), as demais alteracoes desta
+  versao sao refator interno sem impacto visivel para o usuario final.
 
 # modprev 2.0.0
 

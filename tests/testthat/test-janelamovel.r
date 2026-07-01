@@ -157,25 +157,66 @@ test_that("Testes de previsao em janela", {
     prev_ref3 <- predict(mod_ref3, newdata = regd[161:165, ])
     expect_equal(prev_ref3, jm[[3]])
 
-    # Full Output ---------------------------------------------------
+    # Output Level 2 (Full Output) -----------------------------------
 
     # Caso com variavel explicativa
-    cfg <- jm_config(janela = 150, passo = 5, n.ahead = 5, full.output = TRUE)
+    cfg <- jm_config(janela = 150, passo = 5, n.ahead = 5, output.level = 2)
     jm <- janelamovel(ss, "ss_reg_din", config = cfg, regdata = regd, formula = ~ V1)
-    outs <- sapply(jm, function(l) {
-        length(l) &
-            ("ts" %in% class(l[[1]])) & ("modprev" %in% class(l[[2]])) & ("data.frame" %in% class(l[[3]]))
-    })
+    outs <- vapply(jm, function(l) {
+        length(l) == 3 &&
+            ("ts" %in% class(l[[1]])) && ("modprev" %in% class(l[[2]])) &&
+            ("data.frame" %in% class(l[[3]]))
+    }, logical(1))
     expect_true(all(outs))
 
     # Caso sem variavel explicativa
-    cfg <- jm_config(janela = 48, passo = 12, n.ahead = 6, full.output = TRUE)
+    cfg <- jm_config(janela = 48, passo = 12, n.ahead = 6, output.level = 2)
     jm <- janelamovel(serie, "ss_ar1_saz", config = cfg)
-    outs <- sapply(jm, function(l) {
-        length(l) &
-            ("ts" %in% class(l[[1]])) & ("modprev" %in% class(l[[2]])) & (is.null(l[[3]]))
-    })
+    outs <- vapply(jm, function(l) {
+        length(l) == 3 &&
+            ("ts" %in% class(l[[1]])) && ("modprev" %in% class(l[[2]])) && (is.null(l[[3]]))
+    }, logical(1))
     expect_true(all(outs))
+})
+
+test_that("Output Level 1 (refit-only)", {
+
+    serie <- geraserie(100, 4)
+
+    cfg <- jm_config(janela = 48, passo = 6, n.ahead = 6, refit.cada = 2, output.level = 1)
+    jm <- janelamovel(serie, "ss_ar1_saz", config = cfg)
+
+    janelas <- expandejanelas(serie, cfg$janela, cfg$passo)
+    v_refit <- expanderefit(janelas, cfg$refit.cada)
+
+    expect_true(any(v_refit))
+    expect_true(any(!v_refit))
+
+    all_length_two <- vapply(jm, function(l) length(l) == 2, logical(1))
+    expect_true(all(all_length_two))
+
+    all_pred_ts <- vapply(jm, function(l) "ts" %in% class(l[[1]]), logical(1))
+    expect_true(all(all_pred_ts))
+
+    for (i in seq_along(jm)) {
+        if (v_refit[i]) {
+            expect_true("modprev" %in% class(jm[[i]][[2]]))
+        } else {
+            expect_null(jm[[i]][[2]])
+        }
+    }
+})
+
+test_that("Output Level 0 (default, forecast only)", {
+
+    serie <- geraserie(100, 4)
+
+    cfg <- jm_config(janela = 48, passo = 12, n.ahead = 6)
+    jm <- janelamovel(serie, "sarima", config = cfg)
+
+    expect_equal(cfg$output.level, 0L)
+    expect_true(all(vapply(jm, function(m) "ts" %in% class(m), logical(1))))
+    expect_true(all(vapply(jm, function(m) all(dim(m) == c(6, 2)), logical(1))))
 })
 
 test_that("janelamovel requires config parameter", {

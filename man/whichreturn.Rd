@@ -4,14 +4,16 @@
 \alias{whichreturn}
 \title{Tipo De \code{return} Em \code{janelamovel}}
 \usage{
-whichreturn(full.output)
+whichreturn(output.level)
 }
 \arguments{
-\item{full.output}{booleano indicando o tipo de retorno}
+\item{output.level}{inteiro indicando o nivel de detalhe do retorno: 0 = apenas a previsao,
+1 = lista \code{list(pred, mod)} onde \code{mod} so e retornado nas janelas em que o modelo
+foi reajustado (\code{NULL} nas demais), 2 = lista completa \code{list(pred, mod, regdata)}}
 }
 \value{
-funcao de retorno para usar no lapply de \code{janelamovel}
+funcao de retorno para usar no loop de janelas de \code{\link{janelamovel}}
 }
 \description{
-Seleciona se a funcao de \code{return} no lapply devolve tudo ou so a previsao
+Seleciona qual funcao de \code{return} no loop de janelas devolve o resultado de cada janela
 }

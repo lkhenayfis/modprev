@@ -90,7 +90,7 @@ janelamovel <- function(serie, tipo, config, ...) {
     mod <- c(list(quote(estimamodelo), serie = iserie, tipo = tipo, regdata = iregdata), args)
     mod <- eval(as.call(mod), parent.frame(), parent.frame())
 
-    retfun <- whichreturn(config$full.output)
+    retfun <- whichreturn(config$output.level)
 
     jm <- vector("list", length(janelas))
     for (i in seq_along(janelas)) {
@@ -106,7 +106,7 @@ janelamovel <- function(serie, tipo, config, ...) {
         inewdata <- regdata[window(aux, ijn[[1]], ijn[[2]]), , drop = FALSE]
         pred <- predict(mod, config$n.ahead, newdata = inewdata)
 
-        jm[[i]] <- retfun(pred, mod, inewdata)
+        jm[[i]] <- retfun(pred, mod, inewdata, v_refit[i])
     }
 
     return(jm)
@@ -115,16 +115,25 @@ janelamovel <- function(serie, tipo, config, ...) {
 # HELPERS ------------------------------------------------------------------------------------------
 
 #' Tipo De \code{return} Em \code{janelamovel}
-#' 
-#' Seleciona se a funcao de \code{return} no lapply devolve tudo ou so a previsao
-#' 
-#' @param full.output booleano indicando o tipo de retorno
-#' 
-#' @return funcao de retorno para usar no lapply de \code{janelamovel}
+#'
+#' Seleciona qual funcao de \code{return} no loop de janelas devolve o resultado de cada janela
+#'
+#' @param output.level inteiro indicando o nivel de detalhe do retorno: 0 = apenas a previsao,
+#'     1 = lista \code{list(pred, mod)} onde \code{mod} so e retornado nas janelas em que o modelo
+#'     foi reajustado (\code{NULL} nas demais), 2 = lista completa \code{list(pred, mod, regdata)}
+#'
+#' @return funcao de retorno para usar no loop de janelas de \code{\link{janelamovel}}
 
-whichreturn <- function(full.output) ifelse(full.output, fullreturn, simplereturn)
+whichreturn <- function(output.level) {
+    switch(as.character(output.level),
+        "0" = simplereturn,
+        "1" = refitreturn,
+        "2" = fullreturn
+    )
+}
 
-fullreturn   <- function(pred, mod, regdata) return(list(pred, mod, regdata))
+fullreturn   <- function(pred, mod, regdata, ...) return(list(pred, mod, regdata))
+refitreturn  <- function(pred, mod, regdata, refit) if (refit) list(pred, mod) else list(pred, NULL)
 simplereturn <- function(pred, ...) return(pred)
 
 #' Selecao Da Funcao De Log

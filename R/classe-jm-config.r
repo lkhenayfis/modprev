@@ -1,6 +1,6 @@
 ########################################### JM CONFIG ############################################
 
-new_jm_config <- function(janela, passo, n.ahead, refit.cada, verbose, full.output) {
+new_jm_config <- function(janela, passo, n.ahead, refit.cada, verbose, output.level) {
     structure(
         list(
             janela = janela,
@@ -8,7 +8,7 @@ new_jm_config <- function(janela, passo, n.ahead, refit.cada, verbose, full.outp
             n.ahead = n.ahead,
             refit.cada = refit.cada,
             verbose = verbose,
-            full.output = full.output
+            output.level = output.level
         ),
         class = "jm_config"
     )
@@ -51,8 +51,9 @@ validate_jm_config <- function(config) {
         stop("'verbose' must be 0, 1, or 2")
     }
 
-    if (!is.logical(config$full.output) || length(config$full.output) != 1) {
-        stop("'full.output' must be a logical scalar")
+    if (!is.numeric(config$output.level) || length(config$output.level) != 1 ||
+        !config$output.level %in% c(0, 1, 2)) {
+        stop("'output.level' must be 0, 1, or 2")
     }
 
     invisible(config)
@@ -71,8 +72,10 @@ validate_jm_config <- function(config) {
 #'     fit once and updated. If integer, model is refit every `refit.cada` windows.
 #' @param verbose Integer verbosity level: 0 = silent, 1 = refit events,
 #'     2 = all windows. Default 0.
-#' @param full.output Logical indicating whether to return full output (predictions,
-#'     models, regdata) or just predictions. Default FALSE.
+#' @param output.level Integer output level controlling what each window returns:
+#'     0 = forecast only (default), 1 = `list(pred, mod)` with `mod` present only
+#'     on windows where the model was refitted (`NULL` otherwise), 2 = full
+#'     `list(pred, mod, regdata)`.
 #'
 #' @return S3 object of class `jm_config` containing validated configuration
 #'
@@ -89,17 +92,18 @@ validate_jm_config <- function(config) {
 #' @export
 
 jm_config <- function(janela, passo = 1L, n.ahead = 1L, refit.cada = NA,
-    verbose = 0L, full.output = FALSE) {
+    verbose = 0L, output.level = 0L) {
 
     passo <- as.integer(passo)
     n.ahead <- as.integer(n.ahead)
     verbose <- as.integer(verbose)
+    output.level <- as.integer(output.level)
 
     if (length(refit.cada) == 1 && is.numeric(refit.cada) && !is.na(refit.cada)) {
         refit.cada <- as.integer(refit.cada)
     }
 
-    config <- new_jm_config(janela, passo, n.ahead, refit.cada, verbose, full.output)
+    config <- new_jm_config(janela, passo, n.ahead, refit.cada, verbose, output.level)
     validate_jm_config(config)
 
     config
@@ -142,7 +146,12 @@ print.jm_config <- function(x, ...) {
     )
     cat("Verbosity:", verbosity, "\n")
 
-    cat("Full Output:", x$full.output, "\n")
+    output_desc <- switch(as.character(x$output.level),
+        "0" = "Forecasts only",
+        "1" = "Forecasts + refitted models",
+        "2" = "Full (forecasts, models, regdata)"
+    )
+    cat("Output Level:", output_desc, "\n")
 
     invisible(x)
 }

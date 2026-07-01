@@ -10,7 +10,7 @@ jm_config(
   n.ahead = 1L,
   refit.cada = NA,
   verbose = 0L,
-  full.output = FALSE
+  output.level = 0L
 )
 }
 \arguments{
@@ -28,8 +28,10 @@ fit once and updated. If integer, model is refit every \code{refit.cada} windows
 \item{verbose}{Integer verbosity level: 0 = silent, 1 = refit events,
 2 = all windows. Default 0.}
 
-\item{full.output}{Logical indicating whether to return full output (predictions,
-models, regdata) or just predictions. Default FALSE.}
+\item{output.level}{Integer output level controlling what each window returns:
+0 = forecast only (default), 1 = \code{list(pred, mod)} with \code{mod} present only
+on windows where the model was refitted (\code{NULL} otherwise), 2 = full
+\code{list(pred, mod, regdata)}.}
 }
 \value{
 S3 object of class \code{jm_config} containing validated configuration
