@@ -146,10 +146,41 @@ update.sarimax <- function(object, newseries, newregdata, refit = FALSE, ...) {
     return(object)
 }
 
+#' @param nsim número de simulações a serem geradas
+#' @param seed opcionalmente, semente para geração das simulações
+#' @param ... Para \code{simulate}, demais argumentos passados a
+#'     \code{\link[forecast]{simulate.Arima}}
+#'
+#' @return \code{simulate} retorna uma série temporal multivariada contendo \code{nsim}
+#'     simulações para os passos de tempo \code{1:n.ahead}
+#'
+#' @rdname modelos_sarimax
+#'
+#' @export
+
+simulate.sarimax <- function(object, nsim = 1, seed = NULL, n.ahead, newdata, ...) {
+    if (missing(newdata)) {
+        stop("Forneca a variavel explicativa para simulacao atraves do parametro 'newdata'")
+    }
+
+    if (!missing(n.ahead)) {
+        regobs  <- min(n.ahead, nrow(newdata))
+        newdata <- newdata[seq(regobs), , drop = FALSE]
+    }
+
+    formula <- attr(object, "mod_atrs")$formula
+    Xreg <- expandexreg(newdata, formula)
+
+    if (!is.null(seed)) set.seed(seed)
+
+    sims <- replicate(nsim, simulate(object$modelo, future = TRUE, xreg = Xreg, ...))
+
+    sim_ts(sims, object$serie)
+}
+
 # HELPERS ------------------------------------------------------------------------------------------
 
 expandexreg <- function(data, formula) {
-    formula <- formula
     Xreg <- model.frame(formula, data = data)
     Xreg <- data.matrix(Xreg)
 

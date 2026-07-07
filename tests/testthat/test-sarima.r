@@ -48,3 +48,19 @@ test_that("Atualizacao de modelo SARIMA", {
     expect_equal(mod_refit$modelo$x, serie2)
     expect_snapshot_value(round(coef(mod_refit$modelo), 5), style = "deparse")
 })
+
+test_that("simulate.sarima returns n.ahead x nsim ts", {
+    mod <- estimamodelo(AirPassengers, "sarima")
+
+    sims <- simulate(mod, nsim = 20, n.ahead = 12)
+
+    expect_equal(dim(sims), c(12, 20))
+    expect_equal(colnames(sims), paste0("sim_", 1:20))
+
+    expect_equal(start(sims), c(1961, 1))
+    expect_equal(frequency(sims), 12)
+
+    sims1 <- simulate(mod, nsim = 5, n.ahead = 6, seed = 42)
+    sims2 <- simulate(mod, nsim = 5, n.ahead = 6, seed = 42)
+    expect_equal(sims1, sims2)
+})

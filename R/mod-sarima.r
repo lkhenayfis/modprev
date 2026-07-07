@@ -113,3 +113,23 @@ update.sarima <- function(object, newseries, refit = FALSE, ...) {
 
     return(object)
 }
+
+#' @param nsim número de simulações a serem geradas
+#' @param seed opcionalmente, semente para geração das simulações
+#' @param ... Para \code{simulate}, demais argumentos passados a
+#'     \code{\link[forecast]{simulate.Arima}}
+#'
+#' @return \code{simulate} retorna uma série temporal multivariada contendo \code{nsim}
+#'     simulações para os passos de tempo \code{1:n.ahead}
+#'
+#' @rdname modelos_sarima
+#'
+#' @export
+
+simulate.sarima <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
+    if (!is.null(seed)) set.seed(seed)
+
+    sims <- replicate(nsim, simulate(object$modelo, nsim = n.ahead, future = TRUE, ...))
+
+    sim_ts(sims, object$serie)
+}

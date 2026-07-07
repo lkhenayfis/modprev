@@ -111,3 +111,28 @@ test_that("Atualizacao de modelo SARIMAX", {
 
     expect_snapshot_value(coef(mod_refit$modelo), style = "deparse")
 })
+
+test_that("simulate.sarimax returns n.ahead x nsim ts", {
+    yy <- window(datregdin$obs, 1, 150)
+    xx <- head(datregdin$varex, 150)
+    mod <- estimamodelo(yy, "sarima", regdata = xx, formula = ~ V1 + V2 + V3)
+
+    newdata <- datregdin$varex[151:158, ]
+
+    sims <- simulate(mod, nsim = 15, n.ahead = 8, newdata = newdata)
+
+    expect_equal(dim(sims), c(8, 15))
+    expect_equal(colnames(sims), paste0("sim_", 1:15))
+
+    expect_equal(frequency(sims), frequency(mod$serie))
+    expect_equal(start(sims), c(151, 1))
+
+    expect_error(
+        simulate(mod, nsim = 15, n.ahead = 8),
+        "Forneca a variavel explicativa para simulacao"
+    )
+
+    sims1 <- simulate(mod, nsim = 15, n.ahead = 8, newdata = newdata, seed = 7)
+    sims2 <- simulate(mod, nsim = 15, n.ahead = 8, newdata = newdata, seed = 7)
+    expect_equal(sims1, sims2)
+})

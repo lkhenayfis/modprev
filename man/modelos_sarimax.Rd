@@ -5,6 +5,7 @@
 \alias{sarimax}
 \alias{predict.sarimax}
 \alias{update.sarimax}
+\alias{simulate.sarimax}
 \title{Modelos \code{sarimax}}
 \usage{
 sarimax(serie, regdata, formula = expandeformula(regdata, "ls"), ...)
@@ -12,6 +13,8 @@ sarimax(serie, regdata, formula = expandeformula(regdata, "ls"), ...)
 \method{predict}{sarimax}(object, newdata, n.ahead, ...)
 
 \method{update}{sarimax}(object, newseries, newregdata, refit = FALSE, ...)
+
+\method{simulate}{sarimax}(object, nsim = 1, seed = NULL, n.ahead, newdata, ...)
 }
 \arguments{
 \item{serie}{serie para ajustar}
@@ -21,7 +24,8 @@ sarimax(serie, regdata, formula = expandeformula(regdata, "ls"), ...)
 \item{formula}{formula da regressão. Se for omitido, todas as variaveis em \code{regdata} serão
 utilizadas. So tem uso se \code{regdata} for passado}
 
-\item{...}{para \code{update} nao tem uso, existe apenas para consistência com a genérica}
+\item{...}{Para \code{simulate}, demais argumentos passados a
+\code{\link[forecast]{simulate.Arima}}}
 
 \item{object}{objeto com classes \code{c("sarimax", "modprev")} contendo modelo}
 
@@ -35,6 +39,10 @@ seja informado a previsão sera feita tantos passos à frente quanto amostras em
 \item{newregdata}{\code{data.frame}-like contendo variáveis explicativas na nova amostra}
 
 \item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
+
+\item{nsim}{número de simulações a serem geradas}
+
+\item{seed}{opcionalmente, semente para geração das simulações}
 }
 \value{
 Objeto da classe \code{modprev} e subclasse \code{sarimax}, uma lista de dois elementos:
@@ -45,6 +53,9 @@ previsão \code{n.ahead} passos à frente;
 
 \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado.
 Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
+
+\code{simulate} retorna uma série temporal multivariada contendo \code{nsim}
+simulações para os passos de tempo \code{1:n.ahead}
 }
 \description{
 Estimação e métodos de modelos da classe \code{sarimax}
