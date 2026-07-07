@@ -130,3 +130,32 @@ update.ss_ar1_saz <- function(object, newseries, refit = FALSE, ...) {
 
     return(object)
 }
+
+#' @param nsim número de simulações a serem geradas
+#' @param seed opcionalmente, semente para geração das simulações
+#' @param n.ahead número de passos à frente para simular
+#' @param ... demais argumentos passados a \code{\link[KFAS]{simulateSSM}}
+#'
+#' @return \code{simulate} retorna uma série temporal multivariada contendo \code{nsim}
+#'     simulações para os passos de tempo \code{1:n.ahead}
+#'
+#' @rdname modelos_ss_ar1_saz
+#'
+#' @export
+
+simulate.ss_ar1_saz <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
+    if (!is.null(seed)) set.seed(seed)
+
+    modelo <- object$modelo
+    n_obs  <- attr(modelo, "n")
+
+    # estende o modelo com n.ahead observacoes futuras NA -- espelha o ramo n.ahead de
+    # KFAS:::predict.SSModel usado internamente por predict.ss_ar1_saz
+    modelo$y <- window(modelo$y, end = end(modelo$y) + c(0, n.ahead), extend = TRUE)
+    attr(modelo, "n") <- as.integer(n_obs + n.ahead)
+
+    sims <- simulateSSM(modelo, type = "observations", nsim = nsim, conditional = TRUE, ...)
+    sims <- matrix(sims[n_obs + seq_len(n.ahead), 1, ], nrow = n.ahead, ncol = nsim)
+
+    sim_ts(sims, object$serie)
+}

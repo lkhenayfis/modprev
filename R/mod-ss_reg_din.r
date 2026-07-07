@@ -174,7 +174,89 @@ update.ss_reg_din <- function(object, newseries, newregdata, refit = FALSE, ...)
     return(object)
 }
 
+#' @param nsim número de simulações a serem geradas
+#' @param seed opcionalmente, semente para geração das simulações
+#' @param n.ahead número de passos à frente para simular. Se omitido, o horizonte é
+#'     \code{nrow(newdata)}
+#' @param newdata \code{data.frame}-like contendo variáveis explicativas fora da amostra
+#' @param ... demais argumentos passados a \code{\link[KFAS]{simulateSSM}}
+#'
+#' @return \code{simulate} retorna uma série temporal multivariada contendo \code{nsim}
+#'     simulações para os passos de tempo \code{1:n.ahead}
+#'
+#' @rdname modelos_ss_reg_din
+#'
+#' @export
+
+simulate.ss_reg_din <- function(object, nsim = 1, seed = NULL, n.ahead, newdata, ...) {
+    if (missing(newdata)) {
+        stop("Forneca a variavel explicativa para simulacao atraves do parametro 'newdata'")
+    }
+    if (isTRUE(attr(object, "mod_atrs")$vardin)) {
+        stop(
+            "simulate.ss_reg_din nao suporta modelos heterocedasticos (vardin = TRUE) -- ",
+            "ver ticket de follow-up"
+        )
+    }
+
+    if (!missing(n.ahead)) {
+        regobs  <- min(n.ahead, nrow(newdata))
+        newdata <- newdata[seq(regobs), , drop = FALSE]
+    }
+    h <- nrow(newdata)
+
+    extmod <- suppressWarnings(update(object, rep(NA_real_, h), newdata)$modelo)
+    comb   <- combine_ss(object$modelo, extmod)
+    n_obs  <- attr(object$modelo, "n")
+
+    if (!is.null(seed)) set.seed(seed)
+
+    sims <- simulateSSM(comb, type = "observations", nsim = nsim, conditional = TRUE, ...)
+    sims <- matrix(sims[n_obs + seq_len(h), 1, ], nrow = h, ncol = nsim)
+
+    sim_ts(sims, object$serie)
+}
+
 # HELPERS ------------------------------------------------------------------------------------------
+
+#' Combina Modelo Ajustado Com Modelo Futuro
+#'
+#' Combina o modelo ajustado (span observado) com um modelo futuro-apenas (\code{extmod}) ao
+#' longo do tempo, empilhando as matrizes variantes no tempo na terceira dimensao
+#'
+#' Matrizes do sistema cuja terceira dimensao seja igual ao numero de observacoes de
+#' \code{modelo} (i.e. variantes no tempo) sao empilhadas com as correspondentes de
+#' \code{extmod}; as demais, constantes no tempo, permanecem inalteradas
+#'
+#' @param modelo o modelo \code{SSModel} ajustado, com span observado
+#' @param extmod o modelo \code{SSModel} futuro-apenas, construido via \code{update}
+#'
+#' @return \code{SSModel} unico com \code{y} e as matrizes variantes no tempo estendidas para
+#'     cobrir observado + futuro
+#'
+#' @keywords internal
+
+combine_ss <- function(modelo, extmod) {
+    no <- attr(modelo, "n")
+    nn <- attr(extmod, "n")
+
+    comb <- modelo
+    comb$y <- ts(
+        rbind(as.matrix(modelo$y), as.matrix(extmod$y)),
+        start = start(modelo$y),
+        frequency = frequency(modelo$y)
+    )
+    attr(comb, "n") <- as.integer(no + nn)
+
+    for (mat in c("Z", "H", "T", "R", "Q")) {
+        if (dim(modelo[[mat]])[3] == no) {
+            d12 <- dim(modelo[[mat]])[1:2]
+            comb[[mat]] <- array(c(modelo[[mat]], extmod[[mat]]), dim = c(d12, no + nn))
+        }
+    }
+
+    comb
+}
 
 #' Auxiliares Para Estimacao
 #' 

@@ -5,6 +5,7 @@
 \alias{ss_ar1_saz}
 \alias{predict.ss_ar1_saz}
 \alias{update.ss_ar1_saz}
+\alias{simulate.ss_ar1_saz}
 \title{Modelos \code{ss_ar1_saz}}
 \usage{
 ss_ar1_saz(serie, ...)
@@ -12,19 +13,25 @@ ss_ar1_saz(serie, ...)
 \method{predict}{ss_ar1_saz}(object, n.ahead, ...)
 
 \method{update}{ss_ar1_saz}(object, newseries, refit = FALSE, ...)
+
+\method{simulate}{ss_ar1_saz}(object, nsim = 1, seed = NULL, n.ahead, ...)
 }
 \arguments{
 \item{serie}{serie para ajustar}
 
-\item{...}{existe apenas para consistência com a genérica}
+\item{...}{demais argumentos passados a \code{\link[KFAS]{simulateSSM}}}
 
 \item{object}{objeto com classes \code{c("ss_ar1_saz", "modprev")} contendo modelo}
 
-\item{n.ahead}{número de passos à frente para previsão}
+\item{n.ahead}{número de passos à frente para simular}
 
 \item{newseries}{nova série com a qual atualizar o modelo}
 
 \item{refit}{booleano indicando se o modelo deve ou não ser reajustado}
+
+\item{nsim}{número de simulações a serem geradas}
+
+\item{seed}{opcionalmente, semente para geração das simulações}
 }
 \value{
 Objeto da classe \code{modprev} e subclasse \code{ss_ar1_saz}, uma lista de dois
@@ -35,6 +42,9 @@ padrao da previsão \code{n.ahead} passos à frente;
 
 \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado.
 Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
+
+\code{simulate} retorna uma série temporal multivariada contendo \code{nsim}
+simulações para os passos de tempo \code{1:n.ahead}
 }
 \description{
 Estimação e métodos de modelos da classe \code{ss_ar1_saz}

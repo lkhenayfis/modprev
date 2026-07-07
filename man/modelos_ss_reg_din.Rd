@@ -5,6 +5,7 @@
 \alias{ss_reg_din}
 \alias{predict.ss_reg_din}
 \alias{update.ss_reg_din}
+\alias{simulate.ss_reg_din}
 \title{Modelos \code{ss_reg_din}}
 \usage{
 ss_reg_din(serie, regdata, formula, vardin = FALSE, ...)
@@ -12,6 +13,8 @@ ss_reg_din(serie, regdata, formula, vardin = FALSE, ...)
 \method{predict}{ss_reg_din}(object, newdata, n.ahead, ...)
 
 \method{update}{ss_reg_din}(object, newseries, newregdata, refit = FALSE, ...)
+
+\method{simulate}{ss_reg_din}(object, nsim = 1, seed = NULL, n.ahead, newdata, ...)
 }
 \arguments{
 \item{serie}{série para ajustar}
@@ -23,20 +26,24 @@ ss_reg_din(serie, regdata, formula, vardin = FALSE, ...)
 
 \item{vardin}{booleano indicando se deve ser estimado modelo com heterocedasticidade.}
 
-\item{...}{nao possui uso, existe apenas para consistencia com a generica}
+\item{...}{demais argumentos passados a \code{\link[KFAS]{simulateSSM}}}
 
 \item{object}{objeto com classes \code{c("ss_reg_din", "modprev")} contendo modelo}
 
-\item{newdata}{\code{data.frame}-like contendo variéveis explicativas fora da amostra}
+\item{newdata}{\code{data.frame}-like contendo variáveis explicativas fora da amostra}
 
-\item{n.ahead}{número de passos à frente para previsão. Este argumento não é necessario, caso não
-seja informado a previsão sera feita tantos passos à frente quanto amostras em \code{newdata}}
+\item{n.ahead}{número de passos à frente para simular. Se omitido, o horizonte é
+\code{nrow(newdata)}}
 
 \item{newseries}{nova série com a qual atualizar o modelo}
 
 \item{newregdata}{\code{data.frame}-like contendo variáveis explicativas na nova amostra}
 
 \item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
+
+\item{nsim}{número de simulações a serem geradas}
+
+\item{seed}{opcionalmente, semente para geração das simulações}
 }
 \value{
 Objeto da classe \code{modprev} e subclasse \code{ss_reg_din}, uma lista de dois
@@ -47,6 +54,9 @@ previsão \code{n.ahead} passos à frente;
 
 \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado.
 Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
+
+\code{simulate} retorna uma série temporal multivariada contendo \code{nsim}
+simulações para os passos de tempo \code{1:n.ahead}
 }
 \description{
 Estimação e métodos de modelos da classe \code{ss_reg_din}

@@ -38,3 +38,21 @@ test_that("Atualizacao de modelo S.S. AR1+Saz", {
     expect_snapshot_value(mod$modelo["Z"], style = "deparse", tolerance = 1e-3)
     expect_snapshot_value(mod$modelo["T"], style = "deparse", tolerance = 1e-3)
 })
+
+test_that("simulate.ss_ar1_saz returns n.ahead x nsim ts", {
+    mod <- estimamodelo(AirPassengers, "ss_ar1_saz")
+
+    sims <- simulate(mod, nsim = 20, n.ahead = 12)
+    expect_equal(dim(sims), c(12, 20))
+    expect_equal(colnames(sims), paste0("sim_", 1:20))
+    expect_equal(start(sims), c(1961, 1))
+    expect_equal(frequency(sims), 12)
+
+    sims1 <- simulate(mod, nsim = 1, n.ahead = 6)
+    expect_equal(dim(sims1), c(6, 1))
+    expect_true(all(is.finite(sims1)))
+
+    s1 <- simulate(mod, nsim = 5, n.ahead = 6, seed = 42)
+    s2 <- simulate(mod, nsim = 5, n.ahead = 6, seed = 42)
+    expect_equal(s1, s2)
+})

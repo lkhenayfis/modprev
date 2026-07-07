@@ -293,3 +293,34 @@ test_that("Identificacao de deslocamento de array", {
     s1 <- seq(99)
     expect_warning(expect_warning(expect_equal(parsedesloc(s1, s2, 10), -9)))
 })
+
+test_that("simulate.ss_reg_din returns n.ahead x nsim ts", {
+    serie   <- window(datregdin$obs, 1, 100)
+    varex   <- datregdin$varex[1:100, "V1", drop = FALSE]
+    mod     <- estimamodelo(serie, regdata = varex, tipo = "ss_reg_din", formula = ~ V1)
+    newdata <- datregdin$varex[101:120, "V1", drop = FALSE]
+
+    sims <- simulate(mod, nsim = 15, n.ahead = 10, newdata = newdata)
+    expect_equal(dim(sims), c(10, 15))
+    expect_equal(colnames(sims), paste0("sim_", 1:15))
+    expect_equal(start(sims), c(101, 1))
+    expect_equal(frequency(sims), 1)
+    expect_true(all(is.finite(sims)))
+
+    expect_error(
+        simulate(mod, nsim = 15, n.ahead = 10),
+        "Forneca a variavel explicativa para simulacao"
+    )
+
+    s1 <- simulate(mod, nsim = 5, n.ahead = 8, newdata = newdata, seed = 7)
+    s2 <- simulate(mod, nsim = 5, n.ahead = 8, newdata = newdata, seed = 7)
+    expect_equal(s1, s2)
+
+    serieh <- ts(c(window(datregdin$obs, 1, 150)), freq = 10)
+    modh   <- estimamodelo(serieh, regdata = datregdin$varex[1:150, ], tipo = "ss_reg_din",
+        formula = ~ V1, vardin = TRUE)
+    expect_error(
+        simulate(modh, nsim = 5, n.ahead = 10, newdata = datregdin$varex[151:160, ]),
+        "nao suporta modelos heterocedasticos"
+    )
+})
