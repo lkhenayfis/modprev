@@ -43,6 +43,15 @@ DA SÉRIE MAIS \code{n.ahead} À FRENTE}. A primeira parte dessa restrição é 
 necessárias as variáveis explicativas insample para ajustes do modelo. As observações
 \code{n.ahead} passos à frente do final da série são necessárias apenas para a previsão das
 últimas janelas.
+
+\bold{Simulação:}
+
+Quando \code{config$simulate} é \code{TRUE}, cada janela devolve, no lugar da previsão, uma
+matriz de simulação \code{n.ahead x nsim} (colunas \code{sim_1..sim_nsim}), obtida via
+\code{simulate(mod, ...)} em vez de \code{predict(mod, ...)}. A quantidade de trajetórias e a
+semente são controladas por \code{config$nsim} e \code{config$seed}, respectivamente. O
+formato de retorno de cada janela segue o mesmo \code{output.level} usado no caminho de
+previsão.
 }
 \examples{
 
@@ -59,6 +68,10 @@ serie <- window(datregdin$obs, 1, 190)
 varex <- datregdin$varex
 cfg <- jm_config(janela = 100, passo = 10, n.ahead = 5)
 jm_regdin <- janelamovel(serie, "ss_reg_din", config = cfg, regdata = varex)
+
+# Simulacao em janela movel
+cfg <- jm_config(janela = 60, passo = 6, n.ahead = 12, simulate = TRUE, nsim = 100, seed = 123)
+jm_sim <- janelamovel(AirPassengers, "sarima", config = cfg)
 
 }
 \seealso{

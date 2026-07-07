@@ -216,3 +216,78 @@ update.modprevP <- function(object, newseries, refit = FALSE, ...) {
 
     new_modprevP(mods, newseries, mod_atrs)
 }
+
+#' Simulacao De Modelos Periodicos
+#'
+#' Wrapper para simular cada modelo individual e reorganizacao em serie unica
+#'
+#' Coordena as chamadas de \code{simulate} de cada sub-modelo sazonal e reagrupa os blocos
+#' \code{n.ahead x nsim} numa unica serie temporal, espelhando \code{\link{predict.modprevP}}.
+#' O tratamento de \code{newdata} (continuacao cronologica ou lista por estacao) e identico ao
+#' de \code{predict.modprevP}.
+#'
+#' @param object modelo periodico com o qual simular
+#' @param nsim numero de simulacoes a serem geradas
+#' @param seed opcionalmente, semente para geracao das simulacoes. Definida uma unica vez antes
+#'     do loop sazonal, garantindo reprodutibilidade de toda a chamada periodica
+#' @param n.ahead numero de passos a frente para simular
+#' @param ... Opcionalmente, \code{newdata} \code{data.frame}-like (ou lista por estacao) com
+#'     variaveis explicativas fora da amostra para sub-modelos que as necessitem
+#'
+#' @return serie temporal multivariada \code{n.ahead x nsim}, colunas \code{sim_1..sim_nsim},
+#'     iniciando um passo apos o fim da serie ajustada
+#'
+#' @export
+
+simulate.modprevP <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
+
+    nmods <- length(object$modelos)
+
+    aux_tsp <- attr(object, "mod_atrs")$tsp
+    tp1     <- aux_tsp[2] + 1 / aux_tsp[3]
+
+    args <- list(...)
+
+    has_newdata  <- "newdata" %in% ...names()
+    newdata_list <- has_newdata && inherits(args$newdata, "list")
+
+    if (has_newdata && !newdata_list) {
+
+        # assumindo que newdata e uma continuacao cronologica da serie
+        aux_split <- ts(seq_len(nrow(args$newdata)), start = tp1, frequency = aux_tsp[3])
+
+        newdata <- split(args$newdata, cycle(aux_split))
+        args$newdata <- NULL
+
+    } else if (has_newdata && newdata_list) {
+        newdata <- args$newdata
+        args$newdata <- NULL
+        names(newdata) <- seq_along(newdata)
+    } else if (!has_newdata) {
+        newdata <- structure(vector("list", nmods), names = seq_len(nmods))
+    }
+
+    submodels <- as.numeric(names(newdata))
+
+    if (missing("n.ahead")) {
+        v_h <- lapply(newdata, nrow)
+    } else {
+        aux_split <- ts(seq_len(n.ahead), start = tp1, frequency = aux_tsp[3])
+        v_h <- split(seq_len(n.ahead), cycle(aux_split))
+        v_h <- vapply(v_h, length, integer(1))
+    }
+
+    if (!is.null(seed)) set.seed(seed)
+
+    sims <- mapply(object$modelos[submodels], newdata, v_h[submodels], FUN = function(mod, nd, h) {
+        args <- c(list(object = mod, nsim = nsim, seed = NULL, n.ahead = h, newdata = nd), args)
+        do.call(simulate, args)
+    }, SIMPLIFY = FALSE)
+
+    sim_times <- unlist(lapply(sims, time))
+
+    sims <- do.call(rbind, lapply(sims, unclass))
+    sims <- ts(sims[order(sim_times), , drop = FALSE], start = tp1, frequency = aux_tsp[3])
+
+    return(sims)
+}

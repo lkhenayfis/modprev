@@ -129,7 +129,12 @@ update.sarima <- function(object, newseries, refit = FALSE, ...) {
 simulate.sarima <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
     if (!is.null(seed)) set.seed(seed)
 
-    sims <- replicate(nsim, simulate(object$modelo, nsim = n.ahead, future = TRUE, ...))
+    sims <- vapply(
+        seq_len(nsim),
+        function(i) as.numeric(simulate(object$modelo, nsim = n.ahead, future = TRUE, ...)),
+        numeric(n.ahead)
+    )
+    sims <- matrix(sims, nrow = n.ahead, ncol = nsim)
 
     sim_ts(sims, object$serie)
 }

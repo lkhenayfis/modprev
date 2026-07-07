@@ -108,6 +108,31 @@ test_that("jm_config", {
         expect_error(f(janela = 60, output.level = c(0, 1)),
             "'output.level' must be 0, 1, or 2")
     })
+
+    test_that("jm_config defaults simulate/nsim/seed", {
+        config <- f(janela = 60)
+        expect_false(config$simulate)
+        expect_equal(config$nsim, 1L)
+        expect_null(config$seed)
+    })
+
+    test_that("jm_config accepts and coerces simulation fields", {
+        config <- f(janela = 60, simulate = TRUE, nsim = 100, seed = 42)
+        expect_true(config$simulate)
+        expect_identical(config$nsim, 100L)
+        expect_identical(config$seed, 42L)
+    })
+
+    test_that("jm_config validates simulation fields", {
+        expect_error(f(janela = 60, simulate = "yes"), "'simulate' must be a length-1 logical")
+        expect_error(f(janela = 60, nsim = 0), "'nsim' must be a positive integer scalar")
+        expect_error(f(janela = 60, seed = c(1, 2)), "'seed' must be NULL or an integer scalar")
+        expect_error(f(janela = 60, nsim = NA), "'nsim' must be a positive integer scalar")
+        expect_error(
+            suppressWarnings(f(janela = 60, seed = "abc")),
+            "'seed' must be NULL or an integer scalar"
+        )
+    })
 })
 
 test_that("new_jm_config", {
@@ -254,5 +279,18 @@ test_that("print.jm_config", {
         config2 <- jm_config(janela = 60, output.level = 2)
         output2 <- capture.output(f(config2))
         expect_true(any(grepl("Output Level.*Full", output2)))
+    })
+
+    test_that("print.jm_config displays simulation mode", {
+        cfg <- jm_config(janela = 60, simulate = TRUE, nsim = 50, seed = 7)
+        out <- capture.output(f(cfg))
+        expect_true(any(grepl("Mode.*Simulation", out)))
+        expect_true(any(grepl("Number of Simulations.*50", out)))
+        expect_true(any(grepl("Seed.*7", out)))
+
+        cfg0 <- jm_config(janela = 60)
+        out0 <- capture.output(f(cfg0))
+        expect_true(any(grepl("Mode.*Forecast", out0)))
+        expect_false(any(grepl("Number of Simulations", out0)))
     })
 })

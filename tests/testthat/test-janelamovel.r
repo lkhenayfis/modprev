@@ -239,3 +239,31 @@ test_that("janelamovel validates config is jm_config", {
         "'config' must be a jm_config object"
     )
 })
+
+test_that("janelamovel simulate path returns n.ahead x nsim per window", {
+    serie <- geraserie(100, 4)
+
+    cfg <- jm_config(janela = 48, passo = 12, n.ahead = 6, simulate = TRUE, nsim = 10,
+        seed = 123)
+    jm1 <- janelamovel(serie, "ss_ar1_saz", config = cfg)
+    expect_equal(length(jm1), 6)
+    expect_true(all(vapply(jm1, function(m) all(dim(m) == c(6, 10)), logical(1))))
+
+    jm2 <- janelamovel(serie, "ss_ar1_saz", config = cfg)
+    expect_equal(jm1, jm2)
+
+    expect_true(any(apply(jm1[[1]], 1, function(x) length(unique(round(x, 8))) > 1)))
+    expect_false(isTRUE(all.equal(unclass(jm1[[1]]), unclass(jm1[[2]]),
+        check.attributes = FALSE)))
+
+    dados <- geradado()
+    ss <- window(dados[[2]], 1, 195)
+    regd <- dados[[1]]
+    cfgr <- jm_config(janela = 150, passo = 5, n.ahead = 5, simulate = TRUE, nsim = 8, seed = 1)
+    jmr <- janelamovel(ss, "ss_reg_din", config = cfgr, regdata = regd, formula = ~ V1)
+    expect_true(all(vapply(jmr, function(m) all(dim(m) == c(5, 8)), logical(1))))
+
+    cfg0 <- jm_config(janela = 48, passo = 12, n.ahead = 6)
+    jm0 <- janelamovel(serie, "sarima", config = cfg0)
+    expect_true(all(vapply(jm0, function(m) all(dim(m) == c(6, 2)), logical(1))))
+})

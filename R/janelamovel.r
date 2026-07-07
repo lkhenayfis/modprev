@@ -24,6 +24,15 @@
 #' \code{n.ahead} passos à frente do final da série são necessárias apenas para a previsão das
 #' últimas janelas.
 #'
+#' \bold{Simulação:}
+#'
+#' Quando \code{config$simulate} é \code{TRUE}, cada janela devolve, no lugar da previsão, uma
+#' matriz de simulação \code{n.ahead x nsim} (colunas \code{sim_1..sim_nsim}), obtida via
+#' \code{simulate(mod, ...)} em vez de \code{predict(mod, ...)}. A quantidade de trajetórias e a
+#' semente são controladas por \code{config$nsim} e \code{config$seed}, respectivamente. O
+#' formato de retorno de cada janela segue o mesmo \code{output.level} usado no caminho de
+#' previsão.
+#'
 #' @param serie serie temporal pela qual passar a janela movel
 #' @param tipo tipo de modelo a ser ajustado. Ver \code{\link{estimamodelo}}.
 #' @param config Objeto de configuração criado por \code{\link{jm_config}}. Obrigatório.
@@ -46,6 +55,10 @@
 #' varex <- datregdin$varex
 #' cfg <- jm_config(janela = 100, passo = 10, n.ahead = 5)
 #' jm_regdin <- janelamovel(serie, "ss_reg_din", config = cfg, regdata = varex)
+#'
+#' # Simulacao em janela movel
+#' cfg <- jm_config(janela = 60, passo = 6, n.ahead = 12, simulate = TRUE, nsim = 100, seed = 123)
+#' jm_sim <- janelamovel(AirPassengers, "sarima", config = cfg)
 #'
 #' @return lista contendo previsoes de 1 a n.ahead passos à frente para cada janela
 #'
@@ -92,6 +105,8 @@ janelamovel <- function(serie, tipo, config, ...) {
 
     retfun <- whichreturn(config$output.level)
 
+    if (isTRUE(config$simulate) && !is.null(config$seed)) set.seed(config$seed)
+
     jm <- vector("list", length(janelas))
     for (i in seq_along(janelas)) {
 
@@ -104,7 +119,18 @@ janelamovel <- function(serie, tipo, config, ...) {
 
         ijn <- list(deltats(ij[[2]], 1, frequency(aux)), deltats(ij[[2]], config$n.ahead, frequency(aux)))
         inewdata <- regdata[window(aux, ijn[[1]], ijn[[2]]), , drop = FALSE]
-        pred <- predict(mod, config$n.ahead, newdata = inewdata)
+
+        if (isTRUE(config$simulate)) {
+            if (has_regdata) {
+                pred <- simulate(mod, nsim = config$nsim, seed = NULL,
+                    n.ahead = config$n.ahead, newdata = inewdata)
+            } else {
+                pred <- simulate(mod, nsim = config$nsim, seed = NULL,
+                    n.ahead = config$n.ahead)
+            }
+        } else {
+            pred <- predict(mod, config$n.ahead, newdata = inewdata)
+        }
 
         jm[[i]] <- retfun(pred, mod, inewdata, v_refit[i])
     }

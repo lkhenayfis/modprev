@@ -135,4 +135,7 @@ test_that("simulate.sarimax returns n.ahead x nsim ts", {
     sims1 <- simulate(mod, nsim = 15, n.ahead = 8, newdata = newdata, seed = 7)
     sims2 <- simulate(mod, nsim = 15, n.ahead = 8, newdata = newdata, seed = 7)
     expect_equal(sims1, sims2)
+
+    sims_distinct <- simulate(mod, nsim = 4, n.ahead = 8, newdata = newdata, seed = 1)
+    expect_false(identical(sims_distinct[, 1], sims_distinct[, 2]))
 })

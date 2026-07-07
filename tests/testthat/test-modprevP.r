@@ -317,3 +317,29 @@ test_that("Atualizacao de Modelos Periodicos -- S/ Variavel Explicativa _ Init S
 
     expect_equal(attr(modp_upd, "mod_atrs")$tsp, c(21.5, 40.75, 4))
 })
+
+test_that("simulate.modprevP returns n.ahead x nsim ts", {
+    serie_p <- gera_dados_p_sX()[[2]]
+
+    modp <- estimamodelo(serie_p, "sarima", periodico = TRUE)
+    sims <- simulate(modp, nsim = 5, n.ahead = 8, seed = 42)
+    expect_equal(dim(sims), c(8, 5))
+    expect_equal(colnames(sims), paste0("sim_", 1:5))
+    expect_equal(tsp(sims), c(21, 22.75, 4))
+
+    s2 <- simulate(modp, nsim = 5, n.ahead = 8, seed = 42)
+    expect_equal(sims, s2)
+
+    modp2 <- estimamodelo(window(serie_p, 1.5), "sarima", periodico = TRUE)
+    sims2 <- simulate(modp2, nsim = 3, n.ahead = 8, seed = 1)
+    expect_equal(tsp(sims2), tsp(predict.modprevP(modp2, 8)))
+
+    serie_r <- ts(head(datregdin$obs, 160), frequency = 4)
+    modr <- estimamodelo(serie_r, "ss_reg_din", periodico = TRUE, formula = ~ V1 + V2 + V3,
+        regdata = head(datregdin$varex, 160))
+    simsr <- simulate(modr, nsim = 6, n.ahead = 8, newdata = tail(datregdin$varex, 40),
+        seed = 99)
+    expect_equal(dim(simsr), c(8, 6))
+    expect_equal(tsp(simsr), c(41, 42.75, 4))
+    expect_true(any(apply(simsr, 1, function(x) length(unique(round(x, 8))) > 1)))
+})

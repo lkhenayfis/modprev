@@ -63,4 +63,11 @@ test_that("simulate.sarima returns n.ahead x nsim ts", {
     sims1 <- simulate(mod, nsim = 5, n.ahead = 6, seed = 42)
     sims2 <- simulate(mod, nsim = 5, n.ahead = 6, seed = 42)
     expect_equal(sims1, sims2)
+
+    sims_distinct <- simulate(mod, nsim = 4, n.ahead = 6, seed = 1)
+    expect_false(identical(sims_distinct[, 1], sims_distinct[, 2]))
+    expect_equal(length(unique(apply(sims_distinct, 2, paste, collapse = ","))), 4)
+
+    sims_onehead <- simulate(mod, nsim = 3, n.ahead = 1, seed = 1)
+    expect_equal(dim(sims_onehead), c(1, 3))
 })

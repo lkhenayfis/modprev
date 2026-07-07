@@ -10,7 +10,10 @@ jm_config(
   n.ahead = 1L,
   refit.cada = NA,
   verbose = 0L,
-  output.level = 0L
+  output.level = 0L,
+  simulate = FALSE,
+  nsim = 1L,
+  seed = NULL
 )
 }
 \arguments{
@@ -32,6 +35,15 @@ fit once and updated. If integer, model is refit every \code{refit.cada} windows
 0 = forecast only (default), 1 = \code{list(pred, mod)} with \code{mod} present only
 on windows where the model was refitted (\code{NULL} otherwise), 2 = full
 \code{list(pred, mod, regdata)}.}
+
+\item{simulate}{Logical indicando se \code{janelamovel} deve simular ao invés de
+prever em cada janela. Padrão \code{FALSE}.}
+
+\item{nsim}{Inteiro com o número de trajetórias simuladas por janela quando
+\code{simulate = TRUE}. Padrão 1L.}
+
+\item{seed}{Inteiro que semeia toda a execução de \code{janelamovel} uma única vez,
+ou \code{NULL} (padrão) para não semear.}
 }
 \value{
 S3 object of class \code{jm_config} containing validated configuration
@@ -48,5 +60,8 @@ config <- jm_config(janela = c(1, 50), n.ahead = 12)
 
 # With refit and verbose output
 config <- jm_config(janela = 60, passo = 6, refit.cada = 6, verbose = 2)
+
+# Simulação em janela móvel com 100 trajetórias, com semente fixa
+config <- jm_config(janela = 60, simulate = TRUE, nsim = 100, seed = 42)
 
 }

@@ -173,7 +173,12 @@ simulate.sarimax <- function(object, nsim = 1, seed = NULL, n.ahead, newdata, ..
 
     if (!is.null(seed)) set.seed(seed)
 
-    sims <- replicate(nsim, simulate(object$modelo, future = TRUE, xreg = Xreg, ...))
+    sims <- vapply(
+        seq_len(nsim),
+        function(i) as.numeric(simulate(object$modelo, future = TRUE, xreg = Xreg, ...)),
+        numeric(nrow(Xreg))
+    )
+    sims <- matrix(sims, nrow = nrow(Xreg), ncol = nsim)
 
     sim_ts(sims, object$serie)
 }

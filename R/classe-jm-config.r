@@ -1,6 +1,7 @@
 ########################################### JM CONFIG ############################################
 
-new_jm_config <- function(janela, passo, n.ahead, refit.cada, verbose, output.level) {
+new_jm_config <- function(janela, passo, n.ahead, refit.cada, verbose, output.level,
+    simulate = FALSE, nsim = 1L, seed = NULL) {
     structure(
         list(
             janela = janela,
@@ -8,7 +9,10 @@ new_jm_config <- function(janela, passo, n.ahead, refit.cada, verbose, output.le
             n.ahead = n.ahead,
             refit.cada = refit.cada,
             verbose = verbose,
-            output.level = output.level
+            output.level = output.level,
+            simulate = simulate,
+            nsim = nsim,
+            seed = seed
         ),
         class = "jm_config"
     )
@@ -56,6 +60,22 @@ validate_jm_config <- function(config) {
         stop("'output.level' must be 0, 1, or 2")
     }
 
+    if (!is.logical(config$simulate) || length(config$simulate) != 1 ||
+        is.na(config$simulate)) {
+        stop("'simulate' must be a length-1 logical")
+    }
+
+    if (!is.numeric(config$nsim) || length(config$nsim) != 1 || is.na(config$nsim) ||
+        config$nsim <= 0) {
+        stop("'nsim' must be a positive integer scalar")
+    }
+
+    if (!is.null(config$seed)) {
+        if (!is.numeric(config$seed) || length(config$seed) != 1 || is.na(config$seed)) {
+            stop("'seed' must be NULL or an integer scalar")
+        }
+    }
+
     invisible(config)
 }
 
@@ -76,6 +96,12 @@ validate_jm_config <- function(config) {
 #'     0 = forecast only (default), 1 = `list(pred, mod)` with `mod` present only
 #'     on windows where the model was refitted (`NULL` otherwise), 2 = full
 #'     `list(pred, mod, regdata)`.
+#' @param simulate Logical indicando se `janelamovel` deve simular ao invés de
+#'     prever em cada janela. Padrão `FALSE`.
+#' @param nsim Inteiro com o número de trajetórias simuladas por janela quando
+#'     `simulate = TRUE`. Padrão 1L.
+#' @param seed Inteiro que semeia toda a execução de `janelamovel` uma única vez,
+#'     ou `NULL` (padrão) para não semear.
 #'
 #' @return S3 object of class `jm_config` containing validated configuration
 #'
@@ -89,21 +115,30 @@ validate_jm_config <- function(config) {
 #' # With refit and verbose output
 #' config <- jm_config(janela = 60, passo = 6, refit.cada = 6, verbose = 2)
 #'
+#' # Simulação em janela móvel com 100 trajetórias, com semente fixa
+#' config <- jm_config(janela = 60, simulate = TRUE, nsim = 100, seed = 42)
+#'
 #' @export
 
 jm_config <- function(janela, passo = 1L, n.ahead = 1L, refit.cada = NA,
-    verbose = 0L, output.level = 0L) {
+    verbose = 0L, output.level = 0L, simulate = FALSE, nsim = 1L, seed = NULL) {
 
     passo <- as.integer(passo)
     n.ahead <- as.integer(n.ahead)
     verbose <- as.integer(verbose)
     output.level <- as.integer(output.level)
+    nsim <- as.integer(nsim)
+
+    if (!is.null(seed)) {
+        seed <- as.integer(seed)
+    }
 
     if (length(refit.cada) == 1 && is.numeric(refit.cada) && !is.na(refit.cada)) {
         refit.cada <- as.integer(refit.cada)
     }
 
-    config <- new_jm_config(janela, passo, n.ahead, refit.cada, verbose, output.level)
+    config <- new_jm_config(janela, passo, n.ahead, refit.cada, verbose, output.level,
+        simulate, nsim, seed)
     validate_jm_config(config)
 
     config
@@ -152,6 +187,14 @@ print.jm_config <- function(x, ...) {
         "2" = "Full (forecasts, models, regdata)"
     )
     cat("Output Level:", output_desc, "\n")
+
+    if (isTRUE(x$simulate)) {
+        cat("Mode: Simulation\n")
+        cat("  Number of Simulations:", x$nsim, "\n")
+        cat("  Seed:", if (is.null(x$seed)) "none" else x$seed, "\n")
+    } else {
+        cat("Mode: Forecast\n")
+    }
 
     invisible(x)
 }
