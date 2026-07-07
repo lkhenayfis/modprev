@@ -195,3 +195,30 @@ split_seasonal <- function(serie) {
 split_seasonal_regdata <- function(regdata, seasons) {
     split(regdata, seasons)
 }
+
+# AUXILIARES PARA SIMULACAO -------------------------------------------------------------------------
+
+#' Formata Saida De Simulacao
+#'
+#' Padroniza a saida de simulacoes de modelos como um \code{ts} multivariado, com colunas
+#' nomeadas e sistema de tempo continuando a serie ajustada
+#'
+#' Espelha a logica de posicionamento de \code{predict.modprevP} (\code{R/classe-modprevP.r}),
+#' que calcula o proximo instante como \code{tp1 = aux_tsp[2] + 1 / aux_tsp[3]}
+#'
+#' @param sims matriz numerica (\code{n.ahead x nsim}) ou vetor numerico (\code{n.ahead}) com os
+#'     valores simulados
+#' @param serie a serie ajustada (um \code{ts} ou numerico coercivel via \code{as.ts})
+#'
+#' @return \code{ts} multivariado com \code{nrow(sims)} linhas e \code{ncol(sims)} colunas,
+#'     nomeadas \code{sim_1..sim_ncol(sims)}, iniciando um passo apos o fim de \code{serie}
+#'
+#' @keywords internal
+
+sim_ts <- function(sims, serie) {
+    sims <- as.matrix(sims)
+    colnames(sims) <- paste0("sim_", seq_len(ncol(sims)))
+
+    aux_tsp <- tsp(as.ts(serie))
+    ts(sims, start = aux_tsp[2] + 1 / aux_tsp[3], frequency = aux_tsp[3])
+}

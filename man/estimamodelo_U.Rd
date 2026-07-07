@@ -30,6 +30,7 @@ detalhadas da estimacao de modelos, periodicos ou nao, devem ser buscadas em
 \seealso{
 Other Metodos modprevU: 
 \code{\link{predict.modprevU}()},
+\code{\link{simulate.modprevU}()},
 \code{\link{update.modprevU}()}
 }
 \concept{Metodos modprevU}

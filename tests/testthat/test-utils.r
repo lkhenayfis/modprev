@@ -93,3 +93,21 @@ test_that("Split sazonal regdata -- shape e nomes", {
     expect_equal(names(result), c("1", "2", "3", "4"))
     expect_true(all(vapply(result, nrow, integer(1)) == 5))
 })
+
+test_that("sim_ts shapes simulation output", {
+    serie <- ts(seq_len(24), frequency = 12)
+    mm <- matrix(seq_len(15), nrow = 5, ncol = 3)
+
+    result <- sim_ts(mm, serie)
+
+    expect_equal(dim(result), c(5, 3))
+    expect_equal(colnames(result), c("sim_1", "sim_2", "sim_3"))
+    expect_equal(start(result), c(3, 1))
+    expect_equal(frequency(result), 12)
+
+    vv <- seq_len(5)
+    result_vec <- sim_ts(vv, serie)
+
+    expect_equal(ncol(result_vec), 1)
+    expect_equal(colnames(result_vec), "sim_1")
+})

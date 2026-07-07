@@ -25,6 +25,7 @@ Wrapper para atualizar e possivelmete reajustar modelos \code{modprevU}
 \seealso{
 Other Metodos modprevU: 
 \code{\link{estimamodelo_U}()},
-\code{\link{predict.modprevU}()}
+\code{\link{predict.modprevU}()},
+\code{\link{simulate.modprevU}()}
 }
 \concept{Metodos modprevU}

@@ -67,6 +67,7 @@ pred <- predict(mod_regdin, newdata = newdata)
 \seealso{
 Other Metodos modprev: 
 \code{\link{estimamodelo}()},
+\code{\link{simulate.modprev}()},
 \code{\link{update.modprev}()}
 }
 \concept{Metodos modprev}

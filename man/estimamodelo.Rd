@@ -137,6 +137,7 @@ plot(mod_regdin)
 
 Other Metodos modprev: 
 \code{\link{predict.modprev}()},
+\code{\link{simulate.modprev}()},
 \code{\link{update.modprev}()}
 }
 \concept{Metodos modprev}

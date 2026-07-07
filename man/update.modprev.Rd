@@ -65,6 +65,7 @@ mod_refit <- update(mod_orig, newserie, newregdata = newvarex, refit = TRUE)
 \seealso{
 Other Metodos modprev: 
 \code{\link{estimamodelo}()},
-\code{\link{predict.modprev}()}
+\code{\link{predict.modprev}()},
+\code{\link{simulate.modprev}()}
 }
 \concept{Metodos modprev}

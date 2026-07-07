@@ -209,6 +209,28 @@ predict.modprev <- function(object, n.ahead, ...) {
     stop(paste0("Modelo do tipo ", class(object)[1], " nao possui metodo 'predict'"))
 }
 
+#' Simulacao De Modelos \code{modprev}
+#'
+#' Wrapper para simulacao de modelos ajustados por \code{\link{estimamodelo}}
+#'
+#' @param object modelo ajustado através de \code{\link{estimamodelo}}
+#' @param nsim número de simulações a serem geradas
+#' @param seed opcionalmente, semente para geração das simulações
+#' @param n.ahead número de passos à frente para simular
+#' @param ... Opcionalmente, pode ser passado o argumento \code{newdata} \code{data.frame}-like
+#'     contendo variaveis explicativas fora da amostra para modelos que necessitem
+#'
+#' @return série temporal multivariada contendo \code{nsim} simulações para os passos de tempo
+#'     \code{1:n.ahead}
+#'
+#' @family Metodos modprev
+#'
+#' @export
+
+simulate.modprev <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
+    stop(paste0("Modelo do tipo ", class(object)[1], " nao possui metodo 'simulate'"))
+}
+
 #' Atualizacao De Modelos \code{modprev}
 #' 
 #' Wrapper para atualizar e possivelmete reajustar modelos \code{modprev}

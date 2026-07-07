@@ -24,6 +24,7 @@ Wrapper para previsão de modelos unicos
 \seealso{
 Other Metodos modprevU: 
 \code{\link{estimamodelo_U}()},
+\code{\link{simulate.modprevU}()},
 \code{\link{update.modprevU}()}
 }
 \concept{Metodos modprevU}
