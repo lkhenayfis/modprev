@@ -45,6 +45,8 @@ estimamodelo_U <- function(serie, tipo, ...) {
 #' @return Objeto da classe \code{modprevU} e subclasse igual a \code{tipo}, uma lista de dois 
 #'     elementos: \code{modelo} e \code{serie} contendo o modelo estimado e a série passada. 
 #'     Adicionalmente, se \code{atrs} for passada, um atributo "mod_atrs" contendo o argumento
+#' 
+#' @export
 
 new_modprevU <- function(fit, serie, tipo, atrs) {
     new <- list(modelo = fit, serie = serie)
