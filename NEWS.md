@@ -1,3 +1,13 @@
+# feat/simulate
+
+## New features
+
+- Adicionada generica e metodos `simulate` para geracao de cenarios com cada metodo
+  - por enquanto apenas os modelos `sarima` e `ss_ar1_saz` possuem metodos `simulate`. Os demais
+    ganharao metodos dedicados conforme necessidade
+- `jm_config` agora tem argumento `simulate` (padrao `FALSE`) para indicar se uma rodada de `janelamovel`
+  deve ser realizada por simulacao ou previsao
+
 # modprev 2.1.0
 
 ## BREAKING CHANGES
