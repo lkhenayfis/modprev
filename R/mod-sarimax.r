@@ -171,7 +171,7 @@ simulate.sarimax <- function(object, nsim = 1, seed = NULL, n.ahead, newdata, ..
     formula <- attr(object, "mod_atrs")$formula
     Xreg <- expandexreg(newdata, formula)
 
-    if (!is.null(seed)) set.seed(seed)
+    set_sim_seed(seed)
 
     sims <- vapply(
         seq_len(nsim),

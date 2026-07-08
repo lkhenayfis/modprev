@@ -127,7 +127,7 @@ update.sarima <- function(object, newseries, refit = FALSE, ...) {
 #' @export
 
 simulate.sarima <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
-    if (!is.null(seed)) set.seed(seed)
+    set_sim_seed(seed)
 
     sims <- vapply(
         seq_len(nsim),

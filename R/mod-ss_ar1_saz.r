@@ -144,7 +144,7 @@ update.ss_ar1_saz <- function(object, newseries, refit = FALSE, ...) {
 #' @export
 
 simulate.ss_ar1_saz <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
-    if (!is.null(seed)) set.seed(seed)
+    set_sim_seed(seed)
 
     modelo <- object$modelo
     n_obs  <- attr(modelo, "n")

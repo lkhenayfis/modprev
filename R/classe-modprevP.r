@@ -277,7 +277,7 @@ simulate.modprevP <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
         v_h <- vapply(v_h, length, integer(1))
     }
 
-    if (!is.null(seed)) set.seed(seed)
+    set_sim_seed(seed)
 
     sims <- mapply(object$modelos[submodels], newdata, v_h[submodels], FUN = function(mod, nd, h) {
         args <- c(list(object = mod, nsim = nsim, seed = NULL, n.ahead = h, newdata = nd), args)

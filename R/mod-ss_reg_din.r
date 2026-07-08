@@ -209,7 +209,7 @@ simulate.ss_reg_din <- function(object, nsim = 1, seed = NULL, n.ahead, newdata,
     comb   <- combine_ss(object$modelo, extmod)
     n_obs  <- attr(object$modelo, "n")
 
-    if (!is.null(seed)) set.seed(seed)
+    set_sim_seed(seed)
 
     sims <- simulateSSM(comb, type = "observations", nsim = nsim, conditional = TRUE, ...)
     sims <- matrix(sims[n_obs + seq_len(h), 1, ], nrow = h, ncol = nsim)

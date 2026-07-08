@@ -198,6 +198,18 @@ split_seasonal_regdata <- function(regdata, seasons) {
 
 # AUXILIARES PARA SIMULACAO -------------------------------------------------------------------------
 
+#' Configura Seed Para Simulacao
+#'
+#' Utilitario para definir semente de geracao aleatoria em simulacoes
+#'
+#' @param seed valor da semente ou \code{NULL} para nao definir
+#'
+#' @keywords internal
+
+set_sim_seed <- function(seed) {
+    if (!is.null(seed)) set.seed(seed)
+}
+
 #' Formata Saida De Simulacao
 #'
 #' Padroniza a saida de simulacoes de modelos como um \code{ts} multivariado, com colunas

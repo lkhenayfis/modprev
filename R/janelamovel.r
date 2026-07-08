@@ -105,7 +105,7 @@ janelamovel <- function(serie, tipo, config, ...) {
 
     retfun <- whichreturn(config$output.level)
 
-    if (isTRUE(config$simulate) && !is.null(config$seed)) set.seed(config$seed)
+    if (isTRUE(config$simulate)) set_sim_seed(config$seed)
 
     jm <- vector("list", length(janelas))
     for (i in seq_along(janelas)) {
