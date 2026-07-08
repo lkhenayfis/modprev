@@ -18,6 +18,25 @@
   cfg <- jm_config(janela = 60, output.level = 2)
   ```
 
+## New features
+
+- Introduz o metodo generico `simulate` para objetos `modprev`, espelhando `predict`. Simulacao de
+  trajetorias futuras esta disponivel para os modelos `sarima`, `sarimax`, `ss_ar1_saz`,
+  `ss_reg_din` e para o coordenador periodico `simulate.modprevP`. O retorno e uma serie temporal
+  multivariada `n.ahead x nsim` com colunas `sim_1..sim_nsim`.
+- `janelamovel()` / `jm_config()` agora suportam simulacao em horizonte rolante atraves dos novos
+  campos `simulate`, `nsim` e `seed` de `jm_config()`, consumidos por `janelamovel()`.
+- `simulate.modprevS` foi introduzido como um stub que sempre gera erro ("Modelo do tipo modprevS
+  nao possui metodo 'simulate'"), pois simulacao de modelos com shapeshifting nao e suportada.
+- Arcaboucos de regressao (`reg_lin`, `reg_quant`, `GAM`, `BOOST`, `LGBM`) e `ss_reg_din` com
+  `vardin = TRUE` nao possuem metodo `simulate`, emitindo o erro de fall-through padrao ("Modelo do
+  tipo <tipo> nao possui metodo 'simulate'").
+
+## Bug fixes
+
+- `simulate.sarima`/`simulate.sarimax` estavam retornando `nsim` colunas identicas, devido ao uso
+  incorreto de `replicate()` com `...`. Agora cada trajetoria simulada e distinta.
+
 ## Misc
 
 - Simplificacao do registro de modelos: `register_model()` agora possui 6 parametros (`tipo`,

@@ -71,3 +71,22 @@ m_regdin <- estimamodelo(serie, "ss_reg_din", formula = ~ V1 + V2 * V3, regdata 
 newvarex <- datregdin$varex[101:110, , drop = FALSE]
 pred_regdin <- predict(m_regdin, newdata = newvarex)
 ```
+
+### Simulacao
+
+Alem da previsao pontual, os modelos genuinamente de series temporais
+(`sarima`, `sarimax`, `ss_ar1_saz`, `ss_reg_din`) e os modelos
+periodicos suportam a geracao de trajetorias simuladas atraves da
+generica `simulate`:
+
+``` r
+# simulacao de trajetorias futuras (mesma interface para todos os modelos)
+sims <- simulate(m_sarima, nsim = 100, n.ahead = 12, seed = 1)
+# sims e um ts n.ahead x nsim, colunas sim_1..sim_nsim
+
+# modelos com variaveis explicativas exigem newdata, como em predict
+sims_regdin <- simulate(m_regdin, nsim = 100, n.ahead = 10, newdata = newvarex, seed = 1)
+```
+
+Simulacao em horizonte rolante tambem esta disponivel atraves de
+`jm_config(simulate = TRUE, nsim, seed)`, consumido por `janelamovel()`.

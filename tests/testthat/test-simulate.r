@@ -9,3 +9,15 @@ test_that("simulate.modprevU errors for unsupported model", {
         "reg_lin nao possui metodo 'simulate'"
     )
 })
+
+test_that("simulate.modprevS rejects simulation", {
+    mod <- structure(
+        list(modelo = NULL, serie = NULL),
+        class = c("modprevS", "sarima", "modprevU", "modprev")
+    )
+
+    expect_error(
+        simulate(mod, nsim = 10, n.ahead = 5),
+        "modprevS nao possui metodo 'simulate'"
+    )
+})

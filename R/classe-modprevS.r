@@ -91,6 +91,24 @@ predict.modprevS <- function(object, n.ahead, newdata_list, feedback_fun = NULL,
     }
 }
 
+#' Simulacao De Modelos \code{modprevS}
+#'
+#' Wrapper para simulacao de modelos com shapeshifting
+#'
+#' @param object modelo ajustado através de \code{\link{estimamodelo_S}}
+#' @param nsim número de simulações a serem geradas
+#' @param seed opcionalmente, semente para geração das simulações
+#' @param n.ahead número de passos à frente para simular
+#' @param ... demais argumentos, nao utilizados
+#'
+#' @return este metodo sempre gera erro, pois simulacao de modelos \code{modprevS} nao e suportada
+#'
+#' @export
+
+simulate.modprevS <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
+    stop(paste0("Modelo do tipo ", class(object)[1], " nao possui metodo 'simulate'"))
+}
+
 predict_default_modprevS <- function(object, n.ahead, newdata_list, ...) {
     data_pipe <- object$data_pipe
     data <- combine_pipes(eval_pipes(data_pipe, newdata_list, parent.frame()))
