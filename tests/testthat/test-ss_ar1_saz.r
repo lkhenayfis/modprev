@@ -55,4 +55,8 @@ test_that("simulate.ss_ar1_saz returns n.ahead x nsim ts", {
     s1 <- simulate(mod, nsim = 5, n.ahead = 6, seed = 42)
     s2 <- simulate(mod, nsim = 5, n.ahead = 6, seed = 42)
     expect_equal(s1, s2)
+
+    # argumentos estranhos a simulateSSM (e.g. newdata repassado por janelamovel) sao ignorados
+    s3 <- simulate(mod, nsim = 5, n.ahead = 6, seed = 42, newdata = NULL)
+    expect_equal(s1, s3)
 })

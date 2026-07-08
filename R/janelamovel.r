@@ -121,13 +121,8 @@ janelamovel <- function(serie, tipo, config, ...) {
         inewdata <- regdata[window(aux, ijn[[1]], ijn[[2]]), , drop = FALSE]
 
         if (isTRUE(config$simulate)) {
-            if (has_regdata) {
-                pred <- simulate(mod, nsim = config$nsim, seed = NULL,
-                    n.ahead = config$n.ahead, newdata = inewdata)
-            } else {
-                pred <- simulate(mod, nsim = config$nsim, seed = NULL,
-                    n.ahead = config$n.ahead)
-            }
+            pred <- simulate(mod, nsim = config$nsim, seed = NULL,
+                n.ahead = config$n.ahead, newdata = inewdata)
         } else {
             pred <- predict(mod, config$n.ahead, newdata = inewdata)
         }

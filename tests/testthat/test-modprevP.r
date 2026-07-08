@@ -318,6 +318,17 @@ test_that("Atualizacao de Modelos Periodicos -- S/ Variavel Explicativa _ Init S
     expect_equal(attr(modp_upd, "mod_atrs")$tsp, c(21.5, 40.75, 4))
 })
 
+test_that("modprevP methods treat explicit newdata = NULL as absent", {
+    serie_p <- gera_dados_p_sX()[[2]]
+    modp <- estimamodelo(serie_p, "sarima", periodico = TRUE)
+
+    expect_equal(predict(modp, n.ahead = 8), predict(modp, n.ahead = 8, newdata = NULL))
+    expect_equal(
+        simulate(modp, nsim = 3, n.ahead = 8, seed = 7),
+        simulate(modp, nsim = 3, n.ahead = 8, seed = 7, newdata = NULL)
+    )
+})
+
 test_that("simulate.modprevP returns n.ahead x nsim ts", {
     serie_p <- gera_dados_p_sX()[[2]]
 

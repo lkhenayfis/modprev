@@ -125,7 +125,8 @@ predict.modprevP <- function(object, n.ahead, ...) {
 
     args <- list(...)
 
-    has_newdata <- "newdata" %in% ...names()
+    # newdata passado explicitamente como NULL e tratado como ausente
+    has_newdata <- !is.null(args$newdata)
     newdata_list <- has_newdata && inherits(args$newdata, "list")
 
     if (has_newdata && !newdata_list) {
@@ -248,7 +249,8 @@ simulate.modprevP <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
 
     args <- list(...)
 
-    has_newdata  <- "newdata" %in% ...names()
+    # newdata passado explicitamente como NULL e tratado como ausente
+    has_newdata  <- !is.null(args$newdata)
     newdata_list <- has_newdata && inherits(args$newdata, "list")
 
     if (has_newdata && !newdata_list) {

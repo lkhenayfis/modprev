@@ -154,7 +154,13 @@ simulate.ss_ar1_saz <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
     modelo$y <- window(modelo$y, end = end(modelo$y) + c(0, n.ahead), extend = TRUE)
     attr(modelo, "n") <- as.integer(n_obs + n.ahead)
 
-    sims <- simulateSSM(modelo, type = "observations", nsim = nsim, conditional = TRUE, ...)
+    # simulateSSM nao possui '...', entao argumentos estranhos (e.g. newdata repassado por
+    # janelamovel) precisam ser filtrados antes da chamada
+    sim_call <- c(
+        list(quote(simulateSSM), modelo, type = "observations", nsim = nsim, conditional = TRUE),
+        match_fun_args(list(...), simulateSSM)
+    )
+    sims <- eval(as.call(sim_call))
     sims <- matrix(sims[n_obs + seq_len(n.ahead), 1, ], nrow = n.ahead, ncol = nsim)
 
     sim_ts(sims, object$serie)
