@@ -1,38 +1,38 @@
 ####################################################################################################
-# UNIVARIATE MODELS — FIT + PREDICT BASICS
+# MODELS WITHOUT EXPLANATORY VARIABLES — FIT + PREDICT BASICS
 ####################################################################################################
 
-test_that("univariate models — fit + predict basics", {
+test_that("models without explanatory variables — fit + predict basics", {
 
     serie_std <- make_seasonal_series(n = 240, frequency = 12, seed = 123)
 
-    cache <- with_registered_models(univariate_only = TRUE, function(tipo) {
+    cache <- with_registered_models(no_regdata_only = TRUE, function(tipo) {
         fit <- estimamodelo(serie_std, tipo)
         pred <- predict(fit, n.ahead = 12)
         list(fit = fit, pred = pred)
     })
     expect_true(length(cache) > 0)
 
-    test_that("all univariate models produce valid modprevU structure", {
-        with_registered_models(univariate_only = TRUE, function(tipo) {
+    test_that("all models without explanatory variables produce valid modprevU structure", {
+        with_registered_models(no_regdata_only = TRUE, function(tipo) {
             expect_modprev_structure(cache[[tipo]]$fit, tipo)
         })
     })
 
-    test_that("all univariate models store original series correctly", {
-        with_registered_models(univariate_only = TRUE, function(tipo) {
+    test_that("all models without explanatory variables store original series correctly", {
+        with_registered_models(no_regdata_only = TRUE, function(tipo) {
             expect_equal(cache[[tipo]]$fit$serie, serie_std)
         })
     })
 
     test_that("predictions have correct format", {
-        with_registered_models(univariate_only = TRUE, function(tipo) {
+        with_registered_models(no_regdata_only = TRUE, function(tipo) {
             expect_prediction_format(cache[[tipo]]$pred, n.ahead = 12, allow_na_sd = TRUE)
         })
     })
 
     test_that("predictions have compatible time series properties", {
-        with_registered_models(univariate_only = TRUE, function(tipo) {
+        with_registered_models(no_regdata_only = TRUE, function(tipo) {
             pred <- cache[[tipo]]$pred
 
             end_time <- end(serie_std)
@@ -50,7 +50,7 @@ test_that("univariate models — fit + predict basics", {
     })
 
     test_that("multiple predictions without update are consistent", {
-        with_registered_models(univariate_only = TRUE, function(tipo) {
+        with_registered_models(no_regdata_only = TRUE, function(tipo) {
             pred1 <- cache[[tipo]]$pred
             pred2 <- predict(cache[[tipo]]$fit, n.ahead = 12)
             pred3 <- predict(cache[[tipo]]$fit, n.ahead = 12)
@@ -102,16 +102,16 @@ test_that("all models — full workflow", {
 })
 
 ####################################################################################################
-# UNIVARIATE MODELS — UPDATE WITH NEW SERIES
+# MODELS WITHOUT EXPLANATORY VARIABLES — UPDATE WITH NEW SERIES
 ####################################################################################################
 
-test_that("univariate models — update with new series", {
+test_that("models without explanatory variables — update with new series", {
 
     serie_base <- make_seasonal_series(n = 300, seed = 555)
     serie_longer <- make_seasonal_series(n = 360, seed = 555)
     serie_shorter <- make_seasonal_series(n = 240, seed = 211)
 
-    cache <- with_registered_models(univariate_only = TRUE, function(tipo) {
+    cache <- with_registered_models(no_regdata_only = TRUE, function(tipo) {
         mod <- estimamodelo(serie_base, tipo)
         updated_longer <- update(mod, newserie = serie_longer)
         updated_shorter <- update(mod, newserie = serie_shorter)
@@ -125,13 +125,13 @@ test_that("univariate models — update with new series", {
     expect_true(length(cache) > 0)
 
     test_that("update with longer series produces valid predictions", {
-        with_registered_models(univariate_only = TRUE, function(tipo) {
+        with_registered_models(no_regdata_only = TRUE, function(tipo) {
             expect_prediction_format(cache[[tipo]]$pred_longer, n.ahead = 12, allow_na_sd = TRUE)
         })
     })
 
     test_that("update with shorter series preserves new series and predicts", {
-        with_registered_models(univariate_only = TRUE, function(tipo) {
+        with_registered_models(no_regdata_only = TRUE, function(tipo) {
             expect_equal(cache[[tipo]]$updated_shorter$serie, serie_shorter)
 
             expect_prediction_format(
@@ -158,14 +158,14 @@ test_that("all regression models produce valid modprevU structure", {
 })
 
 ####################################################################################################
-# UNIVARIATE MODELS — N.AHEAD VARIATIONS
+# MODELS WITHOUT EXPLANATORY VARIABLES — N.AHEAD VARIATIONS
 ####################################################################################################
 
-test_that("all univariate models support different n.ahead values", {
+test_that("all models without explanatory variables support different n.ahead values", {
     serie_std <- make_seasonal_series(240, seed = 333)
     n_ahead_values <- c(1, 6, 12, 24)
 
-    with_registered_models(univariate_only = TRUE, function(tipo) {
+    with_registered_models(no_regdata_only = TRUE, function(tipo) {
         fit <- estimamodelo(serie_std, tipo)
         for (n in n_ahead_values) {
             pred <- predict(fit, n.ahead = n)
@@ -175,23 +175,23 @@ test_that("all univariate models support different n.ahead values", {
 })
 
 ####################################################################################################
-# UNIVARIATE MODELS — JANELAMOVEL COMPATIBILITY
+# MODELS WITHOUT EXPLANATORY VARIABLES — JANELAMOVEL COMPATIBILITY
 ####################################################################################################
 
-test_that("all univariate models are janelamovel compatible", {
+test_that("all models without explanatory variables are janelamovel compatible", {
     serie <- make_seasonal_series(242, seed = 123)
-    with_registered_models(univariate_only = TRUE, function(tipo) {
+    with_registered_models(no_regdata_only = TRUE, function(tipo) {
         expect_janelamovel_compatible(tipo, serie = serie, config = jm_config(janela = 240))
     })
 })
 
 ####################################################################################################
-# UNIVARIATE MODELS — PERIODIC COMPATIBILITY
+# MODELS WITHOUT EXPLANATORY VARIABLES — PERIODIC COMPATIBILITY
 ####################################################################################################
 
-test_that("all univariate models are periodic compatible", {
+test_that("all models without explanatory variables are periodic compatible", {
     serie <- make_seasonal_series(240, seed = 444)
-    with_registered_models(univariate_only = TRUE, function(tipo) {
+    with_registered_models(no_regdata_only = TRUE, function(tipo) {
         if (tipo %in% c("ss_ar1_saz", "PAR", "PAR_A")) {
             testthat::skip("ss_ar1_saz|PAR|PAR_A periodic adapter known incompatible")
         }

@@ -15,7 +15,7 @@ test_that("with_registered_models executes callback for each model", {
     expect_type(result, "list")
 })
 
-test_that("test_model_workflow returns valid result for univariate model", {
+test_that("test_model_workflow returns valid result for model without explanatory variables", {
     result <- test_model_workflow("sarima", test_update = TRUE)
 
     expect_type(result, "list")
@@ -24,14 +24,14 @@ test_that("test_model_workflow returns valid result for univariate model", {
     expect_s3_class(result$pred, "ts")
 })
 
-test_that("expect_janelamovel_compatible works with univariate model", {
+test_that("expect_janelamovel_compatible works with model without explanatory variables", {
     result <- expect_janelamovel_compatible("sarima")
 
     expect_type(result, "list")
     expect_true(length(result) > 0)
 })
 
-test_that("expect_periodic_compatible works with univariate model", {
+test_that("expect_periodic_compatible works with model without explanatory variables", {
     result <- expect_periodic_compatible("sarima")
 
     expect_s3_class(result, "modprevP")

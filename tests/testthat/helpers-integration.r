@@ -5,10 +5,12 @@
 #' Execute Function with Registered Models
 #'
 #' Helper to iterate over registered models and execute a test function
-#' for each. Automatically filters by requirements (e.g., univariate only).
+#' for each. Automatically filters by requirements (e.g., models without
+#' explanatory variables only).
 #'
 #' @param fn Function to execute for each model (receives tipo as argument)
-#' @param univariate_only Logical; test only models that don't require regdata
+#' @param no_regdata_only Logical; test only models that don't require regdata
+#'   (i.e. without explanatory variables)
 #' @param regression_only Logical; test only regression models
 #' @param exclude Character vector of model types to exclude
 #'
@@ -18,7 +20,7 @@
 
 with_registered_models <- function(
     fn,
-    univariate_only = FALSE,
+    no_regdata_only = FALSE,
     regression_only = FALSE,
     exclude = character(0)
 ) {
@@ -31,7 +33,7 @@ with_registered_models <- function(
 
         spec <- get_model(tipo)
 
-        if (univariate_only && spec$requires_regdata) next
+        if (no_regdata_only && spec$requires_regdata) next
         if (regression_only && !spec$requires_regdata) next
 
         results[[tipo]] <- fn(tipo)

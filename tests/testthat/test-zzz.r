@@ -42,11 +42,11 @@ test_that(".register_builtin_models", {
 
     test_that(".register_builtin_models sets correct requires_regdata flags", {
         modprev:::.onLoad(NULL, NULL)
-        univariate <- c("sarima", "ss_ar1_saz", "PAR", "PAR_A")
-        for (tipo in univariate) {
+        no_regdata_tipos <- c("sarima", "ss_ar1_saz", "PAR", "PAR_A")
+        for (tipo in no_regdata_tipos) {
             expect_false(get_model(tipo)$requires_regdata, label = tipo)
         }
-        regdata_tipos <- setdiff(expected_tipos, univariate)
+        regdata_tipos <- setdiff(expected_tipos, no_regdata_tipos)
         for (tipo in regdata_tipos) {
             expect_true(get_model(tipo)$requires_regdata, label = tipo)
         }

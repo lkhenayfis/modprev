@@ -5,7 +5,7 @@
 #' Generate Univariate Time Series for Testing
 #'
 #' Creates a deterministic time series with optional trend, seasonality,
-#' and noise for testing univariate models.
+#' and noise for testing models without explanatory variables.
 #'
 #' @param n Number of observations
 #' @param frequency Time series frequency
