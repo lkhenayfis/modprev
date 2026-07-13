@@ -32,6 +32,14 @@ PAR <- function(serie, ...) {
     new_modprevU(fit, serie, "PAR", list(call = cc))
 }
 
+#' @rdname PAR
+
+PAR_A <- function(serie, ...) {
+    cc <- match.call()
+    fit <- parmodels::par_a(serie = serie, ...)
+    new_modprevU(fit, serie, "PAR_A", list(call = cc))
+}
+
 # METODOS ------------------------------------------------------------------------------------------
 
 #' @param object objeto com classes \code{c("PAR"|"parA", "modprev")} contendo modelo
@@ -46,8 +54,16 @@ PAR <- function(serie, ...) {
 #' @export
 
 predict.PAR <- function(object, n.ahead, ...) {
-    predict(object$modelo, n.ahead = n.ahead, ...)
+    meds <- predict(object$modelo, n.ahead = n.ahead, ...)
+    prev <- cbind(meds, rep(NA_real_, length(meds)))
+    colnames(prev) <- c("prev", "sd")
+
+    prev <- ts(prev, start = start(meds), frequency = frequency(meds))
+
+    return(prev)
 }
+
+predict.PAR_A <- function(object, n.ahead, ...) predict.PAR(object, n.ahead, ...)
 
 #' @param newseries nova série com a qual atualizar o modelo
 #' @param refit booleano indicando se o modelo deve ou não ser reajustado
@@ -75,12 +91,32 @@ update.PAR <- function(object, newseries, refit = FALSE, ...) {
         modelo$residuals <- as.numeric(newseries) - fitted(modelo)
 
         res <- residuals(modelo)
-        sigma2 <- var(res, na.rm = TRUE)
-
         modelo$residuals <- res
-        modelo$sigma2 <- sigma2
 
         object <- new_modprevU(modelo, newseries, "PAR", mod_atrs)
+    }
+
+    return(object)
+}
+
+update.PAR_A <- function(object, newseries, refit) {
+    mod_atrs <- attr(object, "mod_atrs")
+
+    if (refit) {
+        call <- mod_atrs$call
+        call$serie <- newseries
+        object <- eval(call, parent.frame())
+    } else {
+
+        modelo <- object$modelo
+
+        modelo$residuals <- NULL
+        modelo$residuals <- as.numeric(newseries) - fitted(modelo)
+
+        res <- residuals(modelo)
+        modelo$residuals <- res
+
+        object <- new_modprevU(modelo, newseries, "PAR_A", mod_atrs)
     }
 
     return(object)
