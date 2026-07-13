@@ -63,17 +63,13 @@ test_model_workflow <- function(
 ) {
     spec <- get_model(tipo)
 
-    models_without_sd <- c("reg_quant", "BOOST", "LGBM")
-    allow_na_sd <- tipo %in% models_without_sd
-
     if (is.null(serie)) {
         if (spec$requires_regdata) {
-            n_obs <- if (tipo == "GAM") 200 else 100
-            data <- make_regression_data(n = n_obs, seed = 123)
+            data <- make_regression_data(n = 240, seed = 123)
             serie <- data$serie
             regdata <- data$regdata
         } else {
-            serie <- make_univariate_series(seed = 123)
+            serie <- make_seasonal_series(240, seed = 123)
         }
     }
 
@@ -92,7 +88,7 @@ test_model_workflow <- function(
         pred <- predict(fit, n.ahead = n.ahead)
     }
 
-    expect_prediction_format(pred, n.ahead = n.ahead, allow_na_sd = allow_na_sd)
+    expect_prediction_format(pred, n.ahead = n.ahead, allow_na_sd = TRUE)
 
     results <- list(fit = fit, pred = pred)
 

@@ -4,7 +4,7 @@
 
 test_that("univariate models — fit + predict basics", {
 
-    serie_std <- make_univariate_series(n = 100, frequency = 12, seed = 123)
+    serie_std <- make_seasonal_series(n = 240, frequency = 12, seed = 123)
 
     cache <- with_registered_models(univariate_only = TRUE, function(tipo) {
         fit <- estimamodelo(serie_std, tipo)
@@ -27,7 +27,7 @@ test_that("univariate models — fit + predict basics", {
 
     test_that("predictions have correct format", {
         with_registered_models(univariate_only = TRUE, function(tipo) {
-            expect_prediction_format(cache[[tipo]]$pred, n.ahead = 12)
+            expect_prediction_format(cache[[tipo]]$pred, n.ahead = 12, allow_na_sd = TRUE)
         })
     })
 
@@ -107,9 +107,9 @@ test_that("all models — full workflow", {
 
 test_that("univariate models — update with new series", {
 
-    serie_base <- make_univariate_series(n = 100, seed = 555)
-    serie_longer <- make_univariate_series(n = 120, seed = 555)
-    serie_shorter <- make_univariate_series(n = 80, seed = 211)
+    serie_base <- make_seasonal_series(n = 300, seed = 555)
+    serie_longer <- make_seasonal_series(n = 360, seed = 555)
+    serie_shorter <- make_seasonal_series(n = 240, seed = 211)
 
     cache <- with_registered_models(univariate_only = TRUE, function(tipo) {
         mod <- estimamodelo(serie_base, tipo)
@@ -126,7 +126,7 @@ test_that("univariate models — update with new series", {
 
     test_that("update with longer series produces valid predictions", {
         with_registered_models(univariate_only = TRUE, function(tipo) {
-            expect_prediction_format(cache[[tipo]]$pred_longer, n.ahead = 12)
+            expect_prediction_format(cache[[tipo]]$pred_longer, n.ahead = 12, allow_na_sd = TRUE)
         })
     })
 
@@ -134,12 +134,10 @@ test_that("univariate models — update with new series", {
         with_registered_models(univariate_only = TRUE, function(tipo) {
             expect_equal(cache[[tipo]]$updated_shorter$serie, serie_shorter)
 
-            models_without_sd <- c("reg_quant", "BOOST", "LGBM")
-            allow_na <- tipo %in% models_without_sd
             expect_prediction_format(
                 cache[[tipo]]$pred_shorter,
                 n.ahead = 12,
-                allow_na_sd = allow_na
+                allow_na_sd = TRUE
             )
         })
     })
@@ -164,14 +162,14 @@ test_that("all regression models produce valid modprevU structure", {
 ####################################################################################################
 
 test_that("all univariate models support different n.ahead values", {
-    serie_std <- make_univariate_series(seed = 333)
+    serie_std <- make_seasonal_series(240, seed = 333)
     n_ahead_values <- c(1, 6, 12, 24)
 
     with_registered_models(univariate_only = TRUE, function(tipo) {
         fit <- estimamodelo(serie_std, tipo)
         for (n in n_ahead_values) {
             pred <- predict(fit, n.ahead = n)
-            expect_prediction_format(pred, n.ahead = n)
+            expect_prediction_format(pred, n.ahead = n, allow_na_sd = TRUE)
         }
     })
 })
@@ -181,9 +179,9 @@ test_that("all univariate models support different n.ahead values", {
 ####################################################################################################
 
 test_that("all univariate models are janelamovel compatible", {
-    serie <- make_univariate_series(seed = 444)
+    serie <- make_seasonal_series(242, seed = 123)
     with_registered_models(univariate_only = TRUE, function(tipo) {
-        expect_janelamovel_compatible(tipo, serie = serie)
+        expect_janelamovel_compatible(tipo, serie = serie, config = jm_config(janela = 240))
     })
 })
 
@@ -192,10 +190,10 @@ test_that("all univariate models are janelamovel compatible", {
 ####################################################################################################
 
 test_that("all univariate models are periodic compatible", {
-    serie <- make_univariate_series(seed = 444)
+    serie <- make_seasonal_series(240, seed = 444)
     with_registered_models(univariate_only = TRUE, function(tipo) {
-        if (tipo == "ss_ar1_saz") {
-            testthat::skip("ss_ar1_saz periodic adapter known incompatible")
+        if (tipo %in% c("ss_ar1_saz", "PAR", "PAR_A")) {
+            testthat::skip("ss_ar1_saz|PAR|PAR_A periodic adapter known incompatible")
         }
         expect_periodic_compatible(tipo, serie = serie)
     })

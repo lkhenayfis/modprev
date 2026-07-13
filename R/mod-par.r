@@ -28,7 +28,9 @@ NULL
 
 PAR <- function(serie, ...) {
     cc <- match.call()
-    fit <- parmodels::par(serie = serie, ...)
+    cc[[1]] <- parmodels::par
+    cc$regdata <- NULL
+    fit <- eval(cc, parent.frame(), parent.frame())
     new_modprevU(fit, serie, "PAR", list(call = cc))
 }
 
@@ -36,7 +38,9 @@ PAR <- function(serie, ...) {
 
 PAR_A <- function(serie, ...) {
     cc <- match.call()
-    fit <- parmodels::par_a(serie = serie, ...)
+    cc[[1]] <- parmodels::par_a
+    cc$regdata <- NULL
+    fit <- eval(cc, parent.frame(), parent.frame())
     new_modprevU(fit, serie, "PAR_A", list(call = cc))
 }
 
@@ -63,6 +67,8 @@ predict.PAR <- function(object, n.ahead, ...) {
     return(prev)
 }
 
+#' @export
+
 predict.PAR_A <- function(object, n.ahead, ...) predict.PAR(object, n.ahead, ...)
 
 #' @param newseries nova série com a qual atualizar o modelo
@@ -87,8 +93,9 @@ update.PAR <- function(object, newseries, refit = FALSE, ...) {
 
         modelo <- object$modelo
 
+        modelo$x <- newseries
         modelo$residuals <- NULL
-        modelo$residuals <- as.numeric(newseries) - fitted(modelo)
+        modelo$residuals <- residuals(modelo)
 
         res <- residuals(modelo)
         modelo$residuals <- res
@@ -99,7 +106,9 @@ update.PAR <- function(object, newseries, refit = FALSE, ...) {
     return(object)
 }
 
-update.PAR_A <- function(object, newseries, refit) {
+#' @export
+
+update.PAR_A <- function(object, newseries, refit = FALSE, ...) {
     mod_atrs <- attr(object, "mod_atrs")
 
     if (refit) {
@@ -110,8 +119,9 @@ update.PAR_A <- function(object, newseries, refit) {
 
         modelo <- object$modelo
 
+        modelo$x <- newseries
         modelo$residuals <- NULL
-        modelo$residuals <- as.numeric(newseries) - fitted(modelo)
+        modelo$residuals <- residuals(modelo)
 
         res <- residuals(modelo)
         modelo$residuals <- res

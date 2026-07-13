@@ -57,6 +57,28 @@
     )
 
     register_model(
+        tipo = "PAR",
+        fit_fn = PAR,
+        requires_regdata = FALSE,
+        deps = c("parmodels"),
+        metadata = list(
+            description = "PAR(p) models via package parmodels",
+            category = "univariate_ts"
+        )
+    )
+
+    register_model(
+        tipo = "PAR_A",
+        fit_fn = PAR_A,
+        requires_regdata = FALSE,
+        deps = c("parmodels"),
+        metadata = list(
+            description = "PAR(p)-A models via package parmodels",
+            category = "univariate_ts"
+        )
+    )
+
+    register_model(
         tipo = "ss_ar1_saz",
         fit_fn = ss_ar1_saz,
         requires_regdata = FALSE,

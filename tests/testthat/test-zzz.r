@@ -31,7 +31,7 @@ test_that(".register_builtin_models", {
     expect_true(is.function(f))
 
     expected_tipos <- c("sarima", "ss_ar1_saz", "sarimax", "reg_lin", "reg_quant",
-        "ss_reg_din", "GAM", "BOOST", "LGBM")
+        "ss_reg_din", "GAM", "BOOST", "LGBM", "PAR", "PAR_A")
 
     test_that(".register_builtin_models registers all 9 expected tipos", {
         modprev:::.onLoad(NULL, NULL)
@@ -42,7 +42,7 @@ test_that(".register_builtin_models", {
 
     test_that(".register_builtin_models sets correct requires_regdata flags", {
         modprev:::.onLoad(NULL, NULL)
-        univariate <- c("sarima", "ss_ar1_saz")
+        univariate <- c("sarima", "ss_ar1_saz", "PAR", "PAR_A")
         for (tipo in univariate) {
             expect_false(get_model(tipo)$requires_regdata, label = tipo)
         }
@@ -56,6 +56,8 @@ test_that(".register_builtin_models", {
         modprev:::.onLoad(NULL, NULL)
         expect_true("forecast" %in% get_model("sarima")$deps)
         expect_true("KFAS" %in% get_model("ss_ar1_saz")$deps)
+        expect_true("parmodels" %in% get_model("PAR")$deps)
+        expect_true("parmodels" %in% get_model("PAR_A")$deps)
         expect_true("forecast" %in% get_model("sarimax")$deps)
         expect_true("stats" %in% get_model("reg_lin")$deps)
         expect_true("quantreg" %in% get_model("reg_quant")$deps)
