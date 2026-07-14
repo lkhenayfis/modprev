@@ -3,11 +3,14 @@
 \name{modelos_par}
 \alias{modelos_par}
 \alias{PAR}
+\alias{PAR_A}
 \alias{predict.PAR}
 \alias{update.PAR}
 \title{Modelos \code{PAR}}
 \usage{
 PAR(serie, ...)
+
+PAR_A(serie, ...)
 
 \method{predict}{PAR}(object, n.ahead, ...)
 

@@ -34,7 +34,7 @@ PAR <- function(serie, ...) {
     new_modprevU(fit, serie, "PAR", list(call = cc))
 }
 
-#' @rdname PAR
+#' @rdname modelos_par
 
 PAR_A <- function(serie, ...) {
     cc <- match.call()
