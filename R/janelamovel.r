@@ -36,8 +36,7 @@
 #' @param serie serie temporal pela qual passar a janela movel
 #' @param tipo tipo de modelo a ser ajustado. Ver \code{\link{estimamodelo}}.
 #' @param config Objeto de configuração criado por \code{\link{jm_config}}. Obrigatório.
-#' @param ... demais argumentos pertinentes a estimação de cada \code{tipo}. Para
-#'     modelos \code{modprevS}, deve incluir \code{newdata_list}. Veja
+#' @param ... demais argumentos pertinentes a estimação de cada \code{tipo}. Veja
 #'     \code{\link{estimamodelo}} para mais detalhes.
 #'
 #' @examples
