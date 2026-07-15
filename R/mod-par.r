@@ -135,3 +135,32 @@ update.PAR_A <- function(object, newseries, refit = FALSE, ...) {
 
     return(object)
 }
+
+#' @param nsim número de simulações a serem geradas
+#' @param seed opcionalmente, semente para geração das simulações
+#' @param ... Para \code{simulate}, demais argumentos passados a
+#'     \code{\link[forecast]{simulate.Arima}}
+#'
+#' @return \code{simulate} retorna uma série temporal multivariada contendo \code{nsim}
+#'     simulações para os passos de tempo \code{1:n.ahead}
+#'
+#' @rdname modelos_par
+#'
+#' @export
+
+simulate.PAR <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
+    set_sim_seed(seed)
+
+    sims <- simulate(object$modelo, nsim = nsim, seed = seed, n.ahead = n.ahead, ...)
+    sims <- matrix(sims, nrow = n.ahead, ncol = nsim)
+
+    sim_ts(sims, object$serie)
+}
+
+#' @rdname modelos_par
+#'
+#' @export
+
+simulate.PAR_A <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
+    simulate.PAR(object, nsim, seed, n.ahead, ...)
+}

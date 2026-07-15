@@ -6,6 +6,9 @@
 \alias{PAR_A}
 \alias{predict.PAR}
 \alias{update.PAR}
+\alias{update.PAR_A}
+\alias{simulate.PAR}
+\alias{simulate.PAR_A}
 \title{Modelos \code{PAR}}
 \usage{
 PAR(serie, ...)
@@ -15,11 +18,18 @@ PAR_A(serie, ...)
 \method{predict}{PAR}(object, n.ahead, ...)
 
 \method{update}{PAR}(object, newseries, refit = FALSE, ...)
+
+\method{update}{PAR_A}(object, newseries, refit = FALSE, ...)
+
+\method{simulate}{PAR}(object, nsim = 1, seed = NULL, n.ahead, ...)
+
+\method{simulate}{PAR_A}(object, nsim = 1, seed = NULL, n.ahead, ...)
 }
 \arguments{
 \item{serie}{série para ajustar}
 
-\item{...}{para \code{update} nao tem uso, existe apenas para consistência com a genérica}
+\item{...}{Para \code{simulate}, demais argumentos passados a
+\code{\link[forecast]{simulate.Arima}}}
 
 \item{object}{objeto com classes \code{c("PAR"|"parA", "modprev")} contendo modelo}
 
@@ -28,6 +38,10 @@ PAR_A(serie, ...)
 \item{newseries}{nova série com a qual atualizar o modelo}
 
 \item{refit}{booleano indicando se o modelo deve ou não ser reajustado}
+
+\item{nsim}{número de simulações a serem geradas}
+
+\item{seed}{opcionalmente, semente para geração das simulações}
 }
 \value{
 Objeto da classe \code{modprev} e subclasse \code{PAR}, uma lista de dois
@@ -38,6 +52,9 @@ padrão da previsão \code{n.ahead} passos à frente;
 
 \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado.
 Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
+
+\code{simulate} retorna uma série temporal multivariada contendo \code{nsim}
+simulações para os passos de tempo \code{1:n.ahead}
 }
 \description{
 Estimação e métodos de modelos da classe \code{PAR}
