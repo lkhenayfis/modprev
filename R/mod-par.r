@@ -87,6 +87,7 @@ update.PAR <- function(object, newseries, refit = FALSE, ...) {
 
     if (refit) {
         call <- mod_atrs$call
+        call[[1]] <- PAR
         call$serie <- newseries
         object <- eval(call, parent.frame())
     } else {
@@ -106,6 +107,8 @@ update.PAR <- function(object, newseries, refit = FALSE, ...) {
     return(object)
 }
 
+#' @rdname modelos_par
+#' 
 #' @export
 
 update.PAR_A <- function(object, newseries, refit = FALSE, ...) {
@@ -113,6 +116,7 @@ update.PAR_A <- function(object, newseries, refit = FALSE, ...) {
 
     if (refit) {
         call <- mod_atrs$call
+        call[[1]] <- PAR_A
         call$serie <- newseries
         object <- eval(call, parent.frame())
     } else {
