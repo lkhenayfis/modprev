@@ -52,10 +52,7 @@ sarima <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...)
 
     args <- list(...)
 
-    # caso seja passado 'order' ou 'seasonal', estima direto sem parte automatica
-    # atualmente, pelo auto.arima nao da pra fixar uma parte ou outra e pesquisar o resto, de modo
-    # que ou estima um modelo cravado ou deixa a pesquisa ser completa
-    not_auto <- any(c("order", "seasonal") %in% names(args))
+    not_auto <- "order" %in% names(args)
     fitfunc <- ifelse(not_auto, Arima, auto.arima)
 
     if (!not_auto && !("allowdrift" %in% names(args))) args$allowdrift <- FALSE
