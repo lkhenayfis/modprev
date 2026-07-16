@@ -1,25 +1,3 @@
-# parp
-
-## New features
-
-- Introduz modelos `PAR`, com possibilidade de uso da parcela anual via `PAR_A`
-
-## Removals
-
-- A classe experimental `modprevS` (shapeshifting) foi removida do pacote, pois nunca foi
-  integrada a `estimamodelo()` e seu caminho de codigo era nao-funcional. O codigo fica
-  preservado no branch git `modprevS`.
-
-# feat/simulate
-
-## New features
-
-- Adicionada generica e metodos `simulate` para geracao de cenarios com cada metodo
-  - por enquanto apenas os modelos `sarima` e `ss_ar1_saz` possuem metodos `simulate`. Os demais
-    ganharao metodos dedicados conforme necessidade
-- `jm_config` agora tem argumento `simulate` (padrao `FALSE`) para indicar se uma rodada de `janelamovel`
-  deve ser realizada por simulacao ou previsao
-
 # modprev 2.1.0
 
 ## BREAKING CHANGES
@@ -42,6 +20,12 @@
 
 ## New features
 
+- Introduz modelos `PAR`, com possibilidade de uso da parcela anual via `PAR_A`
+- Adicionada generica e metodos `simulate` para geracao de cenarios com cada metodo
+  - por enquanto apenas os modelos `sarima` e `ss_ar1_saz` possuem metodos `simulate`. Os demais
+    ganharao metodos dedicados conforme necessidade
+- `jm_config` agora tem argumento `simulate` (padrao `FALSE`) para indicar se uma rodada de `janelamovel`
+  deve ser realizada por simulacao ou previsao
 - Introduz o metodo generico `simulate` para objetos `modprev`, espelhando `predict`. Simulacao de
   trajetorias futuras esta disponivel para os modelos `sarima`, `sarimax`, `ss_ar1_saz`,
   `ss_reg_din` e para o coordenador periodico `simulate.modprevP`. O retorno e uma serie temporal
@@ -51,6 +35,12 @@
 - Arcaboucos de regressao (`reg_lin`, `reg_quant`, `GAM`, `BOOST`, `LGBM`) e `ss_reg_din` com
   `vardin = TRUE` nao possuem metodo `simulate`, emitindo o erro de fall-through padrao ("Modelo do
   tipo <tipo> nao possui metodo 'simulate'").
+
+## Removals
+
+- A classe experimental `modprevS` (shapeshifting) foi removida do pacote, pois nunca foi
+  integrada a `estimamodelo()` e seu caminho de codigo era nao-funcional. O codigo fica
+  preservado no branch git `modprevS`.
 
 ## Bug fixes
 
