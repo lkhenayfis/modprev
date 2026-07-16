@@ -149,8 +149,6 @@ update.PAR_A <- function(object, newseries, refit = FALSE, ...) {
 #' @export
 
 simulate.PAR <- function(object, nsim = 1, seed = NULL, n.ahead, ...) {
-    set_sim_seed(seed)
-
     sims <- simulate(object$modelo, nsim = nsim, seed = seed, n.ahead = n.ahead, ...)
     sims <- matrix(sims, nrow = n.ahead, ncol = nsim)
 
