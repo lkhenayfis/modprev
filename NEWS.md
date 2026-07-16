@@ -4,6 +4,12 @@
 
 - Introduz modelos `PAR`, com possibilidade de uso da parcela anual via `PAR_A`
 
+## Removals
+
+- A classe experimental `modprevS` (shapeshifting) foi removida do pacote, pois nunca foi
+  integrada a `estimamodelo()` e seu caminho de codigo era nao-funcional. O codigo fica
+  preservado no branch git `modprevS`.
+
 # feat/simulate
 
 ## New features
@@ -42,8 +48,6 @@
   multivariada `n.ahead x nsim` com colunas `sim_1..sim_nsim`.
 - `janelamovel()` / `jm_config()` agora suportam simulacao em horizonte rolante atraves dos novos
   campos `simulate`, `nsim` e `seed` de `jm_config()`, consumidos por `janelamovel()`.
-- `simulate.modprevS` foi introduzido como um stub que sempre gera erro ("Modelo do tipo modprevS
-  nao possui metodo 'simulate'"), pois simulacao de modelos com shapeshifting nao e suportada.
 - Arcaboucos de regressao (`reg_lin`, `reg_quant`, `GAM`, `BOOST`, `LGBM`) e `ss_reg_din` com
   `vardin = TRUE` nao possuem metodo `simulate`, emitindo o erro de fall-through padrao ("Modelo do
   tipo <tipo> nao possui metodo 'simulate'").

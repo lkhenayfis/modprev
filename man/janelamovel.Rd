@@ -13,8 +13,7 @@ janelamovel(serie, tipo, config, ...)
 
 \item{config}{Objeto de configuração criado por \code{\link{jm_config}}. Obrigatório.}
 
-\item{...}{demais argumentos pertinentes a estimação de cada \code{tipo}. Para
-modelos \code{modprevS}, deve incluir \code{newdata_list}. Veja
+\item{...}{demais argumentos pertinentes a estimação de cada \code{tipo}. Veja
 \code{\link{estimamodelo}} para mais detalhes.}
 }
 \value{
