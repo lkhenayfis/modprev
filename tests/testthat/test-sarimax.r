@@ -112,6 +112,38 @@ test_that("Atualizacao de modelo SARIMAX", {
     expect_snapshot_value(coef(mod_refit$modelo), style = "deparse")
 })
 
+test_that("Atualizacao de modelo SARIMAX com refit preserva argumentos de estimacao", {
+    yy <- window(datregdin$obs, 1, 150)
+    xx <- head(datregdin$varex, 150)
+    mod <- estimamodelo(yy, "sarima", regdata = xx, formula = ~ V1 + V2 + V3,
+        order = c(1, 0, 0), seasonal = c(0, 0, 0))
+
+    ordem_orig <- unname(forecast::arimaorder(mod$modelo)[c("p", "d", "q")])
+    expect_equal(ordem_orig, c(1, 0, 0), tolerance = 1e-8)
+
+    yy2 <- window(datregdin$obs, 151, 200)
+    xx2 <- tail(datregdin$varex, 50)
+
+    mod_refit <- update(mod, yy2, xx2, refit = TRUE)
+    expect_s3_class(mod_refit, "sarimax")
+
+    ordem_refit <- unname(forecast::arimaorder(mod_refit$modelo)[c("p", "d", "q")])
+    expect_equal(ordem_refit, c(1, 0, 0), tolerance = 1e-8)
+})
+
+test_that("Atualizacao de modelo SARIMAX com refit funciona sem argumentos extras previos", {
+    yy <- window(datregdin$obs, 1, 150)
+    xx <- head(datregdin$varex, 150)
+    mod <- estimamodelo(yy, "sarima", regdata = xx, formula = ~ V1 + V2 + V3)
+    attr(mod, "mod_atrs")$call <- NULL
+
+    yy2 <- window(datregdin$obs, 151, 200)
+    xx2 <- tail(datregdin$varex, 50)
+
+    expect_no_error(mod_refit <- update(mod, yy2, xx2, refit = TRUE))
+    expect_s3_class(mod_refit, "sarimax")
+})
+
 test_that("simulate.sarimax returns n.ahead x nsim ts", {
     yy <- window(datregdin$obs, 1, 150)
     xx <- head(datregdin$varex, 150)

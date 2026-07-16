@@ -38,7 +38,9 @@ seja informado a previsão sera feita tantos passos à frente quanto amostras em
 
 \item{newregdata}{\code{data.frame}-like contendo variáveis explicativas na nova amostra}
 
-\item{refit}{booleano indicando se o modelo deve ou nao ser reajustado}
+\item{refit}{booleano indicando se o modelo deve ou nao ser reajustado. Se \code{TRUE}, os
+argumentos extras utilizados na estimação original (passados por \code{...} em
+\code{\link{sarimax}}) sao automaticamente reaplicados}
 
 \item{nsim}{número de simulações a serem geradas}
 

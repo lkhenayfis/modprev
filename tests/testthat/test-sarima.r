@@ -49,6 +49,32 @@ test_that("Atualizacao de modelo SARIMA", {
     expect_snapshot_value(round(coef(mod_refit$modelo), 5), style = "deparse")
 })
 
+test_that("Atualizacao de modelo SARIMA com refit preserva argumentos de estimacao", {
+    serie1 <- window(AirPassengers, c(1949, 1), c(1954, 12))
+    serie2 <- window(AirPassengers, c(1955, 1), c(1960, 12))
+
+    mod <- estimamodelo(serie1, "sarima", order = c(2, 0, 0), seasonal = c(0, 0, 0))
+    ordem_orig <- unname(forecast::arimaorder(mod$modelo)[c("p", "d", "q")])
+    expect_equal(ordem_orig, c(2, 0, 0), tolerance = 1e-8)
+
+    mod_refit <- update(mod, serie2, refit = TRUE)
+    expect_s3_class(mod_refit, "sarima")
+
+    ordem_refit <- unname(forecast::arimaorder(mod_refit$modelo)[c("p", "d", "q")])
+    expect_equal(ordem_refit, c(2, 0, 0), tolerance = 1e-8)
+})
+
+test_that("Atualizacao de modelo SARIMA com refit funciona sem mod_atrs previo", {
+    serie1 <- window(AirPassengers, c(1949, 1), c(1954, 12))
+    serie2 <- window(AirPassengers, c(1955, 1), c(1960, 12))
+
+    mod <- estimamodelo(serie1, "sarima")
+    attr(mod, "mod_atrs") <- NULL
+
+    expect_no_error(mod_refit <- update(mod, serie2, refit = TRUE))
+    expect_s3_class(mod_refit, "sarima")
+})
+
 test_that("simulate.sarima returns n.ahead x nsim ts", {
     mod <- estimamodelo(AirPassengers, "sarima")
 

@@ -33,7 +33,9 @@ sarima(serie, regdata, formula = expandeformula(regdata, "ls"), ...)
 
 \item{newseries}{nova série com a qual atualizar o modelo}
 
-\item{refit}{booleano indicando se o modelo deve ou não ser reajustado}
+\item{refit}{booleano indicando se o modelo deve ou não ser reajustado. Se \code{TRUE}, os
+argumentos extras utilizados na estimação original (passados por \code{...} em
+\code{\link{sarima}}) sao automaticamente reaplicados}
 
 \item{nsim}{número de simulações a serem geradas}
 

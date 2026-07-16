@@ -50,7 +50,8 @@ sarima <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...)
     # o is.null e necessario para garantir que nao entre no sarimax errado durante janelamovel
     if (!missing(regdata) && !is.null(regdata)) return(sarimax(serie, regdata, formula, ...))
 
-    args <- list(...)
+    user_args <- list(...)
+    args <- user_args
 
     not_auto <- "order" %in% names(args)
     fitfunc <- ifelse(not_auto, Arima, auto.arima)
@@ -59,7 +60,9 @@ sarima <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...)
 
     mc <- as.call(c(list(fitfunc, substitute(serie)), args))
     mod <- eval(mc, envir = parent.frame())
-    out <- new_modprevU(mod, serie, "sarima")
+
+    mod_atrs <- list(call = user_args)
+    out <- new_modprevU(mod, serie, "sarima", mod_atrs)
     return(out)
 }
 
@@ -88,24 +91,30 @@ predict.sarima <- function(object, n.ahead, ...) {
 }
 
 #' @param newseries nova série com a qual atualizar o modelo
-#' @param refit booleano indicando se o modelo deve ou não ser reajustado
+#' @param refit booleano indicando se o modelo deve ou não ser reajustado. Se \code{TRUE}, os
+#'     argumentos extras utilizados na estimação original (passados por \code{...} em
+#'     \code{\link{sarima}}) sao automaticamente reaplicados
 #' @param ... para \code{update} nao tem uso, existe apenas para consistência com a genérica
-#' 
-#' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
+#'
+#' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado.
 #'     Contrário à função de estimação, \code{update} já retorna o objeto da classe \code{modprev};
-#' 
+#'
 #' @rdname modelos_sarima
-#' 
+#'
 #' @export
 
 update.sarima <- function(object, newseries, refit = FALSE, ...) {
     if (refit) {
-        object <- estimamodelo(newseries, "sarima")
+        stored_dots <- attr(object, "mod_atrs")$call
+        if (is.null(stored_dots)) stored_dots <- list()
+
+        object <- do.call(estimamodelo, c(list(newseries, "sarima"), stored_dots))
     } else {
         newseries <- if (is.ts(newseries)) newseries else ts(newseries)
         modelo <- Arima(newseries, model = object$modelo)
 
-        object <- new_modprevU(modelo, newseries, "sarima")
+        mod_atrs <- attr(object, "mod_atrs")
+        object <- new_modprevU(modelo, newseries, "sarima", mod_atrs)
     }
 
     return(object)

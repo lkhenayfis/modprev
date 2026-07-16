@@ -50,9 +50,11 @@ sarimax <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...
 
     if (missing(regdata)) stop("Forneca a variavel explicativa atraves do parametro 'regdata'")
 
+    user_args <- list(...)
+
     Xreg <- expandexreg(regdata, formula)
 
-    args <- list(...)
+    args <- user_args
     args$xreg <- Xreg
 
     not_auto <- "order" %in% names(args)
@@ -63,7 +65,7 @@ sarimax <- function(serie, regdata, formula = expandeformula(regdata, "ls"), ...
     mc <- as.call(c(list(fitfunc, substitute(serie)), args))
     mod <- eval(mc, envir = parent.frame())
 
-    mod_atrs <- list(formula = formula)
+    mod_atrs <- list(formula = formula, call = user_args)
     out <- new_modprevU(mod, serie, "sarimax", mod_atrs)
 
     return(out)
@@ -110,7 +112,9 @@ predict.sarimax <- function(object, newdata, n.ahead, ...) {
 #' 
 #' @param newseries nova série com a qual atualizar o modelo
 #' @param newregdata \code{data.frame}-like contendo variáveis explicativas na nova amostra
-#' @param refit booleano indicando se o modelo deve ou nao ser reajustado
+#' @param refit booleano indicando se o modelo deve ou nao ser reajustado. Se \code{TRUE}, os
+#'     argumentos extras utilizados na estimação original (passados por \code{...} em
+#'     \code{\link{sarimax}}) sao automaticamente reaplicados
 #' @param ... para \code{update} nao tem uso, existe apenas para consistência com a genérica
 #' 
 #' @return \code{update} retorna modelo com novos dados e, caso \code{refit == TRUE}, reajustado. 
@@ -126,7 +130,14 @@ update.sarimax <- function(object, newseries, newregdata, refit = FALSE, ...) {
 
     if (refit) {
         formula <- mod_atrs$formula
-        object <- estimamodelo(newseries, "sarimax", regdata = newregdata, formula = formula)
+        stored_dots <- mod_atrs$call
+        if (is.null(stored_dots)) stored_dots <- list()
+
+        fit_args <- c(
+            list(newseries, "sarimax", regdata = newregdata, formula = formula),
+            stored_dots
+        )
+        object <- do.call(estimamodelo, fit_args)
     } else {
 
         if (missing(newregdata)) stop("Forneca nova variavel explicativa atraves do parametro 'newregdata'")
